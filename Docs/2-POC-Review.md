@@ -1,0 +1,281 @@
+# Angular POC Review and Reuse Recommendations
+
+Review date: 13 November 2026.
+
+Decision update: The user accepted the technical findings and then explicitly expanded the desired architecture/tooling. Sections 6-8 record the current decisions and supersede the original recommendations to omit a library workspace, Tailwind, Jest, Cypress, and mandatory Storybook.
+
+## 1. Conclusion and scope
+
+The earlier project was becoming a reusable application template and component toolkit. Its strongest completed work is the form-control library, together with a modular workspace, signal-based component APIs, lazy feature routes, configurable themes, localization, and development tooling. The business pages remain placeholders, and several modern Angular experiments never reached the main branch.
+
+For the GSCF assignment, adopt the requested library layout in an Angular CLI multi-project workspace, integrate the requested tools separately, and build a focused shared UI catalog before the business features. Reuse the POC structure and lessons without copying its private-API form framework, version-specific builder workarounds, or unrelated utilities.
+
+The accepted decisions are now reflected in [the implementation plan](D:/Projects/GSCF_Interview_Assignment/Docs/1-Initial-Plan.md) and [the project rules](D:/Projects/GSCF_Interview_Assignment/AGENTS.md). The [assignment](D:/Projects/GSCF_Interview_Assignment/Instructions/SeniorFrontendEngineer-Interview-Task.pdf) still governs business behavior, data, validation, and visual requirements. The historical POC findings below remain unchanged; additional tooling is a user-requested engineering choice, not an extra PDF requirement.
+
+### Review method and limitations
+
+- Reviewed the local Git history, branch differences, README, backlog, configuration, representative components and services, tests, and existing uncommitted changes in `D:/Projects/angular-17-template-v2`.
+- Used read-only file access and Git inspection. No checkout, fetch, install, build, test execution, formatting, or source modification was performed in that repository.
+- Current branch: `master`; HEAD: `85545f1fdab312e0ad3a979faa22bfa4627de81a`, dated 28 June 2025, with the subject `Implemented some common validators and pipes`. There are 204 commits reachable from HEAD.
+- Despite the directory and README name, the installed-version declarations reached Angular **18.0.6**, Angular CLI/build tooling **18.0.7**, Nx **19.4.1**, and TypeScript **5.4.5**. These are historical versions, not recommendations for the new application. See [package.json](D:/Projects/angular-17-template-v2/package.json).
+- Existing uncommitted work was treated separately from committed implementation. The reviewed file inventory contains 606 tracked or non-ignored untracked files, including 40 component TypeScript files, 42 spec files, one Storybook story file, and one Cypress spec file. Counts do not establish coverage or quality.
+- Statements such as “implemented” mean the code/configuration exists and was inspected. They do not mean it was executed successfully during this review. No current runtime, CI, accessibility, performance, or deployment pass is claimed.
+- The before-and-after content manifest matched for all 606 reviewed files; HEAD and Git status were also unchanged. All 37 original local evidence links resolved when the initial review was checked.
+
+## 2. What you were trying to achieve
+
+The [README](D:/Projects/angular-17-template-v2/README.md:18), commit messages, and [TODO](D:/Projects/angular-17-template-v2/TODO) show six connected goals:
+
+1. **A repeatable project foundation:** Nx libraries, aliases, strict TypeScript, linting, formatting, generators, and an automated delivery pipeline, so future applications start with consistent conventions.
+2. **Modern Angular usage:** standalone components, OnPush, `inject()`, signals, signal inputs and queries, native template control flow, lazy loading, and eventually zoneless operation and deferred views.
+3. **A reusable UI and forms toolkit:** consistent field layout, labels, validation messages, disabled states, prefix/suffix content, and richer controls built around shared behavior.
+4. **Configurable application behavior:** themes, user preferences, localization, resources, navigation, document titles, and initialization of feature dependencies.
+5. **Documented and tested components:** Storybook, Compodoc, unit tests, browser tests, and published test artifacts.
+6. **Measured or anticipated optimization:** esbuild, task caching, lazy imports, tree-shaking declarations, and bundle limits.
+
+The implementation effort increasingly concentrated on the third goal. The history contains many controls and repeated fixes to their value, validation, touched, and dirty synchronization. It contains substantially less completed business-page functionality.
+
+## 3. What the Git history establishes
+
+These are representative milestones, grouped by topic rather than treating commit dates as a perfectly linear roadmap. All hashes refer to the reviewed POC repository.
+
+| Area | Representative commits | What the changes establish |
+| --- | --- | --- |
+| Workspace foundation | `43e9cc4`, `00e4025`, `615ea71`, `1905c2d`, `928b8b8`, `20ea562` | Nx application, dependency-version policy, core, dashboard, settings, and common UI libraries. |
+| Styling and documentation | `acda652`, `80f2ed9`, `f7c6f1f`, `8fbf7aa` | Tailwind, Storybook, Compodoc, and CDK integration. |
+| Automation | `d7e61e0`, `303b3f3`, `df8b4c9`, `66e95ad` | Editor/lint setup, build metadata, GitLab CI, and custom generators for libraries and stories. |
+| Modernization and build work | `4117d97`, `48265d4`, `5e7c9af`, `a80ef70`, `b29d025` | Upgrades through Angular 18/Nx 19, `sideEffects: false`, and ES2022 targeting. |
+| App infrastructure | `98a7241`, `9d3d0ad`, `a967314`, `7ddfc12`, `3d1066d`, `6060517` | Resource/localization loading, initialization, user configuration, themes, and dynamic document titles. |
+| Dependency boundaries | `213db70`, `e076d45`, `094ac90` | Shared feature components moved out of core to address a circular dependency; form UI and icons separated into dedicated libraries. |
+| Route loading | `40377c0` | Added `loadComponent` to dashboard/settings route definitions and updated the generator. The title says “every component,” but the diff concerns feature entry components, not all UI components. |
+| Form framework | `4d62431`, `4b90677`, `83c7b20`, `a1682fa`, `62ef311`, `def37b2`, `6b11176` | Shared field wrapper/base control plus repeated CVA synchronization fixes and tests. |
+| Expanded component set | `0d49456`, `40fb834`, `bd8bc51`, `a9943b9`, `0526723`, `686df3e`, `d526fac`, `6611554`, `726bd47`, `bcb0989` | Selection, numeric input, autocomplete, checkbox/radio, files, colors, dates, and times. |
+| Notifications and utilities | `07f46b0`, `e73a5ba`, `85545f1` | Package-backed toasts, serving production output locally, and additional validators/pipes. |
+
+The custom-generator commit explicitly describes generating Tailwind, Storybook, Compodoc, ESLint, and CI configuration together. This supports the interpretation that you wanted a reusable development platform, not just a feature demo.
+
+### Branch-only and unfinished work
+
+| Location | Observed state | Interpretation |
+| --- | --- | --- |
+| `zoneless-cd` | Two commits absent from master: `3e27e2c` and `098e56c`, both temporary-work subjects. Contains experimental zoneless setup and test changes. | An experiment, not a completed main-branch migration. The backlog still records Zone.js/test-tooling issues. |
+| `TODO-components` | WIP/stash-derived branch headed by `e9dab1d`, containing additional candidate utilities/components. | A collection of possible imports and experiments. Do not count every branch file as a shipped component. Some ideas later appear on master independently. |
+| `prod`, `prod2` through `prod7` | Historical local snapshots/branches. | Additional history, not evidence of new requirements for this assignment or currently working deployments. |
+| Current unstaged changes | Six tracked files; 997 inserted and 44 deleted lines. Most additions are form examples in the layout. | A local component playground, not a finished feature page. |
+| Current staged changes | New dynamic-attribute directive and its export; two files, 69 inserted lines. | An unfinished utility with explicit testing/documentation TODOs. |
+| Untracked `TODO-extra.txt` | Proposed restrictions on importing Angular's built-in pipes directly. | A proposed convention, not an established implementation requirement. |
+
+The local build configuration also raises the initial-bundle error threshold from 1 MB to 10 MB. That change relaxes a guardrail; it is not an optimization result. See [project.json](D:/Projects/angular-17-template-v2/apps/app/project.json:36).
+
+## 4. Intended versus implemented
+
+### Workspace, architecture, and tooling
+
+| Intention | Evidence in the POC | Status and qualification |
+| --- | --- | --- |
+| Feature-based modular workspace | Ten libraries across `config`, `core`, `feature`, `shared-assets`, and `ui`; TypeScript aliases and project targets. | Implemented. Stronger separation than a single undifferentiated app folder, but substantially more infrastructure than GSCF needs. |
+| Separate business features, UI, and data access | Dashboard/settings route libraries; `ui/common` and `ui/form`; documented `data-access` generator workflow. | Feature/UI separation exists. The proposed data-access layer is not a completed business API/store layer. |
+| Enforce dependency boundaries | Nx lint rule exists, but tag constraints allow `*` to depend on `*`; project tags are empty. | Partial. Nx configuration alone does not enforce the intended architectural layers. Circular-dependency detection and layer policy are different concerns. |
+| Strict typing | App/core configurations enable `strict`, strict templates, and additional checks. | Implemented configuration. Some helpers still use `any`, casts, and Angular internals, so configuration is not proof of fully safe APIs. |
+| Consistent generation | Custom library and story generators, defaults for standalone/OnPush/SCSS, documentation and styling setup. | Implemented tooling. Its Angular/Nx assumptions need migration before reuse. |
+| Reproducible checks and delivery | Lockfile, npm installation, format/lint/build/unit/component/E2E jobs, artifacts, coverage, and Pages deployment configuration. | Substantial configuration exists. No pipeline was executed or remote deployment verified in this review. |
+| Efficient builds | esbuild-based application target, Nx task cache, CI caches, production build serving. | Implemented mechanisms. No measured before/after performance evidence was established. |
+
+Evidence: [workspace aliases](D:/Projects/angular-17-template-v2/tsconfig.base.json), [strict app configuration](D:/Projects/angular-17-template-v2/apps/app/tsconfig.json:7), [Nx lint constraints](D:/Projects/angular-17-template-v2/.eslintrc.json:10), [GitLab pipeline](D:/Projects/angular-17-template-v2/.gitlab-ci.yml), and [generator](D:/Projects/angular-17-template-v2/tools/custom-nx-generators-plugin/src/generators/angular-library/generator.ts).
+
+### Application behavior and component library
+
+| Area | What exists | What remains incomplete or unproven |
+| --- | --- | --- |
+| Navigation and shell | Layout/sidebar, route entries, theme/language controls, and dynamic page titles. | Not a complete business application. The large current layout is partly an uncommitted demonstration surface. |
+| Dashboard and settings | Lazy route shells and placeholder components. | The settings page itself remains a TODO. Earlier checked backlog entries do not override the placeholder source and later TODO. |
+| Localization | Resource services, English/Hungarian resources, locale loading, and feature initialization. | Useful infrastructure, but unrelated to the English-only GSCF scope. |
+| User preferences and themes | Signal-backed configuration, localStorage persistence, CSS-variable generation, light/dark/system options, and color helpers. | Configurable behavior exists. Accessibility of arbitrary color choices is not guaranteed. |
+| Common UI | Alert, button, navigation button, SVG icon, connected overlay, dropdown, and error display. | Reusable code exists; comprehensive stories and interaction/accessibility verification do not. |
+| Basic form controls | Input/text/number/password/textarea, checkbox, radio, common label/error wrapper. | Significant implementation, with a complex shared inheritance/CVA system. |
+| Rich form controls | Select/multiselect, autocomplete behavior, file input, color/date/time pickers, and scrolling selection. | Implemented controls and experiments. The backlog still records edge cases, including a small-viewport color-picker issue. |
+| Form customization | Prefix/suffix projection, dynamic component content, configuration tokens, masks, required markers, and validation-message resolution. | Broad flexibility, with considerable framework and synchronization overhead. |
+| Notifications | `ngx-toastr` dependency and `provideToastr` integration. | Package-backed lifecycle achieved. The configured position is bottom-left, whereas GSCF requires bottom-right. |
+| Generic confirm dialog/table | Ideas and backlog items. | No completed equivalent to the required GSCF confirm/remove flow or disputes table was established. |
+
+Examples: [settings placeholder](D:/Projects/angular-17-template-v2/libs/feature/settings/src/lib/settings/settings.component.html), [user preferences](D:/Projects/angular-17-template-v2/libs/core/src/lib/user-config/services/user-config.service.ts:16), [theme service](D:/Projects/angular-17-template-v2/libs/core/src/lib/theme/services/theme.service.ts), [form wrapper](D:/Projects/angular-17-template-v2/libs/ui/form/src/lib/form-field/components/form-field/form-field.component.html), and [toast configuration](D:/Projects/angular-17-template-v2/apps/app/src/app/app.config.ts:58).
+
+### Modern Angular features
+
+| Feature or practice | Observed state | Implication for GSCF |
+| --- | --- | --- |
+| Standalone components and `inject()` | Widely implemented. | Carry forward using current defaults and APIs. |
+| Signals and `computed()` | Used across UI and application infrastructure. | Carry forward for local state and derived values. |
+| `input()`, `output()`, `model()` | Substantial adoption, including required inputs; some decorator inputs remain. | Use the current functions consistently. The old Storybook compatibility note is not a reason to avoid them today. |
+| Signal queries | `viewChild` and content-query usage exists. | Use where a real view/focus requirement needs it. |
+| Native control flow | `@if`/`@for` usage exists. | Carry forward; do not copy older `CommonModule`/`ngClass` patterns alongside it. |
+| OnPush | Explicitly configured, appropriate to Angular 18. | In current Angular v22, omit the explicit setting as required by AGENTS. |
+| Lazy routing | `loadChildren` plus `loadComponent` for feature entries. | Keep one lazy disputes route; avoid an extra split for every small child component. |
+| Zoneless operation | Main still uses `provideZoneChangeDetection` and includes `zone.js`; separate experimental branch. | Use the current stable approach in the new project, not the old experimental setup. |
+| Signal Forms | The POC uses classic forms with custom signal/RxJS bridges; a signal-forms experiment is in the backlog. | Use the current plan's Signal Forms instead of migrating the old CVA framework. |
+| `linkedSignal`, resources | Not established as implemented features of this Angular 18 POC. | Use current APIs only when the domain needs them; there is no HTTP requirement in the agreed plan. |
+| Directive composition API | Recommended in README, but no `hostDirectives` implementation found in app/library sources. | Intent was present; component inheritance remained the actual reuse mechanism. |
+| `@defer` and `NgOptimizedImage` | Backlog items; no implementation found in app/library templates or TypeScript. | Optimize the required static images; defer heavy optional UI only if it actually exists. |
+| Later Angular upgrades, `@let`, newer tooling | Backlog includes upgrades beyond 18.0.6 and related syntax/tooling changes. | Planned, not completed in the reviewed main branch. |
+
+Examples: [overlay signal APIs](D:/Projects/angular-17-template-v2/libs/ui/common/src/lib/connected-overlay/connected-overlay.component.ts), [lazy feature routes](D:/Projects/angular-17-template-v2/apps/app/src/app/layout/layout.routes.ts:9), [main change-detection setup](D:/Projects/angular-17-template-v2/apps/app/src/app/app.config.ts:23), and [modern-feature backlog](D:/Projects/angular-17-template-v2/TODO:832).
+
+## 5. Technical concerns that affect reuse
+
+### 5.1 Amount parsing conflicts directly with the assignment
+
+The [number control](D:/Projects/angular-17-template-v2/libs/ui/form/src/lib/number-field/number-field.component.ts:50) removes every character except digits, periods, and commas before parsing. A string such as `-12.34` therefore becomes `12.34`. This follows directly from the transformation; it is not a runtime test result.
+
+The control also defaults to a two-decimal separator mask and uses a text-input abstraction. That creates a further integration risk: invalid precision might be constrained or normalized before the assignment's explicit validation can report it. The mask's full browser behavior was not tested.
+
+**Recommendation:** do not reuse this control or parser for dispute amounts. Preserve the raw input until validation succeeds, use the specified native numeric input, enforce the exact error priority, and convert validated amounts into integer minor units. Do not strip signs, round invalid values, or use permissive partial parsing. This is required by the assignment and existing plan, not a style preference.
+
+### 5.2 Validation timing differs from the required behavior
+
+The [field wrapper](D:/Projects/angular-17-template-v2/libs/ui/form/src/lib/form-field/components/form-field/form-field.component.html:4) and [error display](D:/Projects/angular-17-template-v2/libs/ui/common/src/lib/error-display/components/error-display/error-display.component.ts:65) expose errors for invalid controls that are either dirty or touched. This can show an error while the user is still typing before the first blur. The error renderer selects the first/last collected error according to configuration, rather than explicitly encoding the dispute amount's business priority.
+
+**Recommendation:** keep the useful idea of consistent error presentation, but implement the GSCF policy directly: reveal a field's error on blur or submit, clear it as soon as corrected, and report one amount error in the specified order. An abstraction must not change that behavior.
+
+### 5.3 The form inheritance framework depends on fragile synchronization
+
+The controls use a chain such as number field → input field → base form-field control → base CVA with form. The [base CVA](D:/Projects/angular-17-template-v2/libs/core/src/lib/form/directives/base-control-value-accessor-with-form.directive.ts:343) reads Angular's private `_rawValidators`, synchronizes inner/outer form state, and replaces control methods, including [updateValueAndValidity](D:/Projects/angular-17-template-v2/libs/core/src/lib/form/directives/base-control-value-accessor-with-form.directive.ts:449). Several utilities also import the internal `ɵGetProperty` type.
+
+These choices explain why the history contains repeated synchronization fixes. They are not suitable foundations for a new, small Signal Forms screen. The README's preference for directive composition was not fully realized; inheritance itself is supported by Angular, but the depth and internal coupling here increase maintenance risk.
+
+**Recommendation:** native controls plus the narrowly scoped amount control from the plan. Use public APIs, small pure validators, and composition where behavior is actually shared. Do not introduce a generic form-control hierarchy or override framework methods.
+
+### 5.4 Reuse the accessibility intent, not the custom focus machinery
+
+The [connected overlay](D:/Projects/angular-17-template-v2/libs/ui/common/src/lib/connected-overlay/connected-overlay.component.ts:95) has Escape handling, focus restoration, and a custom focus trap with manually inserted sentinels and global IDs. Opening/restoration also uses timers. This is substantial work, but it does not establish the complete semantics or reliable focus behavior required for the GSCF dialogs, especially after deleting the original trigger.
+
+**Recommendation:** retain CDK Dialog as planned. Test initial focus, Tab/Shift+Tab containment, Escape/backdrop/Cancel behavior, and the fallback after deletion. Use native controls for ordinary fields and a semantic table. Add `@angular/aria` only if a required interaction actually needs one of its supported patterns.
+
+The [theme contrast helper](D:/Projects/angular-17-template-v2/libs/core/src/lib/theme/services/theme.service.ts:154) chooses the better of two contrast ratios; it does not enforce an AA threshold. Selecting the better color is not evidence that either color passes. Keep fixed, measured design tokens for this assignment.
+
+Passing axe is necessary under our rules but does not prove all WCAG requirements. Keep automated scans across important UI states and manual keyboard/focus and assistive-technology checks. [Playwright's accessibility guidance](https://playwright.dev/docs/accessibility-testing) explicitly describes this limitation.
+
+### 5.5 Some utility abstractions are unnecessary or risky for this domain
+
+| POC pattern | Concern | Proposed treatment |
+| --- | --- | --- |
+| Generic `SafeHtmlPipe` | Calls `bypassSecurityTrustHtml` on its argument. That is unsafe for untrusted buyer/reason text if routed through it. No exploitable POC data flow is claimed here. | Render dispute content through normal text interpolation. |
+| Injecting pipes for TypeScript formatting | Adds Angular DI/provider coupling to otherwise pure calculations. Template imports and injectable providers serve different purposes. | Use template pipes where needed; pure functions for amount/date logic and shared TypeScript formatting. |
+| Proposed ban on direct Angular pipe imports | A blanket wrapper layer is not needed for a fixed English-only screen. | Import only the specific built-in pipe/directive used, as AGENTS already requires. |
+| Generic `CallFnPipe` | Invokes functions using a view-context assumption; a broad abstraction makes dependencies less explicit. | Prefer simple template expressions and `computed()` for derived state. |
+| Lifecycle/property observation helpers | Some patch lifecycle methods or redefine properties to expose observables. | Prefer public lifecycle APIs, `DestroyRef`, and `takeUntilDestroyed` when subscriptions are necessary. |
+| Dynamic provider directive | Clears and recreates its embedded view whenever configuration changes. It is not an in-place update of the existing component tree. | Do not use it to reconfigure a live form; preserve draft state and focus with explicit inputs/signals. |
+
+Evidence: [SafeHtmlPipe](D:/Projects/angular-17-template-v2/libs/core/src/lib/utility/common/pipes/safe-html.pipe.ts:23), [CallFnPipe](D:/Projects/angular-17-template-v2/libs/core/src/lib/utility/common/pipes/call-fn.pipe.ts), [lifecycle helper](D:/Projects/angular-17-template-v2/libs/core/src/lib/ng-lifecycle/helpers/extract-ng-on-destroy$.helper.ts), and [dynamic provider](D:/Projects/angular-17-template-v2/libs/core/src/lib/dynamic-provider/directives/dynamic-provider/dynamic-provider.directive.ts:59). The recommendation to keep untrusted content out of trust-bypass APIs follows [Angular's security guidance](https://angular.dev/best-practices/security).
+
+### 5.6 Build optimizations need evidence and supported extension points
+
+Lazy routes, esbuild, and task caching are real mechanisms in the POC. However, the review found no measurements that justify claiming a particular speed or bundle-size improvement. `sideEffects: false` is a package declaration, not proof that all exports are safely tree-shaken.
+
+The custom [application executor](D:/Projects/angular-17-template-v2/tools/custom-nx-executors-plugin/src/executors/nx-angular-application/executor.ts:1) imports an internal Nx implementation. The [development-server builder](D:/Projects/angular-17-template-v2/tools/custom-nx-executors-plugin/src/builders/nx-angular-dev-server/builder.ts:46) temporarily replaces `Array.prototype.includes` to work around executor recognition. These are version-sensitive workarounds, not reusable best practices for the new application.
+
+**Recommendation:** retain the standard current Angular CLI pipeline, strict budgets, and a production-build inspection. Keep the planned feature lazy route. Additional component splits can introduce loading dependencies, so justify them with measurements rather than applying “lazy-load everything” mechanically. Angular documents eager and lazy loading as a tradeoff in its [route-loading guide](https://angular.dev/guide/routing/loading-strategies).
+
+### 5.7 Test infrastructure is further along than behavioral coverage
+
+The POC has meaningful tests around parts of the CVA, lifecycle, and reactive utilities. Many UI specs are creation smoke tests; for example, the [number-field spec](D:/Projects/angular-17-template-v2/libs/ui/form/src/lib/number-field/number-field.component.spec.ts:25) only checks that the component exists. The single [story file](D:/Projects/angular-17-template-v2/libs/ui/common/src/lib/nav-button/nav-button.component.stories.ts) supplies two navigation-button stories and a text assertion. The [Cypress spec](D:/Projects/angular-17-template-v2/apps/app/cypress/e2e/app.cy.ts) checks build metadata rather than complete business workflows. No axe integration was found in the inspected source/configuration.
+
+The README's division into TypeScript-focused unit tests and browser-based UI tests is reasonable in principle. The problem would be treating class-only tests as sufficient, or requiring Storybook before testing every small component. Angular's [component-testing guidance](https://angular.dev/guide/testing/components-basics) also treats the template and class interaction as part of the component's behavior.
+
+**Updated decision:** use Jest with zoneless TestBed, Cypress for the complete business E2E suite, Playwright for targeted browser/accessibility/visual verification, and mandatory Storybook stories/component tests for shared UI. The earlier recommendation to keep only Vitest and Playwright is superseded. The finding still applies: test money/numbering as domain behavior, blur/submit through rendered controls, and complete workflows in the browser; tooling configuration alone is not behavioral coverage.
+
+## 6. Accepted reuse scope and implementation approach
+
+The user wants to preserve more of the POC's development platform than the initial review recommended. This is an explicit scope decision. Keep the business app small while deliberately building its supporting library structure and component catalog.
+
+| Requested idea | Current decision | Qualification |
+| --- | --- | --- |
+| Library structure | Adopt `libs/core`, `libs/feature/*`, `libs/ui/*`, and `libs/data-access/*`, with `apps/disputes`. | Use native Angular CLI projects and explicit public APIs/build order; no Nx requirement. |
+| Core services/features | Core contains cross-cutting infrastructure; business pages live in feature libraries. | This prevents `core` from becoming a second feature/UI layer and avoids the old circular dependency. |
+| Strict TypeScript | Require strict language and template checking with no `any`. | Do not weaken typing to integrate a tool or reproduce the POC's private-type imports. |
+| Standalone, OnPush, zoneless | Adopt current framework defaults. | Omit redundant decorator options; keep Zone.js out of app and Angular test setup. |
+| Signals and modern component APIs | Use signals, required inputs, outputs/models, computed values, and signal view/content queries. | Keep RxJS for real streams/integrations rather than introducing manual signal bridges everywhere. |
+| Signal Forms | Required for new application forms. | The user confirmed `FormRoot` and `submit()` instead of `ngSubmit`; preserve Enter/button parity. |
+| Lazy routes | Lazy-load business page/feature entries. | Redirects/grouping routes need no chunks; keep the shell eager and avoid redundant nested boundaries. |
+| Deferrable views | Use for expensive nonessential content with placeholders and appropriate loading/error states. | Do not delay initial table/actions or invent a heavy product widget. An isolated catalog example can demonstrate the pattern. |
+| Directive composition | Prefer `hostDirectives` for genuinely shared behavior. | Do not port the component inheritance/CVA framework or introduce abstraction without reuse. |
+| Static images | Use `NgOptimizedImage` with explicit dimensions and appropriate loading priority. | Inline SVG icons are not image elements; unsupported base64 sources remain an exception. |
+| Mobile usability | Required in addition to matching desktop references. | Preserve all columns, usable scrolling/dialogs/errors/actions, touch interaction, and safe notification margins. |
+| Theme colors and styling | Tailwind utilities backed by semantic CSS custom properties. | Small CSS/package-theme integration is allowed; no theme picker, dark-mode requirement, or user-configurable palette. |
+| Formatting | Configure Prettier separately before feature work. | Ignore build/generated/reference files; ESLint has its own integration stage. |
+| Unit tests | Jest and zoneless TestBed, with meaningful specs for every feature. | Prefer focused TypeScript tests, but add DOM integration tests where class-only assertions cannot prove behavior. |
+| Business E2E | Cypress covers every feature and all assignment workflows. | Maintain a traceable requirement-to-test matrix and isolated mock sessions. |
+| Additional browser tests | Playwright covers cross-browser, axe, focus, mobile, and selected visuals. | Avoid duplicating the entire Cypress suite; isolate configurations and global test types. |
+| Component documentation/testing | Storybook plus Compodoc; stories and black-box checks for every shared UI component. | JSDoc covers inputs, outputs, models, aliases, and required values. Compodoc generates documentation, while story `play` functions and a runner test behavior. |
+| Production preview | Add `serve:dist` using pinned `local-web-server`, HTTP/2, and SPA fallback. | Use its local `ws` executable with the real build directory instead of an unpinned runtime download and directory-changing shell chain. |
+| Tree shaking | Use `sideEffects: false` on genuinely side-effect-free libraries. | Preserve required CSS/initialization entries and inspect production output; a blanket flag is not evidence of optimization. |
+| Naming and visibility | `$` prefix for signal fields; `$` suffix for observable/subject fields; private by default, protected for template-only members, public for external contracts. | Outputs are not signals. Input/model aliases keep consumer bindings clean; keep purpose-based filenames. |
+| Dependency versions | Exact versions in owned package manifests, npm exact-save policy, committed lockfile. | Do not edit vendor manifests/transitive ranges; validate peer compatibility and deliberately update pins. |
+
+### Angular CLI monorepo feasibility
+
+Yes: Angular CLI supports an empty multi-project workspace, applications, and `ng-packagr` libraries. `ng generate library` supports `--project-root`, allowing the requested folders without Nx. The revised plan uses a root workspace with an app under `apps/` and separately generated libraries under `libs/`. Each library has a public API and its own build configuration. Consumer builds use built library outputs, with explicit build/watch ordering instead of Nx orchestration. [Angular workspace structure](https://angular.dev/reference/configs/file-structure), [library generator](https://angular.dev/cli/generate/library).
+
+### Integration order
+
+The detailed stage table and exit criteria live in section 11 of the plan. The order is:
+
+1. Verify version compatibility, then establish the CLI workspace and strict standalone/zoneless baseline.
+2. Add Prettier, ESLint/boundaries, and Tailwind/tokens as separate steps.
+3. Add Jest, Cypress, and Playwright independently, each with an appropriate working integration fixture.
+4. Add Storybook, then Compodoc, then the story test runner in separate steps.
+5. Build the small common component kit one component at a time, including its documentation and story checks.
+6. Implement core/domain/store libraries, then the disputes overview, creation, and removal workflows with their tests.
+7. Verify production serving, tree shaking, images, lazy/deferred loading, mobile behavior, and complete acceptance coverage; finish handover documentation.
+
+This sequence does not authorize implementing or installing these tools during the documentation update. It makes later changes independently reviewable and locates compatibility failures before they become entangled with the business application.
+
+### Still excluded
+
+- Copying the POC's custom Nx builders, global built-in patches, private Angular API access, lifecycle monkey-patching, or numeric parser.
+- Localization, persistent settings, a theme picker, authentication, real APIs, invoice/comment management, NgRx, or a generic repository framework.
+- Generic grids, sorting/filtering/pagination/virtual scrolling, unrelated rich input widgets, or an entire publishable design system.
+- SSR, deployment automation, and mandatory version bumps for every commit.
+- Replacing package-owned toast behavior or CDK focus management with custom implementations.
+
+The temporary MSW material in this repository is not adopted by this review or plan revision. It needs a separate explicit evaluation if the user requests it.
+
+## 7. Best-practice clarifications retained in the revised rules
+
+The historical POC must be judged in its Angular 17/18 context. Its explicit standalone and OnPush options were appropriate then. Current Angular v22 defaults make those options unnecessary in new code, consistent with the user's rules. [Angular component configuration](https://angular.dev/guide/components/advanced-configuration).
+
+`@Service()` is a current API and is suitable for new singleton services using `inject()`. The disputes store remains feature-scoped through `@Service({ autoProvided: false })` plus an explicit overview provider. Moving its source into a data-access library must not change that lifetime. [Angular service guidance](https://angular.dev/guide/di/creating-and-using-services).
+
+The accepted `linkedSignal` clarification is now in AGENTS:
+
+> Use `computed()` for read-only derived state, including derivations from multiple signals. Use `linkedSignal()` when derived state must also be writable and must reset or reconcile with changes to its source signals. Define how existing user input is preserved or reset.
+
+The number of sources is not the distinction; writable derived state is. [Angular linked-signal guidance](https://angular.dev/guide/signals/linked-signal).
+
+The request to centralize form submission is retained using the supported Signal Forms `FormRoot`/`submit()` mechanism, explicitly approved by the user. Adding classic forms just to obtain `ngSubmit` would mix form strategies unnecessarily. [Signal Forms submission](https://angular.dev/guide/forms/signals/form-submission).
+
+The Storybook exception for signal inputs is obsolete: [issue #25784](https://github.com/storybookjs/storybook/issues/25784) is closed as completed. Keep modern inputs and verify current controls/documentation against the selected versions, including aliases and required inputs. Do not assume Compodoc extracts every detail automatically.
+
+The TypeScript-focused, white-box unit-test preference is retained without treating class tests as proof of template behavior. Shared components have black-box story tests; features have browser workflows and focused rendered integration tests. Tests must not force public visibility for private implementation details or merely assert construction.
+
+Pipe injection, when genuinely needed, uses a scoped provider and `inject()`. Template imports are only needed when the template uses that pipe; an environment provider is registered at the route/bootstrap scope only when service usage needs it. Pure business transformations and shared formatters can remain plain functions. The exact convention is recorded in the decision register below.
+
+Tailwind, Jest, both browser runners, the library workspace, and signal prefixes are valid project preferences rather than universal best practices. They add configuration and maintenance work; the user explicitly chose that tradeoff. Strict package pinning improves explicit upgrade control but still requires regular deliberate updates.
+
+## 8. Decision register after user feedback
+
+| Item | Current outcome | Effect on the earlier recommendation |
+| --- | --- | --- |
+| `linkedSignal` wording | Accepted and clarified. | Read-only derivation stays `computed`; writable derived state can use `linkedSignal`. |
+| Angular CLI monorepo | Adopted as the implementation approach. | Replaces the original `App/` single-application structure; Nx is still unnecessary. |
+| Tailwind | Explicitly selected. | Supersedes the earlier recommendation to keep SCSS-first styling. |
+| Jest | Explicitly selected. | Replaces application Vitest; zoneless compatibility is an integration gate. |
+| Cypress plus Playwright | Both selected, with distinct responsibilities. | Expands the earlier Playwright-only approach. |
+| Storybook and Compodoc | Required for the shared kit. | Supersedes optional/future Storybook; add documentation and executable stories before feature assembly. |
+| Signal prefixes | `$signal` and `observable$` selected. | Supersedes plain signal names; filenames remain purpose-based because no suffix convention was re-requested. |
+| Visibility | Private/protected/public by actual consumer. | Public component contracts remain available; tests do not dictate visibility. |
+| Form submission | User explicitly approved `FormRoot` and `submit()`. | Replaces the pasted `ngSubmit` wording while preserving behavior. |
+| Pipe usage | Targeted approach explicitly confirmed by the user. | Use pure functions for domain calculations and formatting; a pipe genuinely needed in TypeScript receives a provider, and template imports follow template usage. |
+| Lazy/deferred loading | Accepted with meaningful boundaries and placeholders. | Every business route can be lazy; initial required content is not artificially delayed. |
+| Side effects and production serving | Intent retained with correct package declarations and output paths. | Avoid blindly copying `sideEffects: false` or the original shell command. |
+
+No application implementation, dependency installation, or changes to the old POC are part of this documentation revision. The original amount parsing, validation timing, focus, security, and framework-internals findings remain constraints on what can be reused.

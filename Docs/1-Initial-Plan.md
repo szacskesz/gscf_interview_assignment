@@ -4,13 +4,15 @@ Date: 13 November 2026
 
 Status: Planning only
 
+Revision: Updated after the POC review and the user's workspace, tooling, component-library, and incremental-delivery decisions. This revision supersedes the original single-application layout, SCSS-first styling, Vitest selection, and optional Storybook recommendation.
+
 ## 1. Objective and source material
 
 Build an Angular application that allows enterprise users to create and remove disputes directly from the Disputes overview. The application must reproduce the supplied workflow, validation behavior, visual language, and sample data using an entirely local mock implementation.
 
 This plan is based on all 12 pages of [the interview assignment](../Instructions/SeniorFrontendEngineer-Interview-Task.pdf), dated 2 November 2026, including Figures 1.1-1.6, the color reference, and the input-state specification in Figure 2.0. The supplied [GSCF logo](../Instructions/GSCF-logo.png) is suitable for the dark navigation background and should be reused.
 
-At the start of planning, the repository contained the assignment and logo, with empty `App` and `Docs` directories. Application implementation will live under `App`. This first stage produces the plan only.
+At the start of planning, the repository contained the assignment and logo, with empty `App` and `Docs` directories. The revised implementation will use an Angular CLI multi-project workspace at the repository root, with `apps/` and `libs/`. The earlier `App/` layout is superseded. This stage updates documentation only; temporary/reference projects are not adopted as the application.
 
 All source code, identifiers, UI copy, comments, documentation, test descriptions, and any future commit messages will be written in English. Commit messages should describe the actual change concisely.
 
@@ -29,7 +31,11 @@ All source code, identifiers, UI copy, comments, documentation, test description
 
 ### Included optional functionality
 
-Include both success toasts and the accessibility requirements identified as optional in the PDF, as confirmed during planning. Use an existing notification package for toast behavior and established Angular accessibility infrastructure for dialogs. Their implementation should follow the required workflows rather than delaying the first working version.
+Include both success toasts and the accessibility requirements identified as optional in the PDF, as confirmed during planning. Use an existing notification package for toast behavior and established Angular accessibility infrastructure for dialogs. Prepare their shared UI infrastructure before feature implementation, then connect the actual notifications to successful business operations.
+
+### User-requested engineering scope
+
+Build a small shared component catalog with Storybook, Compodoc, and component interaction tests before assembling the business features. Add Tailwind, Prettier, Jest, Cypress, and Playwright in separate verified steps. Phone usability is now an explicit project requirement, although the PDF supplies desktop references only. These additions expand the engineering scope, not the business workflows or seed data.
 
 ### Scope boundaries
 
@@ -50,17 +56,21 @@ Use a compatible Angular CLI and CDK release from the same major version; verify
 | Framework | Angular 22, latest stable patch | Matches the requested current Angular stack. |
 | Runtime | Node.js 24, a supported patch at or above 24.15.0 | Meets Angular 22's published compatibility range. |
 | Language | Strict TypeScript 6.0.x | Angular 22 currently requires TypeScript `>=6.0.0 <6.1.0`. |
-| Package management | npm with committed `package-lock.json` | Straightforward setup and reproducible `npm ci`. |
+| Package management | npm, exact direct dependency versions, committed `package-lock.json` | Reproducible `npm ci`; configure `save-exact=true` and review upgrades explicitly. |
+| Workspace | Angular CLI multi-project workspace with `apps/` and `libs/` | Supports the requested library layout without Nx or custom builders. |
 | Application model | Standalone components and application providers | Keeps imports and dependencies explicit. |
 | Change detection | Zoneless, with OnPush-compatible components | Fits signal-driven state and avoids a Zone.js dependency. |
 | Forms | Stable Angular Signal Forms | Integrates typed form values, validation, and interaction state. |
 | State | A small feature-local injectable store using signals | Sufficient for one collection and two mutation operations. |
 | Dialog infrastructure | Angular CDK Dialog with custom styles | Provides focus and overlay behavior while retaining the supplied appearance. |
 | Notifications | Angular Material `MatSnackBar` with custom content | Reuses an existing package for timing, replacement, positioning, and announcements. |
-| Styling | Component SCSS plus global CSS custom properties | Direct control over the prototype's typography, colors, and spacing. |
-| Unit/component tests | Angular CLI's Vitest setup and TestBed | Uses the current default testing integration. |
-| Browser tests | Playwright, with selected axe accessibility checks | Exercises real input, focus, layout, and modal behavior. |
+| Styling | Tailwind utilities and semantic CSS custom properties | User preference; shared tokens preserve the prototype's palette and responsive behavior. |
+| Unit/integration tests | Jest, compatible `jest-preset-angular`, zoneless TestBed | User preference; a separate integration step replaces generated unit-runner configuration. |
+| Business E2E tests | Cypress | Complete black-box coverage of assignment workflows and future features. |
+| Browser verification | Playwright with axe | Targeted cross-browser, accessibility, focus, responsive, and visual coverage. |
+| Shared component catalog | Storybook with Compodoc and executable stories | Documents public APIs and verifies isolated UI behavior before feature assembly. |
 | Static quality | Angular ESLint and Prettier | Consistent TypeScript, templates, styles, and documentation. |
+| Production preview | Pinned `local-web-server`, exposed through `serve:dist` | Serves the built SPA with route fallback and HTTP/2. |
 
 Angular's [compatibility matrix](https://angular.dev/reference/versions) is the source for runtime and language versions. Use the CLI-compatible RxJS 7.x dependency where required; it does not need to become the application's state-management mechanism. Check the development machine's Node/npm versions before scaffolding and document the supported runtime in the README and version configuration.
 
@@ -74,10 +84,26 @@ Angular's [compatibility matrix](https://angular.dev/reference/versions) is the 
 - Use signal queries and `afterNextRender` only where needed for focus after the DOM changes.
 - Clean up subscriptions and timers with lifecycle-aware APIs such as `DestroyRef` and `takeUntilDestroyed` where applicable.
 - Keep derived state in `computed` values rather than synchronizing duplicate fields with effects.
+- Use `linkedSignal` only for derived state that also needs independent writes and a defined reset/reconciliation policy; multiple dependencies alone do not require it.
+- Prefer `hostDirectives` for genuinely reusable behavior instead of extending component classes. The shared kit must not recreate the old CVA inheritance hierarchy.
+- Use `viewChild`, `viewChildren`, `contentChild`, and `contentChildren` instead of query decorators. Required queries must have guaranteed results.
+- Prefix signal fields with `$` and suffix observable/subject fields with `$`. Keep template-facing members `protected`, implementation members `private`, and intentional external contracts `public`; inputs, outputs, and models are public contracts. Use input/model aliases to keep binding names such as `label` clean.
+- Document shared component inputs, outputs, and models with JSDoc. Use `input.required()` when omission is invalid. `output()` emitters are not signals and do not receive the signal prefix.
+- Keep standalone and OnPush defaults; do not add explicit `standalone: true` or `changeDetection: ChangeDetectionStrategy.OnPush` in Angular v22 decorators.
 
 These choices follow the [Angular style guide](https://angular.dev/style-guide), [input API guidance](https://angular.dev/guide/components/inputs), and [template control-flow guidance](https://angular.dev/guide/templates/control-flow). Zoneless operation is already the default in Angular 21 and later; retain the generated default and verify that no dependency or configuration reintroduces Zone.js. See [zoneless guidance](https://angular.dev/guide/zoneless).
 
-Use a client-rendered application. Server rendering, hydration, a global store library, a generic repository framework, and deferred rendering of this small table would add little value to this task. A single lazy-loaded `/disputes` route with an empty-path redirect is enough; the dialogs do not need separate routes.
+Use a client-rendered application. Server rendering, hydration, a global store library, and a generic repository framework remain outside scope. Lazy-load every business page/feature route through `loadComponent` or `loadChildren`; redirects and componentless grouping routes do not need independent chunks, and the bootstrap shell remains eager. Currently there is one `/disputes` feature route and an empty-path redirect. Dialogs do not need separate routes. Avoid combining nested loading boundaries without a reason.
+
+Use `@defer` for expensive, nonessential content that can appear after the initial render, with a lightweight placeholder that reserves space and useful loading/error states. Verify that dependencies are eligible for code splitting and are not also eagerly referenced. Do not defer the required initial table, New Dispute action, or immediately needed dialog fields. There is no current heavy optional product widget to invent merely to demonstrate this API; document and test the pattern in an isolated catalog example if needed. See [deferred-loading guidance](https://angular.dev/guide/templates/defer) and the [directive composition API](https://angular.dev/guide/directives/directive-composition-api).
+
+### Compatibility checks before each integration
+
+The requested stack is viable in principle, but the versions actually installed must pass their own integration checks. The current [jest-preset-angular source manifest](https://github.com/thymikee/jest-preset-angular/blob/main/package.json) declares Angular 20-22 and Jest 30 compatibility, and its [TestBed guide](https://thymikee.github.io/jest-preset-angular/docs/getting-started/testbed-environment) provides `setupZonelessTestEnv`. This supports using Jest without adding Zone.js; it does not replace checking the published release selected at implementation time.
+
+The current [Storybook Angular guide](https://storybook.js.org/docs/get-started/frameworks/angular) supports Angular 18-22 and Compodoc integration. Start with its supported Angular renderer and a zoneless signal-input fixture. The historical [signal-input issue](https://github.com/storybookjs/storybook/issues/25784) was closed as completed; retain signal inputs, including aliases and required values, and verify their generated controls/docs rather than carrying over the old exception.
+
+Keep application Jest, Cypress, Playwright, and Storybook test configuration separate, including TypeScript `types`, file patterns, and browser settings. Do not retain Vitest as a second application unit runner. If the chosen Storybook renderer requires a distinct runner, document that dependency separately; never assume a Vite-only addon works with a Webpack renderer. Do not use forced peer resolution to conceal unsupported combinations.
 
 ## 4. Requirement interpretation and acceptance criteria
 
@@ -207,70 +233,144 @@ Configure a polite announcement and keep keyboard focus in the workflow. Keep th
 
 ## 5. Application architecture
 
-### Proposed structure
+### Angular CLI workspace and library boundaries
 
-The following is a working structure, not a requirement to create empty abstractions. Keep component templates, styles, and tests alongside their TypeScript files.
+Angular CLI supports multiple applications and libraries in one workspace. Create an empty workspace with `--no-create-application`, then generate projects at explicit roots. The library generator supports `--project-root`, so the requested layout does not require Nx. Keep one root `angular.json`, npm manifest, and lockfile. See [multi-project workspaces](https://angular.dev/reference/configs/file-structure) and [library generator options](https://angular.dev/cli/generate/library).
+
+The intended layout is below. Generate libraries when their implementation stage begins; do not create empty projects for every conceivable future feature.
 
 ```text
-App/
-  public/
-    images/gscf-logo.png
-    fonts/
-  src/
-    app/
-      app.ts
-      app.html
-      app.scss
-      app.config.ts
-      app.routes.ts
-      layout/
-        top-navigation/
-      disputes/
-        dispute.model.ts
-        dispute.fixtures.ts
-        disputes-store.ts
-        disputes-store.spec.ts
-        disputes-overview/
-        disputes-table/
-        create-dispute-dialog/
-          create-dispute-dialog.ts
-          create-dispute-dialog.html
-          create-dispute-dialog.scss
-          create-dispute-dialog.spec.ts
-          dispute-form.schema.ts
-        remove-dispute-dialog/
-        amount-field/
-        dispute-amount.ts
-        dispute-amount.spec.ts
-        dispute-date.ts
-        dispute-date.spec.ts
-      shared/
-        notifications/
+apps/
+  disputes/
+    public/
+      images/gscf-logo.png
+      fonts/
+    src/
+      app/
+        app.ts
+        app.html
+        app.config.ts
+        app.routes.ts
+        layout/top-navigation/
+      styles.css
+      main.ts
+libs/
+  core/
+    src/
+      lib/clock/
+      public-api.ts
+  ui/
+    common/
+      src/
+        lib/
+          button/
+          icon-button/
+          icon/
+          badge/
+          dialog-frame/
+        public-api.ts
+    form/
+      src/
+        lib/
+          field-frame/
+          field-error/
+          text-input/
+          radio-group/
+        public-api.ts
+    notifications/
+      src/
+        lib/
           notifications.ts
-          success-notification.ts
-        icons/
-    styles/
-      _tokens.scss
-      _typography.scss
-      _controls.scss
-    styles.scss
-    main.ts
-  e2e/
-    disputes.spec.ts
-    disputes-accessibility.spec.ts
-  angular.json
-  package.json
-  package-lock.json
-  playwright.config.ts
-  README.md
+          success-notification/
+        public-api.ts
+  data-access/
+    disputes/
+      src/
+        lib/
+          dispute.model.ts
+          dispute.fixtures.ts
+          disputes-store.ts
+          disputes-store.spec.ts
+          dispute-amount.ts
+          dispute-amount.spec.ts
+          dispute-date.ts
+          dispute-date.spec.ts
+        public-api.ts
+  feature/
+    disputes/
+      src/
+        lib/
+          disputes.routes.ts
+          disputes-overview/
+          disputes-table/
+          create-dispute-dialog/
+            create-dispute-dialog.ts
+            create-dispute-dialog.html
+            create-dispute-dialog.spec.ts
+            dispute-form.schema.ts
+          remove-dispute-dialog/
+          amount-field/
+        public-api.ts
+styles/
+  tokens.css
+  theme.css
+  typography.css
+.storybook/
+  main.ts
+  preview.ts
+  test-runner.ts
+testing/
+  jest/setup.ts
+  cypress/
+    e2e/
+    support/
+  playwright/
+    accessibility/
+    cross-browser/
+    visual/
+angular.json
+package.json
+package-lock.json
+.npmrc
+.prettierrc.json
+.prettierignore
+eslint.config.js
+jest.config.ts
+cypress.config.ts
+playwright.config.ts
+tsconfig.json
+tsconfig.compodoc.json
 Docs/
-  1-Initial-Plan.md
 Instructions/
-  SeniorFrontendEngineer-Interview-Task.pdf
-  GSCF-logo.png
+AGENTS.md
+README.md
 ```
 
-Keep the empty-state markup inside the overview unless it becomes substantial. Do not extract every visual element into a component. Shared code should represent actual reuse, such as notification presentation or the small icon set.
+Each CLI library also has its generated package/build/TypeScript configuration. Shared components colocate their `*.stories.ts`, focused `*.spec.ts` where needed, templates, and optional CSS. The tree lists locations, not a requirement to wrap every native element. Use native-element directives where they preserve semantics more simply than wrapper components.
+
+| Layer | Responsibility | Allowed application-layer dependencies |
+| --- | --- | --- |
+| `libs/core` | Cross-cutting infrastructure and tokens, such as the controllable current-date source. | No feature, data-access, or UI imports. |
+| `libs/data-access/*` | Domain models, fixtures, pure domain helpers, stores, and future API boundaries. | Core; no UI/feature imports. |
+| `libs/ui/*` | Presentational components and UI-only adapters/behavior. | Other explicitly approved UI libraries and small core tokens; no feature stores. |
+| `libs/feature/*` | Business pages, form schemas, dialogs, and orchestration. | Core, UI, and its own data-access library. |
+| `apps/*` | Bootstrap, global providers/assets, shell, and feature route registration. | Public APIs of the layers above; business features are lazy imports. |
+
+Enforce these boundaries with ESLint restrictions and cycle checks rather than assuming folder names enforce them. Keep the distinction between package/public API names and physical folders explicit, for example `@gscf/disputes-data-access` can map to the library rooted at `libs/data-access/disputes`.
+
+Use CLI-generated `ng-packagr` libraries and their public entry points. Keep consumer aliases pointed at built library outputs, and build dependencies before consumers. Provide a documented dependency order and watch workflow using ordinary scripts; Angular CLI is not an Nx task scheduler. Do not bypass packaging with private source imports just to make a build pass. Verify a clean build without pre-existing `dist` artifacts. [Angular library guidance](https://angular.dev/tools/libraries/creating-libraries).
+
+For deferred UI, inspect the packaged entry-point boundary as well as the template: a flattened library entry point already used eagerly may prevent the desired split. Add a separate public entry point only when the measured loading requirement justifies it. Keep stories and test-only exports out of production public APIs.
+
+### Shared component catalog before feature assembly
+
+Build only the kit needed by the assignment: native button/icon-button treatments, icons and badges, a CDK-compatible dialog frame, accessible field labels/errors, basic text/radio presentation, and package-backed success notification presentation. The disputed amount's raw-input/precision rules remain feature/domain responsibilities; a generic numeric field must not normalize invalid input away.
+
+Every shared component receives JSDoc on public inputs/outputs/models and a story covering its applicable default, focus, disabled, error, narrow-screen, and content-length states. Interactive stories use `play` functions for black-box behavior assertions. Static stories verify rendering and semantics instead of inventing artificial interactions. Stories are part of completing a component, not documentation deferred until the final application is done.
+
+Compodoc emits JSON for Storybook Autodocs. Verify that signal inputs, aliases, required inputs, models, and outputs appear with useful descriptions. Supply explicit `argTypes` or documentation where extraction is incomplete without replacing modern component APIs. Compodoc documents APIs; it does not execute tests. A supported Storybook runner executes the story assertions. For the documented Angular/Webpack integration, `@storybook/test-runner` is a candidate backed by Jest and Playwright; validate it independently from application Jest. [Storybook test-runner guide](https://storybook.js.org/docs/writing-tests/integrations/test-runner).
+
+Keep the empty-state markup within the overview unless it becomes substantial. Do not build a generic grid, modal framework, toast lifecycle, or broad CVA base class as part of the kit.
 
 ### Responsibilities and data flow
 
@@ -285,7 +385,7 @@ Keep the empty-state markup inside the overview unless it becomes substantial. D
 | Amount/date functions | Perform deterministic normalization and display formatting. |
 | Notification adapter | Supplies application copy and appearance to `MatSnackBar`. |
 
-The overview provides the store for the feature. It reads readonly signals, while presentational components receive data through typed inputs. Dialog results are typed; a dismissal result must never be interpreted as confirmation. Only store commands can mutate the collection.
+The overview provides the store from `libs/data-access/disputes` for the feature. Use `@Service({ autoProvided: false })` with the explicit overview provider so its lifetime remains feature-scoped. It exposes readonly signals, while presentational components receive data through typed inputs. Dialog results are typed; a dismissal result must never be interpreted as confirmation. Only store commands can mutate the collection.
 
 For creation, the dialog returns validated data and the overview commits it once. The returned created record supplies the actual number used in the toast. For removal, pass a snapshot of the selected record to the dialog and remove by its stable number after explicit confirmation. Guard against repeated callbacks or a record that is already absent.
 
@@ -328,6 +428,8 @@ No artificial network delay or HTTP layer is needed. The store's small public AP
 
 Use a typed signal model with `form`, `FormField`, and schema-based validation from `@angular/forms/signals`. These APIs are stable in Angular 22, as documented by the [form API](https://angular.dev/api/forms/signals/form) and [FormField API](https://angular.dev/api/forms/signals/FormField).
 
+The user confirmed using `FormRoot` and the Signal Forms `submit()` lifecycle instead of requiring `ngSubmit`. Bind the native form through `FormRoot`, configure the submission action, and use a real submit button. Enter and clicking the button must invoke the same validation/submission path exactly once. Do not combine a second manual submit handler with `FormRoot`'s configured submission action. This preserves centralized submission without importing classic form directives solely for their event names. [Signal Forms submission](https://angular.dev/guide/forms/signals/form-submission).
+
 Define validation in a small feature-specific schema and pure amount-validation function. Render each error from its field state and the submitted/touched policy described above. Keep submission handling centralized so clicking Create Dispute and pressing Enter follow the same path. Use native text and radio inputs directly wherever possible. See the [Signal Forms overview](https://angular.dev/guide/forms/signals/overview) and [validation guidance](https://angular.dev/guide/forms/signals/validation).
 
 ### Numeric input and precision
@@ -355,6 +457,10 @@ The populated prototype shows `1,250.00` inside a number field. Native number co
 Create the date from local year, month, and day when the save command runs. Avoid `toISOString().slice(0, 10)`, which derives a UTC date and can produce the wrong local day.
 
 Use one date formatter for the table with an explicit English locale and the required `d MMM yyyy` output. Store sample dates as date-only values and avoid reparsing them through a timezone-sensitive UTC conversion. Inject a small current-date function or clock token into the store so tests can freeze the date without depending on the machine's clock.
+
+### Pipe use and formatting boundaries
+
+The user confirmed using pure functions for domain calculations and formatting, with targeted pipe injection. When TypeScript genuinely needs a pipe instance, obtain it through `inject()`: provide it in the component, or register an environment provider at the required route/bootstrap scope for service usage. A component adds that pipe to template `imports` only when its template also uses it. Do not create a parallel wrapper library for built-in pipes.
 
 ## 7. Toast and accessibility libraries
 
@@ -408,13 +514,17 @@ On creation cancellation or success, return focus to New Dispute. Opening either
 
 Match the desktop prototype first: a compact dark header, white page, generous outer spacing, blue title, right-aligned primary action, restrained table dividers, and compact status badges. The dialogs use white surfaces, modest corner rounding, clear field spacing, and right-aligned footer actions.
 
-Use Montserrat with locally served font files and appropriate license attribution. Load only the weights actually needed, with a fallback sans-serif stack and `font-display: swap`. This avoids depending on a third-party font request during the live demonstration. Copy the provided logo into the application's public assets and specify its intrinsic dimensions.
+Use Montserrat with locally served font files and appropriate license attribution. Load only the weights actually needed, with a fallback sans-serif stack and `font-display: swap`. This avoids depending on a third-party font request during the live demonstration. Copy the provided logo into the application's public assets and render it with `NgOptimizedImage`, meaningful alternative text, and intrinsic dimensions. Use the directive for eligible static image elements; inline SVG icons and unsupported inline base64 sources are different cases. [Image optimization](https://angular.dev/guide/image-optimization).
 
 Measure proportions from the embedded figures rather than interpreting their scaled-down PDF text as actual browser font sizes. Keep body and form text readable. Use a small, consistent SVG icon set for plus, bin, close, warning, and check icons; decorative icons should inherit color and not require an external icon-font request.
 
 ### Design tokens
 
 Define the supplied colors once as CSS custom properties and use semantic aliases where helpful. Preserve the mapping to the brief's token names in the stylesheet.
+
+Use Tailwind utilities as the primary styling language, mapped to the semantic variables through the current Tailwind CSS-first theme configuration. A small CSS layer remains appropriate for tokens, fonts, CDK structural styles, and Material theme integration. A Sass file may be used narrowly if required by a package's theming API; it does not make the application SCSS-first. Keep one GSCF theme; no theme switcher or user-color editor is implied.
+
+Configure Tailwind source detection for `apps/`, every UI/feature library, and the story files. Use complete utility names in variant maps rather than concatenated fragments. Confirm that a library-only class appears in both the application build and Storybook build. Share the same token/font stylesheet with the catalog. See [Tailwind source detection](https://tailwindcss.com/docs/detecting-classes-in-source-files).
 
 | Prototype token | Value | Use |
 | --- | --- | --- |
@@ -441,7 +551,7 @@ Keep toast body text dark on white; the green token is for the icon and outline.
 
 ### Responsive behavior
 
-The PDF defines desktop views only. Proposed narrow-screen behavior:
+The PDF defines desktop views only, but phone usability is now explicitly requested. Required narrow-screen behavior:
 
 - Let the page heading/action row wrap when needed.
 - Keep all eight table columns available in a horizontal scrolling region rather than hiding required data.
@@ -449,8 +559,9 @@ The PDF defines desktop views only. Proposed narrow-screen behavior:
 - Size dialogs to the viewport with side margins, a maximum height, and internal vertical scrolling.
 - Keep errors, currency options, and footer buttons usable without horizontal clipping.
 - Position notifications within safe viewport margins.
+- Keep touch actions comfortably usable, avoid viewport-wide horizontal overflow outside the table region, and account for the on-screen keyboard when checking dialog actions.
 
-Review at approximately 1440 px, 1024 px, 768 px, and 375 px widths, plus browser zoom. These are verification points rather than additional product breakpoints mandated by the brief.
+Review at approximately 1440 px, 1024 px, 768 px, 375 px, and 320 px widths, plus browser zoom. These are verification points rather than fixed product breakpoints. Preserve the exact desktop content and all eight columns on smaller screens.
 
 ## 10. Testing and verification
 
@@ -458,7 +569,7 @@ Tests should demonstrate observable behavior and protect the business rules. Avo
 
 ### Unit tests
 
-Use the CLI's [Vitest integration](https://angular.dev/guide/testing) for pure functions and the store:
+Use Jest for pure functions, the store, and focused feature logic. Every feature receives meaningful colocated `*.spec.ts` coverage. Prefer small TypeScript-focused white-box tests that select important paths and edge cases, without making private members public just for tests. Use `jest-preset-angular` and its zoneless TestBed setup for Angular-dependent tests; do not claim this is the CLI's default runner. Remove or replace unused generated Vitest targets in the dedicated Jest integration stage.
 
 - Fixtures retain their exact values and initial ordering.
 - Creation prepends a record, assigns New, uses the controlled current date, and updates the count.
@@ -472,7 +583,7 @@ Use the CLI's [Vitest integration](https://angular.dev/guide/testing) for pure f
 
 ### Component integration tests
 
-Use TestBed with realistic interaction and the production form schema:
+Use Jest/TestBed with realistic interaction and the production form schema for feature integration. Shared UI components additionally have Storybook `play` tests that exercise their public behavior and appearance. A preference for TypeScript-only unit tests does not exclude DOM tests for bindings, validation timing, and focus:
 
 - Opening the creation dialog shows the four fields, required markers, exact placeholders, no selected currency, and no errors.
 - Empty submission reveals all four mandatory errors together and does not create a dispute.
@@ -489,7 +600,7 @@ Do not re-test every internal behavior of CDK or Material. Test the application'
 
 ### End-to-end scenarios
 
-Use [Playwright](https://playwright.dev/docs/intro) with role/label-based locators and isolated page loads:
+Use [Cypress](https://docs.cypress.io/app/end-to-end-testing/writing-your-first-end-to-end-test) as the primary business-workflow E2E runner. Use accessible role/label queries through compatible testing helpers, or stable intent-based selectors where necessary. Keep tests black-box and reset data through isolated page loads. Every feature and every PDF-required behavior must map to at least one E2E scenario:
 
 1. Load the initial three rows and verify key seed values and `Showing 3/3 rows`.
 2. Open creation, submit empty, fix fields individually, and verify each validation state.
@@ -503,7 +614,13 @@ Use [Playwright](https://playwright.dev/docs/intro) with role/label-based locato
 10. Verify notification replacement and automatic dismissal using controlled browser time where practical.
 11. Check narrow-screen table access, modal scrolling, and zoom without clipped actions.
 
-Run the full interaction suite in Chromium and targeted smoke checks in Firefox and WebKit, particularly for number-input behavior and focus. Freeze the clock and timezone for deterministic date assertions. A reload should reset the mock data, making every test and demonstration repeatable.
+12. Reload after mutations and verify the original records and numbering are restored.
+13. Cancel/close/backdrop/Escape from creation and verify the collection is unchanged and the next opening has a clean draft.
+14. Assert exact required error text, nonpositive/precision precedence, no rounding, and all relevant input states through real browser entry.
+
+Run the complete Cypress business suite in a supported Chromium browser. Use [Playwright](https://playwright.dev/docs/intro) for targeted Chromium/Firefox/WebKit checks, particularly numeric-input behavior, keyboard/focus, mobile sizing, and visual comparisons. Cypress remains the traceable owner of business acceptance coverage; the Playwright suite is not a second copy of every business test. Browser engines bundled for Storybook do not by themselves constitute application E2E coverage.
+
+Control the clock and browser environment for deterministic date assertions, with runner-specific setup. A reload should reset the mock data, making every test and demonstration repeatable. Keep an acceptance matrix mapping the requirements in section 4 to concrete Cypress tests and supplementary Playwright checks as tests are implemented.
 
 ### Visual and accessibility checks
 
@@ -511,27 +628,64 @@ Compare browser screenshots against Figures 1.1-1.6 and inspect every Figure 2.0
 
 Use [axe through Playwright](https://playwright.dev/docs/accessibility-testing) on the overview, creation modal, error state, removal modal, and empty state. Supplement automated checks with a full keyboard walkthrough, text contrast inspection, and a screen-reader smoke test where available. Automated checks alone do not establish accessibility compliance.
 
-## 11. Implementation sequence
+## 11. Incremental implementation sequence
 
-| Stage | Work | Completion check |
+Complete the stages in order. Add one tool or architectural concern per reviewable change, run the checks relevant to that change, and record actual results before proceeding to dependent work. Scaffolding stages must leave a usable build, even before domain functionality exists. Do not install all tools together and postpone integration failures until the application is finished.
+
+| Stage | Work introduced in this step | Exit criteria |
 | --- | --- | --- |
-| 1. Project foundation | Verify package versions and peer dependencies; scaffold under `App`; configure strict typing, routing, linting, formatting, and tests. | A clean install can start, test, and build the app. |
-| 2. Design foundation | Add Montserrat, the supplied logo, tokens, shared control styles, navigation, and page shell. | The base overview matches the reference structure and branding. |
-| 3. Data and table | Add domain types, exact fixtures, the signal store, numbering, formatters, table, counter, and empty branch. | Seed data and formatting match; core store tests pass. |
-| 4. Creation flow | Add CDK Dialog, Signal Forms schema, amount control, all input states, submission, and cancellation. | Invalid input cannot save; a valid dispute is inserted first with the correct defaults. |
-| 5. Removal flow | Add record-specific confirmation, all dismissal paths, removal, and post-removal focus behavior. | Only confirmed removal changes data, including the last-row case. |
-| 6. Notifications and polish | Integrate MatSnackBar, finish keyboard/ARIA behavior, refine responsive layouts and visual details. | Both notifications and all agreed accessibility interactions work. |
-| 7. Verification | Complete focused unit/component/browser coverage and visual/accessibility review. | Required workflows pass with no known blocking defects. |
-| 8. Handover | Write setup, design decisions, assumptions, limitations, and a live-demo walkthrough. | Another developer can install, run, validate, and explain the solution. |
+| 0. Compatibility baseline | Verify current stable Angular/CLI, Node/TypeScript, and the requested toolchain's peer ranges; record intended exact versions and any constraint. | A compatible plan exists without forced peer resolution, a hidden Angular downgrade, or an unapproved tool substitution. |
+| 1. CLI workspace | Generate the empty root workspace and `apps/disputes` shell; establish strict TypeScript/templates, standalone/zoneless defaults, npm exact-save policy, project roots, and the build output path. Prepare public-library conventions without generating the entire kit. | Clean installation and production shell build work; no Zone.js runtime, no unintended generated attribution, and existing documents/reference files remain intact. |
+| 2. Prettier | Add formatting config, ignore rules, and format/check scripts only. | Formatting covers owned source/config/docs; generated output and `TMP` are excluded. |
+| 3. ESLint and boundaries | Add Angular ESLint, template checks, and explicit layer/import restrictions. | Lint passes; a small verification confirms forbidden layer imports are rejected. Remove any temporary invalid fixture after that check. |
+| 4. Tailwind and tokens | Add Tailwind/PostCSS, CSS-variable colors, global typography, and app/library/story source detection. | The shell renders token-backed utilities; a production build retains classes from library sources. No business feature is implemented yet. |
+| 5. Jest | Integrate the chosen Jest preset, zoneless TestBed setup, isolated TypeScript configuration, and scripts; replace generated unit-runner targets. | A meaningful signal/DOM integration fixture and a pure-function test pass without Zone.js; no duplicate application Vitest runner. |
+| 6. Cypress | Add E2E config, support code, isolated types, app startup/readiness, and browser installation instructions. | One shell/navigation smoke test runs reproducibly; the requirement-to-E2E matrix is prepared for later feature tests. |
+| 7. Playwright | Add an independent browser-test project, axe integration, viewport/browser settings, and screenshot policy. | Shell accessibility and cross-browser smoke checks run without discovering Cypress/Jest tests. |
+| 8. Storybook | Add the supported Angular renderer, shared styles/assets/providers, and catalog configuration. | A small zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
+| 9. Compodoc | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs. | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits. |
+| 10. Story component tests | Add the renderer-compatible story test runner and isolated configuration. | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command. |
+| 11. Common UI kit | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when the relevant component needs them. Each component includes its stories/tests before moving on. | Required default, focus, invalid, disabled, mobile, and long-content states are demonstrated; the kit builds with documented APIs and no business-store dependencies. |
+| 12. Core and data access | Add the clock token, exact fixtures, domain models, money/date functions, and feature-scoped signal store under the appropriate libraries. | Jest verifies money errors, no rounding, date behavior, prepend/removal, and monotonic IDs. Public APIs and dependency-order builds work. |
+| 13. Disputes overview | Add the lazy feature library, table, counter, empty state, and branded navigation using the completed kit. | Seed values/order match the PDF; Cypress verifies populated/empty rendering as applicable; the route is a real lazy boundary. |
+| 14. Creation flow | Add the isolated Signal Forms draft/schema, narrow amount control, `FormRoot` submission, validation, cancellation, and success notification integration. | Feature specs and Cypress cover the required errors, USD/EUR creation, exact insertion/defaults, cancellation, clean reopening, and toast behavior. |
+| 15. Removal flow | Add the record-specific confirmation, dismissals, mutation, and focus fallback. | Cypress covers all cancellation paths, confirmed removal, last-row removal, recreation, and ID continuity; Playwright checks focus across engines. |
+| 16. Production preview and optimization | Add pinned `local-web-server` and `serve:dist`; review package side effects, emitted chunks, static images, budgets, and any justified deferred content. | Built SPA refreshes at `/disputes`; styles/fonts/assets survive optimization; catalog code is absent from app output; any deferred example has stable fallback states. |
+| 17. Final integration | Complete the acceptance matrix, desktop/mobile visual review, axe scans, manual keyboard/focus checks, and all configured suites. | Every assignment behavior has E2E coverage; mobile workflows remain usable; full clean build and relevant checks pass with recorded results. |
+| 18. Handover | Document root commands, library boundaries/build order, tooling responsibilities, choices, limitations, and demo steps. | Another developer can install, build libraries/app, run each suite/catalog, preview production output, and explain the solution. |
 
-Accessibility semantics and testable design begin in the relevant earlier stages; stage 6 is the final integration and polish pass, not the first accessibility work.
+Accessibility and tests start when each component/feature is introduced. Stage 17 consolidates acceptance evidence; it is not the first test or accessibility pass. Within stage 11, finish one shared component and its stories before starting the next. Within stages 13-15, complete one user workflow and its tests at a time.
 
-If commits are made during implementation, keep them small and describe completed behavior in English, for example `Add dispute creation and validation` or `Add removal confirmation and empty state`. Do not create commits merely to record incomplete scaffolding milestones.
+If a version combination fails its compatibility fixture, resolve that integration before layering dependent features on it. Record an evidence-based alternative for the user if the selected tools cannot coexist; do not silently substitute another unit runner, add Zone.js, or disable required checks.
+
+If commits are requested during implementation, each should describe a completed, independently verifiable step in short English, such as `Configure Tailwind tokens`, `Add zoneless Jest tests`, or `Add shared field stories`. Verified tooling integration is a valid milestone; avoid committing broken scaffolding or unrelated changes together.
+
+### Production preview and tree-shaking verification
+
+Configure the application build base as `dist/apps/disputes`, with browser output under `dist/apps/disputes/browser`; library and Storybook outputs use separate subdirectories. The planned equivalent of the requested server script is:
+
+```json
+{
+  "serve:dist": "ws --http2 --spa index.html --directory dist/apps/disputes/browser"
+}
+```
+
+Install `local-web-server` as an exact development dependency so npm resolves its local `ws` executable. This preserves HTTP/2 and SPA fallback without the original shell directory changes or an on-demand `npx` download. Build first, document the local HTTPS behavior, and verify the installed version's options. A separate loopback HTTP server command may be used for automated suites if local certificate handling would otherwise obscure their purpose. [local-web-server documentation](https://github.com/lwsjs/local-web-server).
+
+Use `sideEffects: false` for packages whose modules are safe to discard when unused. Review styles and any import-time initialization first; a package with necessary side effects must list those files instead of claiming everything is side-effect-free. Keep global styles explicit in app/catalog build configuration. Inspect the production build for missing CSS, unexpected eager feature code, and accidentally bundled stories/test utilities. This is an optimization contract that must be verified, not a fix applied blindly to every manifest. [Angular package format](https://angular.dev/tools/libraries/angular-package-format), [tree shaking and CSS side effects](https://webpack.js.org/guides/tree-shaking/).
 
 ## 12. Assumptions and decisions to document
 
 | Topic | Planned decision | Basis |
 | --- | --- | --- |
+| Workspace | Root Angular CLI workspace, `apps/disputes`, and the four requested library groups. | Explicit user preference; CLI supports the layout without Nx. |
+| Delivery order | Integrate each tool separately, finish the shared kit with stories, then implement features. | Explicit user request for gradual integration and reviewable stages. |
+| Styling | Tailwind with semantic CSS custom properties. | Replaces the earlier SCSS-first choice. |
+| Test responsibilities | Jest for units/integration, Cypress for all business workflows, Playwright for targeted browser checks, story runner for common UI. | Keeps all requested tools while avoiding redundant ownership. |
+| Component documentation | Mandatory shared-component stories and JSDoc/Compodoc API documentation. | Explicit user request. |
+| Form submission | `FormRoot` and Signal Forms `submit()`, shared by Enter and the submit button. | Explicitly confirmed after checking the current API. |
+| Naming/visibility | `$signal`, `observable$`, private implementation, protected template members, public contracts. | Latest user preference supersedes the review's original signal-naming recommendation. |
+| Exact dependencies | Pin owned declarations and lock resolved installs; recheck peers at each integration. | User-requested version policy. |
 | Persistence | Reset to fixtures on reload. | Mock data is required; persistence is unspecified. |
 | Optional features | Include success toasts and keyboard accessibility. | Confirmed during planning. |
 | Toast implementation | Use Material MatSnackBar and custom presentation. | Reuses package behavior as requested. |
@@ -548,7 +702,7 @@ If commits are made during implementation, keep them small and describe complete
 | Removal toast duration | Five seconds. | Aligns with the specified creation duration. |
 | Focus after deletion | Next row, previous row, or New Dispute. | The original trigger is removed from the DOM. |
 | User/language indicators | Static prototype context. | No account or localization workflow is specified. |
-| Responsive layout | Preserve data through table scrolling and adaptive dialogs. | Mobile behavior is not specified. |
+| Responsive layout | Preserve data through table scrolling and adaptive dialogs; verify phone workflows. | Explicitly requested by the user after the POC review. |
 
 These decisions are sufficient to start implementation. Revisit a decision if further instructions change its assumptions; routine library configuration and visual refinement do not require separate approval.
 
@@ -556,21 +710,27 @@ These decisions are sufficient to start implementation. Revisit a decision if fu
 
 The application README should contain:
 
-- Supported Node/npm versions and commands to install and start from `App`.
-- Production build, lint, formatting, unit-test, and browser-test commands.
+- Supported Node/npm versions and commands to install and start from the repository root.
+- Library dependency order/watch workflow, production build/preview, lint, formatting, Jest, Cypress, Playwright, Storybook, Compodoc, and story-test commands.
 - A short architecture explanation, including why signals and Signal Forms fit this scope.
 - The division between CDK/Material behavior and application-specific presentation.
 - Money/date handling, ID allocation, persistence behavior, and documented ambiguities.
 - Actual verification results and any known limitations.
 - A concise demonstration script covering creation errors, successful creation, removal cancellation, confirmed removal, and recovery from an empty list.
 
-Suggested scripts to define during implementation are `start`, `build`, `lint`, `format:check`, `test`, `test:ci`, and `test:e2e`. The README should use the real scripts once they exist and explain browser installation if required.
+Introduce scripts as their stage is completed: `start`, `build:libs`, `build`, `serve:dist`, `lint`, `format`, `format:check`, `test`, `test:ci`, `test:e2e` (Cypress), `test:e2e:open`, `test:browser` (Playwright), `storybook`, `build-storybook`, `docs:components`, and `test:stories`. Document clean library builds and watch mode explicitly. The README must use the real scripts once they exist and explain browser installation and local HTTPS behavior.
 
 For the assignment's 40-minute presentation slot, prepare approximately five minutes on requirements and assumptions, ten minutes of live workflows, ten minutes on architecture/forms/state, ten minutes on testing/accessibility, and five minutes on tradeoffs and possible next steps. The separate team introduction, questions, and wrap-up remain outside that slot.
 
 ## 14. Definition of done
 
-- [ ] The application uses a verified stable Angular 22 toolchain with reproducible dependencies.
+- [ ] The application uses a verified latest-stable Angular toolchain with exact repository-owned dependency declarations and a reproducible lockfile.
+- [ ] The Angular CLI workspace uses the agreed `apps`/`libs` layout, public APIs, enforced dependency boundaries, and a clean dependency-order build.
+- [ ] Tailwind and CSS-variable tokens render consistently in the app and shared component catalog.
+- [ ] Every shared UI component has documented public APIs, Storybook states, and meaningful story checks.
+- [ ] Jest, Cypress, Playwright, and story tests run with isolated configuration; Angular code remains zoneless.
+- [ ] Every assignment-required workflow maps to passing E2E coverage.
+- [ ] Production preview, image optimization, side-effect declarations, and lazy/deferred loading decisions are verified against built output.
 - [ ] All three supplied disputes, values, statuses, and initial ordering match the assignment.
 - [ ] The overview, creation modal, confirmation modal, empty state, and input states match the figures and copy.
 - [ ] Required validation timing, messages, precedence, and immediate error clearing work.
