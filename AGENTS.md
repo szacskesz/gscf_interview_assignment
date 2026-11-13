@@ -44,6 +44,14 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - The skill comes from the official [Angular skills repository](https://github.com/angular/skills/tree/main/angular-developer). Read its `SKILL.md` and the references relevant to the current task.
 - Explicit user instructions and the project-specific rules in this file take precedence over the skill's defaults.
 
+## Angular CLI MCP
+
+- Use the project-configured `angular-cli` MCP server for Angular documentation, workspace inspection, and supported CLI operations when its tools are available. See `Docs/3-Angular-MCP-Setup.md` for configuration and verification details.
+- Start workspace-dependent work with `list_projects`, select the intended workspace, and retrieve its version-specific best practices before implementation. Project requirements and these rules still take precedence over generic guidance.
+- Workspaces under `TMP` are reference material, not the planned application. Do not select, build, migrate, or modify them unless the user explicitly requests it.
+- Until the root Angular workspace is scaffolded, use generic best practices and explicitly versioned documentation searches; do not infer the planned app's Angular version from a temporary POC.
+- Keep the MCP launcher version pinned and verify compatibility when updating it. If the client has not loaded the server, report that accurately and use an appropriate verified fallback where necessary.
+
 ## Notifications and accessibility
 
 - Include the success toasts and keyboard accessibility requirements marked as optional in the assignment.
