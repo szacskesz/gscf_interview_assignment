@@ -22,10 +22,10 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## Workspace structure and incremental delivery
 
 - Use an Angular CLI multi-project workspace at the repository root, with applications under `apps/` and libraries under `libs/`. Nx is not required.
-- Use `libs/core` for cross-cutting services, tokens, and infrastructure; `libs/feature/*` for separate business features/pages; `libs/ui/*` for presentational components and UI-only behavior; and `libs/data-access/*` for feature stores, domain models, fixtures, and future API access.
+- Use `libs/core` for cross-cutting services, tokens, and infrastructure; `libs/feature/*` for separate business features/pages; `libs/ui/*` for presentational components and UI-only behavior; and `libs/data-access/*` for feature stores, domain models, and HTTP access. Keep MSW handlers, fixtures, and the mock repository in a separate `libs/data-access/disputes-mock` library, with no reverse dependency from normal data access.
 - Give every feature its own folder/library. Keep related templates, styles, specs, and stories together. Keep business pages out of `core` and business stores out of `ui`.
 - Use explicit library public APIs and enforce dependency direction with lint rules. Do not import another library's private implementation or create circular dependencies.
-- Integrate one concern at a time: workspace baseline, Prettier, ESLint/boundaries, Tailwind/tokens, Jest, Cypress, Playwright, Storybook, Compodoc, story tests, shared components, then business features and final integration.
+- Integrate one concern at a time: workspace baseline, Prettier, ESLint/boundaries, Tailwind/tokens, Jest, Cypress, Playwright, MSW infrastructure, Storybook, Compodoc, story tests, shared components, domain contracts, mock handlers/repository, HTTP/store integration, then business features and final verification.
 - Each step must have its own usable result and appropriate verification before the next dependent step. Do not install the entire toolchain or implement the whole application in one change.
 - Build the assignment-sized shared component set and its stories before the disputes features. Do not port the entire earlier POC toolkit or add unrelated controls.
 - This order describes future implementation. A documentation request still does not authorize scaffolding or installing application dependencies.
@@ -64,6 +64,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 - Use `Instructions/SeniorFrontendEngineer-Interview-Task.pdf` as the assignment's source of requirements, including its figures and input-state specification.
 - Consult `Docs/1-Initial-Plan.md` for the detailed implementation approach and documented assumptions.
+- Consult `Docs/4-MSW-Integration-Plan.md` for the reviewed mock-backend design, API contract, profile decisions, and staged verification.
 - Keep user requirements distinct from proposed implementation choices. Later user instructions take precedence over earlier planning assumptions.
 - Respect the requested stage of work: a planning or documentation request does not by itself authorize starting application implementation.
 
@@ -71,6 +72,21 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 - Questions are welcome when requirements are unclear, a material decision needs the user's preference, or an important uncertainty remains.
 - Explain the relevant options and tradeoffs concisely when asking for a decision.
+
+## HTTP and mock backend
+
+- Use MSW for the requested mock backend. Keep components and ordinary data-access code unaware of MSW; use Angular HTTP APIs through a typed data-access adapter.
+- Prefer `httpResource` for reads and `HttpClient` for mutations. Keep one signal read model, distinguish loading/error/loaded-empty states, guard resource value access, and prevent stale reads from overwriting confirmed mutations.
+- The mock repository owns records, numbering, status, and creation dates. The feature-scoped store owns UI read/pending/error state. Update rows/counts and show success toasts only after a successful response; do not allocate IDs twice or close the dialog before the result.
+- Preserve raw decimal amount strings until validation succeeds; the API validates the string and stores safe integer cents. Do not copy the reference's floating-point amount validation, Reactive Forms, custom toast timers, or focus implementation.
+- Keep mock state in memory per page session. Full reload restores exact fixtures and numbering; empty stays empty within the session. Do not add the guide's optional localStorage persistence.
+- Use the user-confirmed development/demo/production profiles. Development and optimized demo include MSW; production excludes mock code, fixtures, worker assets, and test controls. Keep `build` production-oriented; `build:demo` plus `serve:dist` is the working interview path, while `serve:dist:prod` requires a real API for data workflows.
+- Use a build-time guard and conditional dynamic mock import; await worker readiness before Angular bootstrap. Fail visibly on startup failure. Fail unmatched requests to the configured mock API while allowing unrelated assets/development traffic.
+- Generate the worker with the pinned local MSW CLI, commit it without manual edits, and verify/update it when MSW changes. Keep profile outputs separate and verify production import graphs/emitted assets rather than trusting a runtime flag or devDependency placement.
+- As explicitly confirmed by the user, lock duplicate actions and all dialog dismissal only while a submitted create/remove request is pending. Announce busy state, retain focus, use finite request timeouts, restore dismissal on failure, and retain drafts/selected records. Ordinary cancellation remains available before submission and after failure. Do not automatically retry writes or imply that cancellation can undo an already sent request.
+- Share environment-independent handler factories between browser and Node adapters; inject repository/date dependencies and avoid browser globals at module import. Reset handlers and repository state separately in tests.
+- Exercise browser workflows through the actual worker. Do not block service workers or layer another response-mocking system over the same requests. Keep controlled error/delay scenarios test-only and out of demo/production. Shared presentational stories need no mock backend.
+- Treat `TMP` as read-only reference material during planning. Adapt the integration pattern to the agreed architecture; do not copy or install the sample as the application.
 
 ## TypeScript Best Practices
 

@@ -4,7 +4,7 @@ Date: 13 November 2026
 
 Status: Planning only
 
-Revision: Updated after the POC review and the user's workspace, tooling, component-library, and incremental-delivery decisions. This revision supersedes the original single-application layout, SCSS-first styling, Vitest selection, and optional Storybook recommendation.
+Revision: Updated after the POC review, the user's engineering decisions, and the MSW reference review. This revision supersedes the original single-application layout, SCSS-first styling, Vitest selection, optional Storybook recommendation, and direct in-memory store mutations without HTTP. Development/demo/production profiles and temporary pending-request dismissal locks were explicitly confirmed by the user.
 
 ## 1. Objective and source material
 
@@ -37,9 +37,11 @@ Include both success toasts and the accessibility requirements identified as opt
 
 Build a small shared component catalog with Storybook, Compodoc, and component interaction tests before assembling the business features. Add Tailwind, Prettier, Jest, Cypress, and Playwright in separate verified steps. Phone usability is now an explicit project requirement, although the PDF supplies desktop references only. These additions expand the engineering scope, not the business workflows or seed data.
 
+Integrate an MSW-based HTTP mock backend in separate infrastructure, handler/repository, and Angular data-access stages. The supplied guide and example were reviewed in [the MSW integration plan](4-MSW-Integration-Plan.md), which records adaptations, API contracts, build isolation, and testing details. The temporary example is reference material, not the application scaffold.
+
 ### Scope boundaries
 
-The initial implementation will use in-memory data and reset to the supplied sample records on a full page reload. No backend, authentication, real invoice or comment management, filtering, sorting, pagination, editing, currency conversion, or deployment is required. The removal description must still include the supplied wording about comments and linked invoices.
+The mock backend will use in-memory data and reset to the supplied sample records on a full page reload. Angular will use real HTTP APIs intercepted by MSW; no separately running backend, persistent storage, authentication, real invoice or comment management, filtering, sorting, pagination, editing, currency conversion, or deployment is required. The removal description must still include the supplied wording about comments and linked invoices. The optimized demo works independently with MSW; the separate mock-free production artifact needs a real API for data workflows.
 
 The prototype's language indicator and user name provide visual context; they do not imply a localization system or account menu. Render them as static information unless an actual interaction is subsequently requested. The active Disputes navigation item can link to the overview.
 
@@ -61,7 +63,8 @@ Use a compatible Angular CLI and CDK release from the same major version; verify
 | Application model | Standalone components and application providers | Keeps imports and dependencies explicit. |
 | Change detection | Zoneless, with OnPush-compatible components | Fits signal-driven state and avoids a Zone.js dependency. |
 | Forms | Stable Angular Signal Forms | Integrates typed form values, validation, and interaction state. |
-| State | A small feature-local injectable store using signals | Sufficient for one collection and two mutation operations. |
+| State | Feature-local signal store with an HTTP resource read model and operation state | Exposes server-confirmed data; the mock repository owns IDs and records. |
+| HTTP and mock backend | Angular `httpResource` for reads, `HttpClient` for mutations, MSW 3 | Keeps UI independent of mocks while testing the actual HTTP boundary. |
 | Dialog infrastructure | Angular CDK Dialog with custom styles | Provides focus and overlay behavior while retaining the supplied appearance. |
 | Notifications | Angular Material `MatSnackBar` with custom content | Reuses an existing package for timing, replacement, positioning, and announcements. |
 | Styling | Tailwind utilities and semantic CSS custom properties | User preference; shared tokens preserve the prototype's palette and responsive behavior. |
@@ -70,7 +73,7 @@ Use a compatible Angular CLI and CDK release from the same major version; verify
 | Browser verification | Playwright with axe | Targeted cross-browser, accessibility, focus, responsive, and visual coverage. |
 | Shared component catalog | Storybook with Compodoc and executable stories | Documents public APIs and verifies isolated UI behavior before feature assembly. |
 | Static quality | Angular ESLint and Prettier | Consistent TypeScript, templates, styles, and documentation. |
-| Production preview | Pinned `local-web-server`, exposed through `serve:dist` | Serves the built SPA with route fallback and HTTP/2. |
+| Built previews | Pinned `local-web-server`; `serve:dist` for demo and `serve:dist:prod` for production | Separate artifacts/origins, SPA fallback, HTTP/2; demo includes MSW intentionally. |
 
 Angular's [compatibility matrix](https://angular.dev/reference/versions) is the source for runtime and language versions. Use the CLI-compatible RxJS 7.x dependency where required; it does not need to become the application's state-management mechanism. Check the development machine's Node/npm versions before scaffolding and document the supported runtime in the README and version configuration.
 
@@ -78,6 +81,7 @@ Angular's [compatibility matrix](https://angular.dev/reference/versions) is the 
 
 - Bootstrap with `bootstrapApplication` and standalone imports.
 - Use `signal` for mutable state and `computed` for derived values such as the row count.
+- Use `httpResource` for the collection read model and explicit `HttpClient` POST/DELETE calls for writes. Handle loading/error/empty states distinctly; do not duplicate resource data with an effect.
 - Use `input()` and `output()` for component boundaries where data or events cross those boundaries.
 - Use `inject()` for dependencies.
 - Use built-in `@if` and `@for`, tracking disputes by their stable dispute number.
@@ -105,7 +109,11 @@ The current [Storybook Angular guide](https://storybook.js.org/docs/get-started/
 
 Keep application Jest, Cypress, Playwright, and Storybook test configuration separate, including TypeScript `types`, file patterns, and browser settings. Do not retain Vitest as a second application unit runner. If the chosen Storybook renderer requires a distinct runner, document that dependency separately; never assume a Vite-only addon works with a Webpack renderer. Do not use forced peer resolution to conceal unsupported combinations.
 
+MSW 3.0.5 was the published stable version at the 13 November review. Verify the selected release and its Node/TypeScript requirements again before installation, pin it exactly, and prove browser-worker startup plus a Jest/Node handler test before adding domain workflows. Keep browser and Node adapters separate. See the compatibility evidence in [the MSW review](4-MSW-Integration-Plan.md#2-reference-review).
+
 ## 4. Requirement interpretation and acceptance criteria
+
+The criteria below preserve the PDF interpretation. One later user-approved extension applies to asynchronous HTTP mutations: after submission/confirmation, temporarily lock dialog dismissal and duplicate actions while pending, announce busy state, then close on success or restore dismissal on failure. All ordinary cancellation criteria apply before submission and after failure. See [async interaction behavior](4-MSW-Integration-Plan.md#6-async-interaction-and-failure-behavior).
 
 ### 4.1 Overview and initial data
 
@@ -243,6 +251,7 @@ The intended layout is below. Generate libraries when their implementation stage
 apps/
   disputes/
     public/
+      mockServiceWorker.js
       images/gscf-logo.png
       fonts/
     src/
@@ -254,10 +263,14 @@ apps/
         layout/top-navigation/
       styles.css
       main.ts
+      define-flags.d.ts
+      environments/
+      mocks/browser.ts
 libs/
   core/
     src/
       lib/clock/
+      lib/api-config/
       public-api.ts
   ui/
     common/
@@ -288,13 +301,23 @@ libs/
       src/
         lib/
           dispute.model.ts
-          dispute.fixtures.ts
+          dispute-api.model.ts
+          disputes-api.ts
           disputes-store.ts
           disputes-store.spec.ts
           dispute-amount.ts
           dispute-amount.spec.ts
           dispute-date.ts
           dispute-date.spec.ts
+        public-api.ts
+    disputes-mock/
+      src/
+        lib/
+          dispute.fixtures.ts
+          disputes-repository.ts
+          disputes-repository.spec.ts
+          disputes.handlers.ts
+          disputes.handlers.spec.ts
         public-api.ts
   feature/
     disputes/
@@ -321,6 +344,9 @@ styles/
   test-runner.ts
 testing/
   jest/setup.ts
+  msw/
+    server.ts
+    scenarios.ts
   cypress/
     e2e/
     support/
@@ -351,10 +377,13 @@ Each CLI library also has its generated package/build/TypeScript configuration. 
 | Layer | Responsibility | Allowed application-layer dependencies |
 | --- | --- | --- |
 | `libs/core` | Cross-cutting infrastructure and tokens, such as the controllable current-date source. | No feature, data-access, or UI imports. |
-| `libs/data-access/*` | Domain models, fixtures, pure domain helpers, stores, and future API boundaries. | Core; no UI/feature imports. |
+| `libs/data-access/disputes` | Domain/DTO models, pure helpers, HTTP adapter, feature-scoped store. | Core; no mock/UI/feature imports. |
+| `libs/data-access/disputes-mock` | MSW handlers, exact fixtures, and in-memory mock repository. | Core and disputes domain public API; no UI/feature imports and no reverse dependency. |
 | `libs/ui/*` | Presentational components and UI-only adapters/behavior. | Other explicitly approved UI libraries and small core tokens; no feature stores. |
 | `libs/feature/*` | Business pages, form schemas, dialogs, and orchestration. | Core, UI, and its own data-access library. |
 | `apps/*` | Bootstrap, global providers/assets, shell, and feature route registration. | Public APIs of the layers above; business features are lazy imports. |
+
+Only the app's guarded dynamic mock adapter and tests may consume the mock library. Keep seeds/handlers out of normal data-access barrels and production imports. The mock library is generated in its own stage, not as part of the shared UI kit.
 
 Enforce these boundaries with ESLint restrictions and cycle checks rather than assuming folder names enforce them. Keep the distinction between package/public API names and physical folders explicit, for example `@gscf/disputes-data-access` can map to the library rooted at `libs/data-access/disputes`.
 
@@ -379,15 +408,17 @@ Keep the empty-state markup within the overview unless it becomes substantial. D
 | Application shell | Navigation, route outlet, and global styling. |
 | Disputes overview | Coordinates user actions, opens dialogs, invokes store commands, and requests notifications. |
 | Disputes table | Displays immutable records and emits a removal request with the selected dispute. |
-| Creation dialog | Owns an isolated form draft, field validation, and the valid creation result. |
-| Removal dialog | Presents the selected record and returns an explicit confirmation or cancellation. |
-| Disputes store | Owns the collection and numbering sequence; validates and applies create/remove commands. |
+| Creation dialog | Owns the isolated draft/validation and awaits the create command before closing. |
+| Removal dialog | Presents the selected record, requests removal only on confirmation, and stays open until the result. |
+| Disputes store | Owns the feature's HTTP read model, derived UI state, and pending/error command state. |
+| Disputes API adapter | Encapsulates resource/HTTP URLs, typed requests, and validated responses; knows nothing about MSW. |
+| Mock repository and handlers | Own session data, validate HTTP requests, allocate IDs/status/date, and return API responses. |
 | Amount/date functions | Perform deterministic normalization and display formatting. |
 | Notification adapter | Supplies application copy and appearance to `MatSnackBar`. |
 
-The overview provides the store from `libs/data-access/disputes` for the feature. Use `@Service({ autoProvided: false })` with the explicit overview provider so its lifetime remains feature-scoped. It exposes readonly signals, while presentational components receive data through typed inputs. Dialog results are typed; a dismissal result must never be interpreted as confirmation. Only store commands can mutate the collection.
+The overview provides the store from `libs/data-access/disputes` for the feature. Use `@Service({ autoProvided: false })` with the explicit overview provider so its lifetime remains feature-scoped. It exposes readonly signals, while presentational components receive data through typed inputs. Pass the same feature command context into dialogs rather than creating a second store there. Dialog results are typed; a dismissal result must never be interpreted as confirmation. Only store commands issue mutations, and only successful API responses update the UI collection.
 
-For creation, the dialog returns validated data and the overview commits it once. The returned created record supplies the actual number used in the toast. For removal, pass a snapshot of the selected record to the dialog and remove by its stable number after explicit confirmation. Guard against repeated callbacks or a record that is already absent.
+For creation, the dialog's single Signal Forms submission action awaits the store command. Keep its draft on failure; close with a typed success result on success, then request the notification once using the returned number. For removal, pass a snapshot of the selected record and remove by its stable number only after explicit confirmation. Retain the dialog/row on failure. Guard repeated actions and an already absent record. CDK controls focus and the user-approved pending dismissal lock; package-owned snack bars report confirmed success only.
 
 ### Domain model
 
@@ -412,15 +443,15 @@ interface Dispute {
 
 ### State management and numbering
 
-- Initialize a private writable signal from a fresh copy of the three fixtures.
-- Expose a readonly disputes signal and computed count/empty-state values.
-- Use immutable prepend and filter operations for creation and removal.
-- Initialize a separate next-number value to the highest seeded number plus one.
-- Increment that value only after successful creation; never recompute it from the remaining rows after deletion.
+- Initialize a fresh mock repository from the exact fixtures when the page's mock runtime starts; never seed the Angular store directly.
+- Load the collection through GET and expose readonly/derived signals. Loading/error is not a successfully loaded empty list.
+- After confirmed POST/DELETE responses, update the read model using immutable prepend/filter operations. Coordinate reloads and mutations so stale GET responses cannot overwrite newer data.
+- Keep the next-number value in the mock repository, starting at the highest seeded number plus one.
+- Increment only after successful creation; never recompute from remaining rows after deletion or allocate a second sequence in the frontend store.
 
 This produces `6229` when creating after deleting all original rows, matching Figure 1.6b. If `6229` has already been created and removed, the next dispute is `6230`. Reloading starts a new mock session and resets both records and numbering.
 
-No artificial network delay or HTTP layer is needed. The store's small public API leaves room for a real data service later without adding unused infrastructure now.
+Use GET/POST `/api/disputes` and DELETE `/api/disputes/:number`. Send the valid raw decimal amount as a string; the shared validator converts it to safe integer cents in the mock repository. The API returns the complete created record. No mandatory artificial delay is needed; controlled scenarios exercise pending/error behavior. The API contract, runtime validation, bootstrap, and profile details are in [the MSW plan](4-MSW-Integration-Plan.md). This supersedes the earlier no-HTTP assumption.
 
 ## 6. Form, money, and date implementation
 
@@ -456,7 +487,7 @@ The populated prototype shows `1,250.00` inside a number field. Native number co
 
 Create the date from local year, month, and day when the save command runs. Avoid `toISOString().slice(0, 10)`, which derives a UTC date and can produce the wrong local day.
 
-Use one date formatter for the table with an explicit English locale and the required `d MMM yyyy` output. Store sample dates as date-only values and avoid reparsing them through a timezone-sensitive UTC conversion. Inject a small current-date function or clock token into the store so tests can freeze the date without depending on the machine's clock.
+Use one date formatter for the table with an explicit English locale and the required `d MMM yyyy` output. Store sample dates as date-only values and avoid reparsing them through a timezone-sensitive UTC conversion. Pass a small current-date function into the mock repository so tests can freeze the date without depending on the machine's clock. The API assigns the date; the frontend store must not assign it again.
 
 ### Pipe use and formatting boundaries
 
@@ -571,6 +602,8 @@ Tests should demonstrate observable behavior and protect the business rules. Avo
 
 Use Jest for pure functions, the store, and focused feature logic. Every feature receives meaningful colocated `*.spec.ts` coverage. Prefer small TypeScript-focused white-box tests that select important paths and edge cases, without making private members public just for tests. Use `jest-preset-angular` and its zoneless TestBed setup for Angular-dependent tests; do not claim this is the CLI's default runner. Remove or replace unused generated Vitest targets in the dedicated Jest integration stage.
 
+Test the mock repository separately from the Angular store. Reuse environment-independent handlers with MSW's Node adapter for HTTP contract tests, and use Angular's HTTP testing providers for focused client/resource tests. Do not stack both interception mechanisms on the same request. Reset handler overrides and repository state separately between tests. See [MSW test responsibilities](4-MSW-Integration-Plan.md#7-testing-strategy).
+
 - Fixtures retain their exact values and initial ordering.
 - Creation prepends a record, assigns New, uses the controlled current date, and updates the count.
 - IDs increase correctly after removing the highest number and after removing all rows.
@@ -580,6 +613,9 @@ Use Jest for pure functions, the store, and focused feature logic. Every feature
 - Cover `0`, `-1`, `-12.345`, `0.01`, `1`, `1.2`, `1.23`, `1.230`, `12.345`, whitespace, invalid syntax, and supported large amounts.
 - Amount parsing and formatting preserve cents and always produce two display decimals.
 - Date formatting and the injected current-date function handle local calendar boundaries.
+- API contracts validate unknown payloads, preserve literal amount precision, and return the planned success/error status codes.
+- Loading, error, and loaded-empty states remain distinct; failed writes do not trigger local success updates or toasts.
+- Repeated submissions and stale GET responses cannot duplicate or overwrite a confirmed mutation.
 
 ### Component integration tests
 
@@ -595,6 +631,7 @@ Use Jest/TestBed with realistic interaction and the production form schema for f
 - Cancellation and confirmation yield different typed results.
 - The empty-state branch hides both the table and counter.
 - Notification calls receive the correct title/body, position, and five-second configuration.
+- While a submitted mutation is pending, busy state is announced and duplicate actions/dismissal are locked; failure restores dismissal and retains the draft/selected record.
 
 Do not re-test every internal behavior of CDK or Material. Test the application's configuration and integration, then confirm user-visible behavior in a real browser.
 
@@ -617,10 +654,14 @@ Use [Cypress](https://docs.cypress.io/app/end-to-end-testing/writing-your-first-
 12. Reload after mutations and verify the original records and numbering are restored.
 13. Cancel/close/backdrop/Escape from creation and verify the collection is unchanged and the next opening has a clean draft.
 14. Assert exact required error text, nonpositive/precision precedence, no rounding, and all relevant input states through real browser entry.
+15. Through controlled MSW scenarios, verify initial-load failure/retry, delayed mutations, the agreed pending dismissal lock, failure recovery, and no success toast on rejection.
+16. Verify worker readiness before the first API request, session reset, and the same happy workflows in the optimized demo artifact. Separately inspect mock-free production behavior without pretending a real API exists.
 
 Run the complete Cypress business suite in a supported Chromium browser. Use [Playwright](https://playwright.dev/docs/intro) for targeted Chromium/Firefox/WebKit checks, particularly numeric-input behavior, keyboard/focus, mobile sizing, and visual comparisons. Cypress remains the traceable owner of business acceptance coverage; the Playwright suite is not a second copy of every business test. Browser engines bundled for Storybook do not by themselves constitute application E2E coverage.
 
 Control the clock and browser environment for deterministic date assertions, with runner-specific setup. A reload should reset the mock data, making every test and demonstration repeatable. Keep an acceptance matrix mapping the requirements in section 4 to concrete Cypress tests and supplementary Playwright checks as tests are implemented.
+
+Keep browser service workers enabled for suites using MSW. Use controlled test-only MSW scenarios rather than overlapping Cypress/Playwright response mocks; Node-originated runner requests do not pass through the page's worker. Keep test controls out of demo/production, use fresh contexts for production checks, and avoid fixed sleeps. Shared UI stories remain independent of business HTTP data.
 
 ### Visual and accessibility checks
 
@@ -642,35 +683,41 @@ Complete the stages in order. Add one tool or architectural concern per reviewab
 | 5. Jest | Integrate the chosen Jest preset, zoneless TestBed setup, isolated TypeScript configuration, and scripts; replace generated unit-runner targets. | A meaningful signal/DOM integration fixture and a pure-function test pass without Zone.js; no duplicate application Vitest runner. |
 | 6. Cypress | Add E2E config, support code, isolated types, app startup/readiness, and browser installation instructions. | One shell/navigation smoke test runs reproducibly; the requirement-to-E2E matrix is prepared for later feature tests. |
 | 7. Playwright | Add an independent browser-test project, axe integration, viewport/browser settings, and screenshot policy. | Shell accessibility and cross-browser smoke checks run without discovering Cypress/Jest tests. |
-| 8. Storybook | Add the supported Angular renderer, shared styles/assets/providers, and catalog configuration. | A small zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
-| 9. Compodoc | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs. | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits. |
-| 10. Story component tests | Add the renderer-compatible story test runner and isolated configuration. | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command. |
-| 11. Common UI kit | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when the relevant component needs them. Each component includes its stories/tests before moving on. | Required default, focus, invalid, disabled, mobile, and long-content states are demonstrated; the kit builds with documented APIs and no business-store dependencies. |
-| 12. Core and data access | Add the clock token, exact fixtures, domain models, money/date functions, and feature-scoped signal store under the appropriate libraries. | Jest verifies money errors, no rounding, date behavior, prepend/removal, and monotonic IDs. Public APIs and dependency-order builds work. |
-| 13. Disputes overview | Add the lazy feature library, table, counter, empty state, and branded navigation using the completed kit. | Seed values/order match the PDF; Cypress verifies populated/empty rendering as applicable; the route is a real lazy boundary. |
-| 14. Creation flow | Add the isolated Signal Forms draft/schema, narrow amount control, `FormRoot` submission, validation, cancellation, and success notification integration. | Feature specs and Cypress cover the required errors, USD/EUR creation, exact insertion/defaults, cancellation, clean reopening, and toast behavior. |
-| 15. Removal flow | Add the record-specific confirmation, dismissals, mutation, and focus fallback. | Cypress covers all cancellation paths, confirmed removal, last-row removal, recreation, and ID continuity; Playwright checks focus across engines. |
-| 16. Production preview and optimization | Add pinned `local-web-server` and `serve:dist`; review package side effects, emitted chunks, static images, budgets, and any justified deferred content. | Built SPA refreshes at `/disputes`; styles/fonts/assets survive optimization; catalog code is absent from app output; any deferred example has stable fallback states. |
-| 17. Final integration | Complete the acceptance matrix, desktop/mobile visual review, axe scans, manual keyboard/focus checks, and all configured suites. | Every assignment behavior has E2E coverage; mobile workflows remain usable; full clean build and relevant checks pass with recorded results. |
-| 18. Handover | Document root commands, library boundaries/build order, tooling responsibilities, choices, limitations, and demo steps. | Another developer can install, build libraries/app, run each suite/catalog, preview production output, and explain the solution. |
+| 8. MSW infrastructure | Add exact MSW, generated worker, typed environments, build-time flags, awaited dynamic startup, and separate development/demo/production outputs. Use a minimal temporary HTTP fixture. | Browser first-request smoke and Jest/Node interception work; development/demo include the worker; production excludes mock code/assets. No domain UI is added. |
+| 9. Storybook | Add the supported Angular renderer, shared styles/assets/providers, and catalog configuration. | A small zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
+| 10. Compodoc | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs. | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits. |
+| 11. Story component tests | Add the renderer-compatible story test runner and isolated configuration. | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command. |
+| 12. Common UI kit | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when needed. Each component includes stories/tests before moving on. | Default, focus, invalid, disabled, busy, mobile, and long-content states are demonstrated; documented APIs have no business-store/mock dependencies. |
+| 13. Core and domain contracts | Add API configuration, date source, domain/DTO models, and pure money/date functions in core/data-access public APIs. | Jest verifies exact validation precedence, raw decimal precision, safe cents, and local dates. Clean dependency-order library builds work. |
+| 14. MSW disputes backend | Add the separate mock library, exact fixtures, in-memory repository, and GET/POST/DELETE handlers; remove the temporary smoke endpoint. | Jest repository/HTTP tests cover seeds/order, payload validation, status codes, prepend/removal, monotonic IDs, empty lists, and session reset; no browser globals in shared handlers. |
+| 15. HTTP and signal store | Add the Angular API adapter, resource read model, feature-scoped store, pending/error commands, and isolated test scenario setup. | Tests verify loading/error/empty separation, confirmed updates, failure recovery, one submission path, no stale-read overwrite, and mock-free client imports. |
+| 16. Disputes overview | Add the lazy feature, table, counter, empty/loading/error states, retry, and branded navigation using the completed kit. | Seed values/order match the PDF through MSW; Cypress verifies populated/empty/error rendering; the route is a real lazy boundary. |
+| 17. Creation flow | Add the Signal Forms draft/schema, narrow amount control, awaited `FormRoot` submission, validation, cancellation, pending lock, and success notification. | Specs/Cypress cover required errors, USD/EUR creation, insertion/defaults, cancellation, clean reopening, delayed/failed requests, preserved draft, and toast behavior. |
+| 18. Removal flow | Add record-specific confirmation, dismissals, awaited mutation, pending lock, and focus fallback. | Cypress covers cancellation, failure without local deletion, confirmed/last-row removal, recreation, and ID continuity; Playwright checks focus/busy behavior across engines. |
+| 19. Built previews and optimization | Add pinned local server and demo/production preview scripts; review side effects, chunks, images, budgets, and justified deferred content. | Optimized demo works at `/disputes` with MSW; production has no worker/seeds/mock or test code; assets survive optimization; output checks use clean separate paths. |
+| 20. Final integration | Complete acceptance matrix, desktop/mobile visual review, axe scans, manual keyboard/focus checks, and configured suites. | Every assignment behavior has E2E coverage; mobile workflows and async states are accessible; clean builds/checks pass with recorded results. |
+| 21. Handover | Document root commands, build order, tool responsibilities, profiles, reset behavior, choices, limitations, and demo steps. | Another developer can install/build, run suites/catalog, preview the working demo, inspect mock-free production, and explain its real-API requirement. |
 
-Accessibility and tests start when each component/feature is introduced. Stage 17 consolidates acceptance evidence; it is not the first test or accessibility pass. Within stage 11, finish one shared component and its stories before starting the next. Within stages 13-15, complete one user workflow and its tests at a time.
+Accessibility and tests start when each component/feature is introduced. Stage 20 consolidates acceptance evidence; it is not the first test or accessibility pass. Within stage 12, finish one shared component and its stories before starting the next. Within stages 16-18, complete one user workflow and its tests at a time. MSW infrastructure, domain handlers, and Angular integration are separate concerns rather than one large backend change.
 
 If a version combination fails its compatibility fixture, resolve that integration before layering dependent features on it. Record an evidence-based alternative for the user if the selected tools cannot coexist; do not silently substitute another unit runner, add Zone.js, or disable required checks.
 
 If commits are requested during implementation, each should describe a completed, independently verifiable step in short English, such as `Configure Tailwind tokens`, `Add zoneless Jest tests`, or `Add shared field stories`. Verified tooling integration is a valid milestone; avoid committing broken scaffolding or unrelated changes together.
 
-### Production preview and tree-shaking verification
+### Demo/production previews and tree-shaking verification
 
-Configure the application build base as `dist/apps/disputes`, with browser output under `dist/apps/disputes/browser`; library and Storybook outputs use separate subdirectories. The planned equivalent of the requested server script is:
+Use separate profile outputs under `dist/apps/disputes/{development,demo,production}/browser`; library and Storybook outputs also remain separate. Keep `build` production-oriented and use explicit `build:demo` for the self-contained interview artifact. The planned server scripts are:
 
 ```json
 {
-  "serve:dist": "ws --http2 --spa index.html --directory dist/apps/disputes/browser"
+  "serve:dist": "ws --http2 --spa index.html --directory dist/apps/disputes/demo/browser --port 4300",
+  "serve:dist:prod": "ws --http2 --spa index.html --directory dist/apps/disputes/production/browser --port 4301"
 }
 ```
 
 Install `local-web-server` as an exact development dependency so npm resolves its local `ws` executable. This preserves HTTP/2 and SPA fallback without the original shell directory changes or an on-demand `npx` download. Build first, document the local HTTPS behavior, and verify the installed version's options. A separate loopback HTTP server command may be used for automated suites if local certificate handling would otherwise obscure their purpose. [local-web-server documentation](https://github.com/lwsjs/local-web-server).
+
+The optimized demo intentionally includes the mock backend. Production must exclude MSW, seeds, worker assets, and test controls; it needs a real API for successful workflows. Inspect import reachability and emitted output, use fresh browser contexts/separate origins, and verify worker scope/readiness. Clean only the selected app output, preserving built libraries. See [profile verification](4-MSW-Integration-Plan.md#5-startup-worker-lifecycle-and-build-profiles).
 
 Use `sideEffects: false` for packages whose modules are safe to discard when unused. Review styles and any import-time initialization first; a package with necessary side effects must list those files instead of claiming everything is side-effect-free. Keep global styles explicit in app/catalog build configuration. Inspect the production build for missing CSS, unexpected eager feature code, and accidentally bundled stories/test utilities. This is an optimization contract that must be verified, not a fix applied blindly to every manifest. [Angular package format](https://angular.dev/tools/libraries/angular-package-format), [tree shaking and CSS side effects](https://webpack.js.org/guides/tree-shaking/).
 
@@ -687,13 +734,16 @@ Use `sideEffects: false` for packages whose modules are safe to discard when unu
 | Naming/visibility | `$signal`, `observable$`, private implementation, protected template members, public contracts. | Latest user preference supersedes the review's original signal-naming recommendation. |
 | Exact dependencies | Pin owned declarations and lock resolved installs; recheck peers at each integration. | User-requested version policy. |
 | Persistence | Reset to fixtures on reload. | Mock data is required; persistence is unspecified. |
+| Mock backend | MSW 3 with normal Angular HTTP calls and an in-memory mock repository. | Later user request supersedes the direct-store/no-HTTP assumption. |
+| Profiles | Development and optimized demo use MSW; production excludes all mocks. | User explicitly confirmed a separate demo artifact because no real backend is supplied. |
+| Pending mutations | Temporarily lock duplicate actions and dialog dismissal, announce busy state, restore dismissal on failure. | User-approved extension for asynchronous requests; finite timeouts prevent indefinite locks. |
 | Optional features | Include success toasts and keyboard accessibility. | Confirmed during planning. |
 | Toast implementation | Use Material MatSnackBar and custom presentation. | Reuses package behavior as requested. |
 | Accessibility infrastructure | Use CDK Dialog and native semantics. | Matches the widgets present in this scope. |
 | Currency default | Start unselected. | Matches empty and invalid form figures. |
 | Creation date | Current local calendar date at save time. | The written requirement says today. |
 | Number allocation | Monotonic within the session, starting at 6229. | Preserves uniqueness after deletion and matches Figure 1.6b. |
-| Create-modal dismissal | Cancel, close icon, Escape, and backdrop discard the draft. | Cancel is explicit; the close icon is shown; other dismissal behavior is a consistency choice. |
+| Create-modal dismissal | Cancel, close icon, Escape, and backdrop discard the draft before submission/after failure; temporarily locked while pending. | Original consistency choice plus the confirmed asynchronous behavior. |
 | Button order | Cancel on the left, primary/danger action on the right. | Matches the figures. |
 | Touch validation | Blur reveals that field's error; submit reveals all invalid fields. | Interprets touched behavior without flagging untouched fields prematurely. |
 | Text values | Trim outer whitespace; reject whitespace-only required input. | Prevents empty business values. |
@@ -715,10 +765,11 @@ The application README should contain:
 - A short architecture explanation, including why signals and Signal Forms fit this scope.
 - The division between CDK/Material behavior and application-specific presentation.
 - Money/date handling, ID allocation, persistence behavior, and documented ambiguities.
+- MSW startup, API contracts, per-page reset, worker regeneration, test scenarios, and development/demo/production differences. Document `build:demo` plus `serve:dist` as the interview path and the production artifact's real-API requirement.
 - Actual verification results and any known limitations.
 - A concise demonstration script covering creation errors, successful creation, removal cancellation, confirmed removal, and recovery from an empty list.
 
-Introduce scripts as their stage is completed: `start`, `build:libs`, `build`, `serve:dist`, `lint`, `format`, `format:check`, `test`, `test:ci`, `test:e2e` (Cypress), `test:e2e:open`, `test:browser` (Playwright), `storybook`, `build-storybook`, `docs:components`, and `test:stories`. Document clean library builds and watch mode explicitly. The README must use the real scripts once they exist and explain browser installation and local HTTPS behavior.
+Introduce scripts as their stage is completed: `start`, `build:libs`, `build`, `build:dev`, `build:demo`, `build:prod`, `mock:worker`, `serve:dist`, `serve:dist:prod`, `lint`, `format`, `format:check`, `test`, `test:ci`, `test:e2e` (Cypress), `test:e2e:open`, `test:browser` (Playwright), `storybook`, `build-storybook`, `docs:components`, and `test:stories`. Document clean library builds and watch mode explicitly. The README must use the real scripts once they exist and explain browser installation and local HTTPS behavior.
 
 For the assignment's 40-minute presentation slot, prepare approximately five minutes on requirements and assumptions, ten minutes of live workflows, ten minutes on architecture/forms/state, ten minutes on testing/accessibility, and five minutes on tradeoffs and possible next steps. The separate team introduction, questions, and wrap-up remain outside that slot.
 
@@ -730,12 +781,14 @@ For the assignment's 40-minute presentation slot, prepare approximately five min
 - [ ] Every shared UI component has documented public APIs, Storybook states, and meaningful story checks.
 - [ ] Jest, Cypress, Playwright, and story tests run with isolated configuration; Angular code remains zoneless.
 - [ ] Every assignment-required workflow maps to passing E2E coverage.
-- [ ] Production preview, image optimization, side-effect declarations, and lazy/deferred loading decisions are verified against built output.
+- [ ] The optimized demo completes workflows with MSW; separate production output contains no mocks, seeds, worker asset, or test controls.
+- [ ] Worker readiness, session reset, HTTP contracts, loading/error states, and confirmed-only mutations are verified.
+- [ ] Preview commands, image optimization, side-effect declarations, and lazy/deferred loading decisions are verified against built output.
 - [ ] All three supplied disputes, values, statuses, and initial ordering match the assignment.
 - [ ] The overview, creation modal, confirmation modal, empty state, and input states match the figures and copy.
 - [ ] Required validation timing, messages, precedence, and immediate error clearing work.
 - [ ] Creation sets the correct number, status, local date, order, and count without duplicate submissions.
-- [ ] Removal changes only the selected row after confirmation; every cancellation path preserves data.
+- [ ] Removal changes only the selected row after confirmation; enabled cancellation paths preserve data and pending dismissal locks are accessible and temporary.
 - [ ] Numbering remains correct after deletion and recreation from an empty state.
 - [ ] Both package-backed success notifications show the correct content and disappear after five seconds.
 - [ ] Keyboard navigation, focus containment/restoration, field semantics, and readable contrast are verified.

@@ -4,6 +4,8 @@ Review date: 13 November 2026.
 
 Decision update: The user accepted the technical findings and then explicitly expanded the desired architecture/tooling. Sections 6-8 record the current decisions and supersede the original recommendations to omit a library workspace, Tailwind, Jest, Cypress, and mandatory Storybook.
 
+Later MSW update: The user requested a separate evaluation of the temporary MSW guide/example. Its accepted HTTP mock architecture and confirmed demo/pending-state decisions are recorded in [the MSW integration review](4-MSW-Integration-Plan.md) and incorporated into sections 6-8 below. This does not change what the older Angular POC actually implemented.
+
 ## 1. Conclusion and scope
 
 The earlier project was becoming a reusable application template and component toolkit. Its strongest completed work is the form-control library, together with a modular workspace, signal-based component APIs, lazy feature routes, configurable themes, localization, and development tooling. The business pages remain placeholders, and several modern Angular experiments never reached the main branch.
@@ -113,7 +115,7 @@ Examples: [settings placeholder](D:/Projects/angular-17-template-v2/libs/feature
 | Lazy routing | `loadChildren` plus `loadComponent` for feature entries. | Keep one lazy disputes route; avoid an extra split for every small child component. |
 | Zoneless operation | Main still uses `provideZoneChangeDetection` and includes `zone.js`; separate experimental branch. | Use the current stable approach in the new project, not the old experimental setup. |
 | Signal Forms | The POC uses classic forms with custom signal/RxJS bridges; a signal-forms experiment is in the backlog. | Use the current plan's Signal Forms instead of migrating the old CVA framework. |
-| `linkedSignal`, resources | Not established as implemented features of this Angular 18 POC. | Use current APIs only when the domain needs them; there is no HTTP requirement in the agreed plan. |
+| `linkedSignal`, resources | Not established as implemented features of this Angular 18 POC. | Use current APIs where needed. The later MSW request introduces an HTTP read model; prefer `httpResource` for reads, with explicit HTTP mutation calls. |
 | Directive composition API | Recommended in README, but no `hostDirectives` implementation found in app/library sources. | Intent was present; component inheritance remained the actual reuse mechanism. |
 | `@defer` and `NgOptimizedImage` | Backlog items; no implementation found in app/library templates or TypeScript. | Optimize the required static images; defer heavy optional UI only if it actually exists. |
 | Later Angular upgrades, `@let`, newer tooling | Backlog includes upgrades beyond 18.0.6 and related syntax/tooling changes. | Planned, not completed in the reviewed main branch. |
@@ -204,9 +206,10 @@ The user wants to preserve more of the POC's development platform than the initi
 | Formatting | Configure Prettier separately before feature work. | Ignore build/generated/reference files; ESLint has its own integration stage. |
 | Unit tests | Jest and zoneless TestBed, with meaningful specs for every feature. | Prefer focused TypeScript tests, but add DOM integration tests where class-only assertions cannot prove behavior. |
 | Business E2E | Cypress covers every feature and all assignment workflows. | Maintain a traceable requirement-to-test matrix and isolated mock sessions. |
+| HTTP mock backend | Adopt MSW through a separate mock library and ordinary Angular HTTP adapter. | Later user request, independent of the historical POC. Repository owns IDs/data; feature store exposes confirmed data and operation state. No localStorage persistence. |
 | Additional browser tests | Playwright covers cross-browser, axe, focus, mobile, and selected visuals. | Avoid duplicating the entire Cypress suite; isolate configurations and global test types. |
 | Component documentation/testing | Storybook plus Compodoc; stories and black-box checks for every shared UI component. | JSDoc covers inputs, outputs, models, aliases, and required values. Compodoc generates documentation, while story `play` functions and a runner test behavior. |
-| Production preview | Add `serve:dist` using pinned `local-web-server`, HTTP/2, and SPA fallback. | Use its local `ws` executable with the real build directory instead of an unpinned runtime download and directory-changing shell chain. |
+| Built previews | Use pinned `local-web-server`, HTTP/2, and SPA fallback for separate demo/production outputs. | `serve:dist` serves the optimized MSW demo; `serve:dist:prod` inspects mock-free production, which needs a real API. The user confirmed three profiles. |
 | Tree shaking | Use `sideEffects: false` on genuinely side-effect-free libraries. | Preserve required CSS/initialization entries and inspect production output; a blanket flag is not evidence of optimization. |
 | Naming and visibility | `$` prefix for signal fields; `$` suffix for observable/subject fields; private by default, protected for template-only members, public for external contracts. | Outputs are not signals. Input/model aliases keep consumer bindings clean; keep purpose-based filenames. |
 | Dependency versions | Exact versions in owned package manifests, npm exact-save policy, committed lockfile. | Do not edit vendor manifests/transitive ranges; validate peer compatibility and deliberately update pins. |
@@ -222,10 +225,12 @@ The detailed stage table and exit criteria live in section 11 of the plan. The o
 1. Verify version compatibility, then establish the CLI workspace and strict standalone/zoneless baseline.
 2. Add Prettier, ESLint/boundaries, and Tailwind/tokens as separate steps.
 3. Add Jest, Cypress, and Playwright independently, each with an appropriate working integration fixture.
-4. Add Storybook, then Compodoc, then the story test runner in separate steps.
-5. Build the small common component kit one component at a time, including its documentation and story checks.
-6. Implement core/domain/store libraries, then the disputes overview, creation, and removal workflows with their tests.
-7. Verify production serving, tree shaking, images, lazy/deferred loading, mobile behavior, and complete acceptance coverage; finish handover documentation.
+4. Integrate MSW infrastructure and development/demo/production profiles with a small HTTP smoke fixture; verify startup and production exclusion before domain work.
+5. Add Storybook, then Compodoc, then the story test runner in separate steps.
+6. Build the small common component kit one component at a time, including its documentation and story checks.
+7. Establish core/domain contracts, then the mock repository/handlers, then the Angular HTTP adapter and feature store as separate verified stages.
+8. Implement the disputes overview, creation, and removal workflows individually, including async states and their tests.
+9. Verify the optimized demo and mock-free production artifacts, tree shaking, images, lazy/deferred loading, mobile behavior, and complete acceptance coverage; finish handover documentation.
 
 This sequence does not authorize implementing or installing these tools during the documentation update. It makes later changes independently reviewable and locates compatibility failures before they become entangled with the business application.
 
@@ -237,7 +242,7 @@ This sequence does not authorize implementing or installing these tools during t
 - SSR, deployment automation, and mandatory version bumps for every commit.
 - Replacing package-owned toast behavior or CDK focus management with custom implementations.
 
-The temporary MSW material in this repository is not adopted by this review or plan revision. It needs a separate explicit evaluation if the user requests it.
+The user subsequently requested the MSW evaluation, now documented in [the dedicated review](4-MSW-Integration-Plan.md). Adopt its dynamic startup, HTTP separation, and build isolation patterns with project-specific adaptations. Do not copy its Angular 21 UI, Reactive Forms, floating-point amount checks, persistent storage, custom notifications/focus logic, package ranges, or Vitest configuration. Keep the original assignment and the current Angular 22 rules authoritative.
 
 ## 7. Best-practice clarifications retained in the revised rules
 
@@ -277,5 +282,8 @@ Tailwind, Jest, both browser runners, the library workspace, and signal prefixes
 | Pipe usage | Targeted approach explicitly confirmed by the user. | Use pure functions for domain calculations and formatting; a pipe genuinely needed in TypeScript receives a provider, and template imports follow template usage. |
 | Lazy/deferred loading | Accepted with meaningful boundaries and placeholders. | Every business route can be lazy; initial required content is not artificially delayed. |
 | Side effects and production serving | Intent retained with correct package declarations and output paths. | Avoid blindly copying `sideEffects: false` or the original shell command. |
+| MSW backend | Requested and planned in separate infrastructure, handler/repository, and HTTP/store stages. | Replaces the earlier no-HTTP assumption; in-memory reset-on-reload behavior remains. |
+| Development/demo/production | User explicitly confirmed all three profiles. | Demo remains self-contained; production excludes MSW and needs an actual API. |
+| Pending mutation dismissal | User explicitly approved temporary dismissal/duplicate-action locks with accessible busy state. | Extends the PDF's unspecified pending state; cancellation works normally before submission and after failure. |
 
 No application implementation, dependency installation, or changes to the old POC are part of this documentation revision. The original amount parsing, validation timing, focus, security, and framework-internals findings remain constraints on what can be reused.
