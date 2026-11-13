@@ -19,6 +19,12 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Build the application with the latest stable Angular version available when implementation begins. Verify the current release and compatible dependencies rather than relying on a remembered version number.
 - Follow Angular best practices and use modern, stable Angular features where they fit the requirements.
 
+## Angular development skill
+
+- Use the installed `angular-developer` skill for subsequent Angular implementation, architecture, and review work in this project.
+- The skill comes from the official [Angular skills repository](https://github.com/angular/skills/tree/main/angular-developer). Read its `SKILL.md` and the references relevant to the current task.
+- Explicit user instructions and the project-specific rules in this file take precedence over the skill's defaults.
+
 ## Notifications and accessibility
 
 - Include the success toasts and keyboard accessibility requirements marked as optional in the assignment.
