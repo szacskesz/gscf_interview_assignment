@@ -272,6 +272,14 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/data-access/disputes/tsconfig.spec.json",
+            "exclude": ["**/*.browser.spec.ts", "**/*.node.spec.ts"],
+            "isolate": true
+          }
         }
       }
     },
