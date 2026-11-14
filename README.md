@@ -20,3 +20,5 @@ The application is in `apps/disputes`. Shared code is in `libs` and imported thr
 The workspace was verified with a clean `npm ci` and development and production builds in library-first order on Windows. npm reported optional native tooling install-script notices. The builds succeeded with npm's default install-script policy.
 
 Use `npm run format` to format workspace source, configuration, and Markdown. Use `npm run format:check` to check them without writing changes.
+
+Use `npm run lint` for TypeScript, Angular template accessibility, and library import checks. Import shared code through a library's public package name. Use relative imports inside the same app or library. Extend the public-package import rules in `eslint.config.mjs` when adding a library.
