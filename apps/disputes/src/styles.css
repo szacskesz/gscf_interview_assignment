@@ -1,1 +1,60 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss' source(none);
+@source '../../';
+@source '../../../libs';
+
+@font-face {
+  font-family: Montserrat;
+  src: url('/fonts/montserrat-variable.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+:root {
+  --gscf-neutral-110: #292929;
+  --gscf-neutral-90: #464646;
+  --gscf-neutral-80: #525252;
+  --gscf-neutral-70: #656565;
+  --gscf-neutral-60: #7c7c7c;
+  --gscf-neutral-40: #bdbdbd;
+  --gscf-neutral-30: #dcdcdc;
+  --gscf-neutral-20: #ededed;
+  --gscf-neutral-0: #ffffff;
+  --gscf-blue-100: #0e2743;
+  --gscf-blue-90: #13375a;
+  --gscf-blue-a70: #0055a4;
+  --gscf-blue-10: #e5eef9;
+  --gscf-yellow-80: #854d0e;
+  --gscf-yellow-10: #fef9c3;
+  --gscf-red-70: #b91c1c;
+  --gscf-green-60: #3a8b25;
+  --gscf-backdrop: rgb(13 26 51 / 50%);
+}
+
+@theme inline {
+  --color-ink: var(--gscf-neutral-110);
+  --color-counter: var(--gscf-neutral-90);
+  --color-muted: var(--gscf-neutral-80);
+  --color-placeholder: var(--gscf-neutral-70);
+  --color-control: var(--gscf-neutral-60);
+  --color-disabled-ink: var(--gscf-neutral-40);
+  --color-divider: var(--gscf-neutral-30);
+  --color-disabled: var(--gscf-neutral-20);
+  --color-surface: var(--gscf-neutral-0);
+  --color-control-hover: var(--gscf-blue-100);
+  --color-brand: var(--gscf-blue-90);
+  --color-primary: var(--gscf-blue-a70);
+  --color-new: var(--gscf-blue-10);
+  --color-acknowledged-ink: var(--gscf-yellow-80);
+  --color-acknowledged: var(--gscf-yellow-10);
+  --color-danger: var(--gscf-red-70);
+  --color-success: var(--gscf-green-60);
+  --color-backdrop: var(--gscf-backdrop);
+  --font-sans: Montserrat, ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-surface font-sans text-ink;
+  }
+}
