@@ -11,7 +11,7 @@ npm start
 
 Open http://localhost:4200/disputes. The overview loads the assignment records in the development mock backend.
 
-Use `npm run watch:libs` in a second terminal when editing the library. If the development server does not pick up a rebuilt library, restart `npm start`.
+Use `npm run watch:libs` in a second terminal when editing `ui-common`. Restart `npm start` if the development server does not pick up a rebuilt library. Run builds and browser suites in sequence because they share the library output directory.
 
 `npm run build` builds the libraries first and writes the production application to `dist/apps/disputes/production/browser`. Library artifacts are written under `dist/libs`. Angular runs zoneless and uses default OnPush change detection.
 
@@ -47,3 +47,33 @@ Use `npm run test:stories` to start the catalog on port 6007 and run its renderi
 - `npm run build:prod` and `npm run serve:dist:prod` open the mock-free build at `https://127.0.0.1:4301/disputes`. Serve a real API under `/api` for the production data workflows.
 
 Both previews bind to loopback and use the local server's self-signed TLS certificate for HTTP/2. Use the development server on localhost if your browser rejects the preview certificate or prevents service worker registration with it.
+
+## Architecture and behavior
+
+- The app shell loads the disputes feature through a lazy route. CLI libraries expose explicit public APIs. The shared UI libraries provide native controls and presentation, CDK owns modal focus and dismissal, and Material owns toast announcements, replacement, and the five-second lifetime.
+- The feature-scoped signal store reads through `httpResource` and sends writes through `HttpClient`. It updates rows only after a confirmed response. Signal Forms validates the create draft and shares one submission path for Enter and the submit button.
+- The native number input accepts ungrouped decimals such as `1250.00`. The table displays `1,250.00`. Precision is checked before converting to integer cents, so `1.230` is invalid. The mock API assigns the local calendar date, status, and next number.
+- The mock worker handles GET and POST at `/api/disputes` and DELETE at `/api/disputes/:number`. A full reload resets the mock repository and numbering. The Playwright-managed E2E profile alone exposes controlled error and empty-state scenarios.
+
+## Verification commands
+
+| Command                                   | What it verifies                                           |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `npm run test:ci`                         | Vitest application, library, and Node contract tests       |
+| `npm run test:components`                 | Vitest component interaction in Chromium                   |
+| `npm run test:e2e`                        | Application workflows, focus, responsive behavior, and axe |
+| `npm run test:e2e:cross-browser`          | Workflows tagged for all three browser engines             |
+| `npm run test:e2e:ui`                     | Interactive Playwright runner                              |
+| `npm run test:stories`                    | Built-in story render and `play` results in Chromium       |
+| `npm run lint` and `npm run format:check` | Workspace lint and formatting                              |
+
+Use `npm run build:libs` for production library artifacts and `npm run build:libs:dev` for development artifacts. The scripts build shared UI, core, data access, mock data access, and the feature in dependency order. For a specific library, start `npm run ng -- build <project> --configuration development --watch` after building its dependencies.
+
+## Interview walkthrough
+
+1. Open the demo and confirm the three records and the row counter.
+2. Open **New Dispute**, submit the empty form, and fix the required errors. Try `12.345` before entering `1250.50`.
+3. Create a dispute in EUR. Confirm its first-row placement, number, date, formatted amount, and toast.
+4. Open **Remove** on that row, cancel with Escape, then reopen and confirm removal.
+5. Remove the remaining rows, recreate from the empty state, and reload to demonstrate the session reset.
+6. Open Storybook to show the shared controls, API documentation, and interaction checks.
