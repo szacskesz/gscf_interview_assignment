@@ -4,6 +4,13 @@ Review date: 14 November 2026
 
 Scope: Check prerequisites and implementation order for the agreed Vitest, Playwright, Storybook, and MSW stack. This review does not scaffold the application or install its dependencies.
 
+### Step 0 implementation check
+
+- Verified Node `24.22.3` and npm `11.19.1` in the implementation terminal.
+- Checked the npm registry for the stable Angular framework (`22.2.6`), CLI and builder (`22.2.7`), and library packager (`22.2.6`). The published peer ranges accept TypeScript `6.0.3` and RxJS `7.8.2`. [Angular compatibility matrix](https://angular.dev/reference/versions).
+- Resolved a fresh lockfile for the exact baseline dependencies in a temporary directory using standard npm peer resolution. The command exited successfully without warnings. Step 1 verifies a clean install and native library/application builds.
+- The Angular CLI MCP workspace scan responded and found the reference POC only. Retrieved generic Angular guidance for scaffolding and will select the root workspace once it exists.
+
 ## 1. Readiness assessment
 
 The requirements, architecture, user decisions, and staged delivery plan are sufficiently defined to begin the workspace foundation. No additional product decision is needed before that stage. The minimal Angular baseline resolves without warnings. **The revised complete toolchain has not yet been installed or validated together:** package metadata provides starting candidates, and each integration stage must pass its own dependency, build, and runtime checks.
