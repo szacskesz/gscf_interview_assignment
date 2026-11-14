@@ -11,7 +11,14 @@ const privateImports = {
 };
 
 export default defineConfig(
-  globalIgnores(['TMP/**', '**/dist/**', '**/out-tsc/**', '**/.angular/**', '**/coverage/**']),
+  globalIgnores([
+    'TMP/**',
+    '**/dist/**',
+    '**/out-tsc/**',
+    '**/.angular/**',
+    '**/coverage/**',
+    'apps/disputes/mocks/mockServiceWorker.js',
+  ]),
   {
     files: sourceFiles,
     extends: [js.configs.recommended, tseslint.configs.recommended, angular.configs.tsRecommended],

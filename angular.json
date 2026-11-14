@@ -24,7 +24,10 @@
                 "input": "apps/disputes/public"
               }
             ],
-            "styles": ["apps/disputes/src/styles.css"]
+            "styles": ["apps/disputes/src/styles.css"],
+            "define": {
+              "COMPILE_TIME_ENABLE_MOCK": "false"
+            }
           },
           "configurations": {
             "production": {
@@ -47,7 +50,63 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
-              "outputPath": "dist/apps/disputes/development"
+              "outputPath": "dist/apps/disputes/development",
+              "define": {
+                "COMPILE_TIME_ENABLE_MOCK": "true"
+              },
+              "fileReplacements": [
+                {
+                  "replace": "apps/disputes/src/environments/environment.ts",
+                  "with": "apps/disputes/src/environments/environment.mock.ts"
+                }
+              ],
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "apps/disputes/public"
+                },
+                {
+                  "glob": "mockServiceWorker.js",
+                  "input": "apps/disputes/mocks",
+                  "output": "/"
+                }
+              ]
+            },
+            "demo": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "outputPath": "dist/apps/disputes/demo",
+              "define": {
+                "COMPILE_TIME_ENABLE_MOCK": "true"
+              },
+              "fileReplacements": [
+                {
+                  "replace": "apps/disputes/src/environments/environment.ts",
+                  "with": "apps/disputes/src/environments/environment.mock.ts"
+                }
+              ],
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "apps/disputes/public"
+                },
+                {
+                  "glob": "mockServiceWorker.js",
+                  "input": "apps/disputes/mocks",
+                  "output": "/"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -60,6 +119,9 @@
             },
             "development": {
               "buildTarget": "disputes:build:development"
+            },
+            "demo": {
+              "buildTarget": "disputes:build:demo"
             }
           },
           "defaultConfiguration": "development"
@@ -68,7 +130,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "apps/disputes/tsconfig.spec.json",
-            "exclude": ["**/*.browser.spec.ts"],
+            "exclude": ["**/*.browser.spec.ts", "**/*.node.spec.ts"],
             "isolate": true
           }
         }
@@ -96,7 +158,7 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "libs/ui/common/tsconfig.spec.json",
-            "exclude": ["**/*.browser.spec.ts"],
+            "exclude": ["**/*.browser.spec.ts", "**/*.node.spec.ts"],
             "isolate": true
           },
           "configurations": {

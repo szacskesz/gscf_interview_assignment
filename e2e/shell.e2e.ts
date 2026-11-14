@@ -21,6 +21,7 @@ test(
 
 test('has no axe violations in the shell', { tag: '@mobile' }, async ({ page }) => {
   await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Disputes' })).toBeVisible();
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
