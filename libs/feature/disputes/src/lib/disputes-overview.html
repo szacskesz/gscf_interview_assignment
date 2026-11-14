@@ -1,7 +1,12 @@
 <section aria-labelledby="disputes-title">
   <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
     <h1 id="disputes-title" class="text-2xl font-semibold text-brand sm:text-3xl">Disputes</h1>
-    <button type="button" gscfButton="primary" disabled>
+    <button
+      type="button"
+      gscfButton="primary"
+      [disabled]="store.$readState() !== 'ready'"
+      (click)="createDispute()"
+    >
       <gscf-icon name="add" /> New Dispute
     </button>
   </div>
