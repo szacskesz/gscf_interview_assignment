@@ -133,6 +133,28 @@
             "exclude": ["**/*.browser.spec.ts", "**/*.node.spec.ts"],
             "isolate": true
           }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "tsConfig": ".storybook/tsconfig.json",
+            "compodoc": false,
+            "experimentalZoneless": true,
+            "styles": ["apps/disputes/src/styles.css"],
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "tsConfig": ".storybook/tsconfig.json",
+            "compodoc": false,
+            "experimentalZoneless": true,
+            "styles": ["apps/disputes/src/styles.css"],
+            "outputDir": "dist/storybook/ui"
+          }
         }
       }
     },

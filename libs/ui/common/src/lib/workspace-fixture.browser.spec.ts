@@ -6,6 +6,7 @@ import { WorkspaceFixture } from './workspace-fixture';
 describe('Workspace fixture in Chromium', () => {
   it('increments through native keyboard activation', async () => {
     const fixture = TestBed.createComponent(WorkspaceFixture);
+    fixture.componentRef.setInput('label', 'Workspace check');
     await fixture.whenStable();
 
     const button = page.getByRole('button', { name: 'Workspace check: 0' });

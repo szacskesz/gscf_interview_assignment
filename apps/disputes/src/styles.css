@@ -1,6 +1,7 @@
 @import 'tailwindcss' source(none);
 @source '../../';
 @source '../../../libs';
+@source '../../../.storybook';
 
 @font-face {
   font-family: Montserrat;

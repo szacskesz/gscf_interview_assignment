@@ -5,6 +5,7 @@ import { WorkspaceFixture } from './workspace-fixture';
 describe('Workspace fixture', () => {
   it('updates the rendered count after clicks in the zoneless environment', async () => {
     const fixture = TestBed.createComponent(WorkspaceFixture);
+    fixture.componentRef.setInput('label', 'Workspace check');
     await fixture.whenStable();
 
     const host: HTMLElement = fixture.nativeElement;

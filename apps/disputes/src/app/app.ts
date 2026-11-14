@@ -12,7 +12,7 @@ import { WorkspaceFixture } from '@gscf/ui-common';
     </header>
     <main class="space-y-4 px-4 py-8 sm:px-8">
       <h1 class="text-2xl font-semibold text-brand">Disputes</h1>
-      <gscf-workspace-fixture />
+      <gscf-workspace-fixture label="Workspace check" />
       <router-outlet />
     </main>
   `,
