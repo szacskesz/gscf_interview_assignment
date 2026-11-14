@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, ElementRef, computed, input, output, viewChildren } from '@angular/core';
 import { formatAmount, formatDisputeDate, type Dispute } from '@gscf/disputes-data-access';
 import { Badge, Button, Icon } from '@gscf/ui-common';
 
@@ -9,6 +9,16 @@ import { Badge, Button, Icon } from '@gscf/ui-common';
 })
 export class DisputesTable {
   readonly $rows = input.required<readonly Dispute[]>({ alias: 'rows' });
+  readonly removalRequested = output<{ dispute: Dispute; trigger: HTMLButtonElement }>();
+  private readonly $removeButtons = viewChildren<ElementRef<HTMLButtonElement>>('removeButton');
+
+  focusRemoveAt(index: number): boolean {
+    const buttons = this.$removeButtons();
+    const button = buttons[Math.min(index, buttons.length - 1)];
+    if (!button) return false;
+    button.nativeElement.focus();
+    return true;
+  }
 
   protected readonly $displayRows = computed(() =>
     this.$rows().map((row) => ({

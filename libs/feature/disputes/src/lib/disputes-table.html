@@ -33,10 +33,11 @@
           <td class="max-w-80 wrap-anywhere">{{ row.reason }}</td>
           <td>
             <button
+              #removeButton
               type="button"
               gscfButton="text-danger"
-              disabled
               [attr.aria-label]="'Remove dispute ' + row.number"
+              (click)="removalRequested.emit({ dispute: row, trigger: removeButton })"
             >
               <gscf-icon name="remove" /> Remove
             </button>
