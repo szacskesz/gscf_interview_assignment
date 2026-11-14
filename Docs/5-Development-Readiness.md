@@ -2,22 +2,22 @@
 
 Review date: 14 November 2026
 
-Scope: Check prerequisites and implementation order after commit `41d9e6c` (`Plan MSW backend integration`). This review does not scaffold the application or install its dependencies.
+Scope: Check prerequisites and implementation order for the agreed Vitest, Playwright, Storybook, and MSW stack. This review does not scaffold the application or install its dependencies.
 
 ## 1. Readiness assessment
 
-The requirements, architecture, user decisions, and staged delivery plan are sufficiently defined to begin the workspace foundation. No additional product decision is needed before that stage. **The complete toolchain is not yet cleared:** the combined package-resolution check exposes a Babel peer mismatch that must be resolved before completing the affected Jest/Storybook integration. The minimal Angular baseline resolves without warnings. Each stage must still pass its actual build/browser/test checks.
+The requirements, architecture, user decisions, and staged delivery plan are sufficiently defined to begin the workspace foundation. No additional product decision is needed before that stage. The minimal Angular baseline resolves without warnings. **The revised complete toolchain has not yet been installed or validated together:** package metadata provides starting candidates, and each integration stage must pass its own dependency, build, and runtime checks.
 
 The review clarified an ordering gap: early library builds and Tailwind checks need a real library before the shared component kit is implemented. Stage 1 now creates only `ui/common` with a minimal integration fixture. Storybook documents that fixture in stage 9, and stage 12 implements the actual reusable kit. This preserves the agreed tooling-before-components-before-features sequence.
 
-Dependency-resolution results and their limits are recorded below. They are not a substitute for the clean install and library/application build required at the end of stage 1.
+The checks below do not replace the clean install and library/application build required at the end of stage 1.
 
 ## 2. Prerequisites checked
 
 | Item | Finding | Follow-up |
 | --- | --- | --- |
 | Assignment and logo | Both files exist under `Instructions`; the plan contains exact seed data, workflow copy, validation, visual tokens, and acceptance criteria. | Use the PDF figures during visual implementation; keep the original assets intact. |
-| User decisions | Workspace/libraries, strict zoneless Angular, Signal Forms, all requested test tools, shared stories, MSW profiles, and pending-state behavior are documented. | Apply the existing decisions; no new approval needed for routine implementation details. |
+| User decisions | Workspace/libraries, strict zoneless Angular, Signal Forms, Vitest/Playwright, shared stories, MSW profiles, and pending-state behavior are documented. | Apply the existing decisions; no new approval needed for routine implementation details. |
 | Git | The approved MSW documents are committed as `41d9e6c`; the commit completed successfully. | Keep each future integration reviewable and use short English commit messages when commits are requested. |
 | Node/npm | Node `24.22.3`, npm `11.19.1`; Windows build `22631`. | Pin/document the selected runtime in stage 1 and verify tool commands in the actual terminal. |
 | Angular development skill | Installed and readable. | Continue using relevant references; project choices override generic runner defaults. |
@@ -25,7 +25,7 @@ Dependency-resolution results and their limits are recorded below. They are not 
 | Root application | No root `package.json`, `angular.json`, or `node_modules` yet. | Expected at this planning stage; create the workspace in stage 1. |
 | Temporary reference material | Available and currently ignored by Git in this environment. | Commit portable root ignore rules in stage 1; do not depend on one machine's ignore configuration. |
 | Montserrat files | Not supplied with the assignment assets. | Obtain locally served fonts and retain their license in stage 4; the source is available, so this is not a missing user input. |
-| Browser executables and test integration | Not installed or exercised by this review. | Verify Cypress in stage 6 and install/verify the selected Playwright browsers in stage 7. |
+| Browser executables and test integration | Not installed or exercised by this review. | Install/verify browsers for Vitest Browser Mode in stage 6 and Playwright Test in stage 7. |
 
 Node 24.22.3 is within Angular 22's supported Node range. Angular 22 requires TypeScript `>=6.0.0 <6.1.0`; TypeScript 7.x is therefore not suitable even though it is the registry's newer release. [Angular compatibility matrix](https://angular.dev/reference/versions).
 
@@ -38,49 +38,49 @@ Queried published npm manifests during this review. These are starting candidate
 | Area | Candidate versions | Constraint or qualification |
 | --- | --- | --- |
 | Angular framework/compiler | `22.2.6` | Align common, compiler, compiler-cli, core, forms, and browser packages. |
-| CLI/application builder | `22.2.7` | Compatible with the installed Node; keep `@angular/build:application` for the app. |
+| CLI/application builder | `22.2.7` | Keep `@angular/build:application` for the app and `@angular/build:unit-test` for Angular tests. Its Vitest peer range accepts the candidate below. |
 | Library packaging | `ng-packagr 22.2.6` | Uses Angular 22 and TypeScript 6.0. |
 | TypeScript/RxJS | `6.0.3` / `7.8.2` | TypeScript `latest` was `7.0.2`; deliberately choose supported `6.0.3`. |
 | CDK/Material | `22.2.7` / `22.2.7` | Material requires the matching CDK patch. |
 | Formatting | `prettier 3.10.1` | Add only in its own stage. |
 | Lint | `angular-eslint 22.6.0`, `typescript-eslint 8.72.2`, `eslint 10.15.0` | Declared peer ranges accept TypeScript 6.0 and the selected ESLint. |
 | Styling | `tailwindcss 4.3.5`, `@tailwindcss/postcss 4.3.5`, `postcss 8.5.32` | Validate source detection in both app and catalog. |
-| Unit tests | `jest 30.5.2`, `jest-preset-angular 17.0.3`, `jest-environment-jsdom 30.5.2`, `@types/jest 30.0.0` | Preset declares Angular 20-22 and Jest 30 support. Use zoneless setup. |
+| Unit/integration tests | `vitest 5.1.0`; `@vitest/coverage-v8 5.1.0` if coverage is configured | Keep related Vitest packages aligned; verify the CLI builder and zoneless TestBed fixture. |
 | DOM test dependency | `jsdom 31.0.1` | Declared runtime range accepts Node 24.22.3; runtime integration remains a stage-5 check. |
-| Babel test-tool compatibility | Unresolved; `@babel/core 7.29.13` was investigated | Do not adopt the attempted pin as a finished fix. Angular's Babel 8 and test-tool Babel 7 dependencies need a correctly resolved graph; see findings below. |
-| Business E2E | `cypress 16.3.0` | Its Node requirement accepts the selected runtime. |
-| Browser/accessibility tests | `@playwright/test 1.65.1`, `@axe-core/playwright 4.14.0` | Browser download and execution are separate checks. |
+| Browser component tests | `@vitest/browser-playwright 5.1.0`, `playwright 1.65.1` | The provider requires matching Vitest; browser setup and Angular compilation must be verified. |
+| E2E/accessibility tests | `@playwright/test 1.65.1`, `@axe-core/playwright 4.14.0` | One E2E suite covers business workflows and targeted browser checks. Browser download and execution are separate checks. |
 | Storybook | `storybook`, `@storybook/angular`, `@storybook/addon-docs`: `10.6.7` | Angular renderer declares Angular 18-22 and TypeScript 6 support; Zone.js is optional. |
-| Story runner | `@storybook/test-runner 0.26.0` | Keep separate from application Jest; verify the chosen Angular/Webpack renderer. |
+| Story runner | `@storybook/test-runner 0.26.0` | Verify its dependency graph and the chosen Angular/Webpack renderer independently of application tests. |
 | API documentation | `@compodoc/compodoc 2.0.0` | Verify extraction of required/aliased signal inputs and models. |
 | Mock backend | `msw 3.0.5` | Separate browser/Node adapters; validate ESM and worker integration. |
 | Built preview | `local-web-server 5.4.2` | Verify HTTP/2, SPA fallback, output directories, and separate ports. |
 
-Versions and peer ranges came from each package's published npm manifest, queried through the registry's `/<package>/latest` endpoint; the TypeScript and Babel selections were restricted to compatible stable release lines. Examples: [Angular build metadata](https://registry.npmjs.org/@angular/build/22.2.7), [Jest preset metadata](https://registry.npmjs.org/jest-preset-angular/17.0.3), [Storybook Angular metadata](https://registry.npmjs.org/@storybook/angular/10.6.7).
+Versions and peer ranges came from published npm manifests. Keep TypeScript on Angular's supported release line and recheck the combined graph at each integration. Sources: [Angular build metadata](https://registry.npmjs.org/@angular/build/22.2.7), [Vitest metadata](https://registry.npmjs.org/vitest/5.1.0), [browser provider metadata](https://registry.npmjs.org/@vitest/browser-playwright/5.1.0), [Playwright Test metadata](https://registry.npmjs.org/@playwright/test/1.65.1), [Storybook Angular metadata](https://registry.npmjs.org/@storybook/angular/10.6.7).
 
 Storybook's Angular/Webpack integration also needs compatible `@angular-devkit/build-angular`, devkit core/architect, and browser-dynamic packages. Add them at the Storybook stage without switching the app builder. Use the renderer's supported zoneless configuration and prove signal input/model controls in the fixture. The Storybook test runner remains the relevant candidate for this renderer; the general recommendation for the Vitest addon targets Vite-powered frameworks. [Angular renderer](https://storybook.js.org/docs/get-started/frameworks/angular), [story test runner](https://storybook.js.org/docs/writing-tests/integrations/test-runner).
 
-Use `setupZonelessTestEnv` for Jest. The skill's generic Vitest examples do not override the user's Jest decision. Keep asynchronous rendering checks based on state/events and `whenStable()` so manual change detection cannot hide a missing zoneless notification. [Jest TestBed environments](https://thymikee.github.io/jest-preset-angular/docs/getting-started/testbed-environment).
+## 4. Testing responsibilities and verification status
 
-## 4. Dependency-resolution findings
+| Layer | Execution owner | Scope |
+| --- | --- | --- |
+| Unit and Node contracts | Vitest | Domain calculations, repository behavior, and MSW HTTP contracts with `setupServer`. |
+| Angular integration | Vitest with zoneless TestBed and jsdom | Bindings, forms, adapters, and store behavior through the Angular CLI test builder. |
+| Browser components | Vitest Browser Mode with the Playwright provider | Focused component behavior requiring a real browser; separate `*.browser.spec.ts` discovery. |
+| Application E2E | Playwright Test | All assignment workflows, plus cross-browser, axe, focus, responsive, and selected visual checks. |
+| Shared component catalog and interactions | Storybook with a renderer-compatible runner | Colocated stories, `play` interactions, and generated Compodoc API documentation. |
 
-All resolution experiments ran in fresh or isolated temporary directories outside this repository, using `--package-lock-only --ignore-scripts --no-audit --no-fund`. No application packages, browser downloads, install hooks, or builds were run; the temporary checks did not create `node_modules`. No `--force`, `--legacy-peer-deps`, or vendor edits were used. One scoped override was tested only in a temporary manifest and rejected because it did not resolve the mismatch. No pin or override was added to this repository.
+Angular CLI supplies Vitest integration and supports browser execution with the Playwright provider. Keep asynchronous Angular assertions based on state/events and `whenStable()` so manual change detection cannot hide a missing zoneless notification. Playwright Test remains a separate runner for complete application workflows. [Angular testing guide](https://angular.dev/guide/testing), [Vitest Playwright provider](https://vitest.dev/config/browser/playwright), [Playwright Test](https://playwright.dev/docs/intro).
 
-1. The minimal Angular/CLI/library baseline resolves successfully with ordinary npm settings and no peer warnings.
-2. An additional `--strict-peer-deps` diagnostic fails while resolving the optional `@oxc-parser/binding-wasm32-wasi 0.156.0` path: it declares `@emnapi/core 2.0.0-alpha.6`, while `@napi-rs/wasm-runtime 1.2.7` declares a different compatible peer range. The adjacent Angular builder patch `22.2.6` uses the same parser version, so changing to that patch is not an evidenced fix. Ordinary resolution can produce separate nested dependency versions; the strict diagnostic failure alone does not prove that the native Windows build is broken. Record it and verify the actual installed graph/build in stage 1.
-3. Resolving the full requested toolchain reports warnings: Jest's `babel-preset-current-node-syntax` syntax plugins require Babel 7 but resolve against Babel 8. An explicit root Babel `7.29.13` selection reduces the mismatch but leaves a Babel 8 helper resolving against Babel 7. A scoped syntax-preset override also fails to produce a clean graph. Neither experiment is an adopted fix.
+Keep each test under one execution owner. Exclude browser component specs from the Node/jsdom target and isolate Playwright and story configurations. Browser HTTP checks use a ready `setupWorker`; Node contracts use `setupServer`. Do not combine MSW interception and `HttpTestingController` for the same request.
 
-| Resolution experiment | Observed result |
+| Check | Observed result and next step |
 | --- | --- |
-| Minimal Angular baseline, ordinary npm | Exit 0, no peer warnings. |
-| Minimal baseline/full stack, extra strict-peer diagnostic | Exit 1 on the optional WASM parser path described above. |
-| Full toolchain, ordinary npm | Exit 0 with peer warnings; lockfile audit found 15 resolved Babel peer mismatches. |
-| Fresh full toolchain plus root Babel 7 candidate | Exit 0 with one warning; audit found one remaining Babel 8 helper mismatch. |
-| Fresh full toolchain plus scoped preset override candidate | Exit 0 with warnings; audit still found 15 Babel peer mismatches. Rejected. |
+| Minimal Angular/CLI/library baseline | Ordinary lockfile-only resolution succeeded without peer warnings. Verify a clean install and native build in stage 1. |
+| Additional strict-peer diagnostic | An optional WASM parser path reported conflicting `@emnapi/core` peer ranges. Ordinary resolution can nest separate versions; this diagnostic alone does not prove a native Windows build failure. Inspect the actual installed graph in stage 1. |
+| Revised testing stack | Current package metadata was checked; a fresh combined resolution and runtime verification are still pending at stages 5-7. |
+| Storybook integration | Renderer and runner remain separate dependency/runtime gates at stages 9-11. Application Vitest setup does not establish story-runner compatibility. |
 
-The audit compared resolved peer versions in the lockfile with their declared semver ranges. Exit 0 with warnings is not a compatibility pass, and these findings do not establish a runtime failure without a build/test run. Keep the minimal workspace baseline separate from later tools. Before stage 5, isolate the Jest/Angular graph, select a supported resolution, and run the meaningful zoneless fixture; repeat resolution when Storybook is added in stage 9. If solving this requires a framework downgrade, replacing Jest, or violating a recorded rule, present the concrete alternative to the user first. Do not silence the warnings or carry an unexplained override into the project.
-
-Package-manager resolution cannot demonstrate that Angular library packaging, MSW/Jest ESM, Storybook rendering, or browser downloads work; retain the planned integration exit criteria.
+The baseline resolution ran outside the repository without install scripts, application packages, or browser downloads. Do not suppress peer conflicts with forced installs or unexplained overrides. Package metadata and lockfile resolution are preliminary evidence; only the planned integration checks establish that each part works.
 
 ## 5. Ordering and prerequisites
 
@@ -90,7 +90,9 @@ The numbered stages remain **0-21**, with the detailed work and exit criteria in
 | --- | --- |
 | 0-1 | Compatibility selection, then root CLI workspace, app shell, minimal `ui/common` fixture, exact-save policy, ignore/runtime configuration, and dependency-order library build/watch commands. |
 | 2-4 | Prettier, then ESLint/boundaries, then Tailwind/tokens/local fonts and logo assets. Each is a separate integration. The existing library fixture makes these checks concrete. |
-| 5-7 | Jest, then Cypress, then Playwright. Establish test discovery isolation, browser installation, server lifecycle/readiness, and initial acceptance mapping. |
+| 5 | Vitest unit/integration tests, zoneless TestBed/jsdom, and isolated Node contracts. |
+| 6 | Vitest Browser Mode with the Playwright provider; install/verify its browser and exclude browser specs from Node discovery. |
+| 7 | Playwright Test E2E, server lifecycle/readiness, selected browser projects, and initial acceptance mapping. |
 | 8 | MSW bootstrap, worker generation, profile isolation, and browser/Node smoke tests. Use a temporary generic endpoint and app-local startup configuration; domain libraries do not exist yet. |
 | 9-11 | Storybook, then Compodoc, then executable story tests. Prove zoneless rendering and signal API documentation before the component kit. |
 | 12 | Implement real shared components individually, each with its stories/tests. Keep them independent of business state, mock data, and the later domain clock/API token. |
@@ -114,10 +116,10 @@ These are scheduled verification tasks, not missing user requirements:
 
 - Clean `npm ci`, required native dependency availability, library packaging, and application build on the selected runtime.
 - Library-only Tailwind classes and locally served fonts in app and Storybook output.
-- Jest zoneless rendering, MSW Node ESM/API behavior, and deterministic isolation.
+- Vitest zoneless rendering, real-browser components, MSW Node ESM/API behavior, and deterministic isolation.
 - Storybook signal aliases/required inputs/models, Compodoc extraction, and executable stories.
-- Cypress and Playwright browser execution, including real worker readiness and pending/failure workflows.
+- Playwright E2E execution, including real worker readiness and pending/failure workflows.
 - The numeric field's raw-string/custom-control behavior across supported browsers, especially literal trailing decimals and invalid native input.
 - Optimized demo functionality, mock-free production output, original acceptance coverage, manual focus/keyboard checks, and axe scans.
 
-Start with the compatibility/workspace stages, not the disputes feature. No new architecture decision or additional user-provided file is required to begin that work. The full-toolchain Babel finding remains open and must be closed at its integration gate before dependent work proceeds.
+Begin with the compatibility and workspace stages. No new architecture decision or additional user-provided file is required; each dependency integration must pass its exit criteria before dependent work proceeds.

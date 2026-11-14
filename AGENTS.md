@@ -25,7 +25,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use `libs/core` for cross-cutting services, tokens, and infrastructure; `libs/feature/*` for separate business features/pages; `libs/ui/*` for presentational components and UI-only behavior; and `libs/data-access/*` for feature stores, domain models, and HTTP access. Keep MSW handlers, fixtures, and the mock repository in a separate `libs/data-access/disputes-mock` library, with no reverse dependency from normal data access.
 - Give every feature its own folder/library. Keep related templates, styles, specs, and stories together. Keep business pages out of `core` and business stores out of `ui`.
 - Use explicit library public APIs and enforce dependency direction with lint rules. Do not import another library's private implementation or create circular dependencies.
-- Integrate one concern at a time: workspace baseline, Prettier, ESLint/boundaries, Tailwind/tokens, Jest, Cypress, Playwright, MSW infrastructure, Storybook, Compodoc, story tests, shared components, domain contracts, mock handlers/repository, HTTP/store integration, then business features and final verification.
+- Integrate one concern at a time: workspace baseline, Prettier, ESLint/boundaries, Tailwind/tokens, Vitest unit/integration tests, Vitest browser component tests with the Playwright provider, Playwright Test E2E, MSW infrastructure, Storybook, Compodoc, story tests, shared components, domain contracts, mock handlers/repository, HTTP/store integration, then business features and final verification.
 - Each step must have its own usable result and appropriate verification before the next dependent step. Do not install the entire toolchain or implement the whole application in one change.
 - Establish only a minimal `ui/common` integration fixture with the initial workspace so early library/Tailwind/tool checks have a real target. Build the actual shared component kit after Storybook and story tests are ready. Maintain build/watch commands and setup notes as each stage lands.
 - Build the assignment-sized shared component set and its stories before the disputes features. Do not port the entire earlier POC toolkit or add unrelated controls.
@@ -148,14 +148,14 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Testing and component documentation
 
-- Use Jest for unit tests and focused Angular TestBed integration tests, with a compatible `jest-preset-angular` zoneless setup. Do not also retain Vitest as the application's unit runner.
+- Use Vitest for unit tests and focused Angular TestBed integration tests through Angular CLI's supported test builder. Keep Angular tests zoneless and use jsdom for fast DOM tests where appropriate.
 - Add meaningful `*.spec.ts` coverage for every feature. Prefer small TypeScript-focused white-box tests for business logic and transformations, while checking rendered behavior where templates and bindings matter. Avoid tests that merely mirror implementation or assert that a component exists.
-- Use Cypress for black-box E2E workflows for every feature. Every behavior required by the assignment must be mapped to E2E coverage.
-- Also use Playwright for targeted cross-browser, accessibility, responsive, focus, and visual checks. Keep its responsibility distinct from the complete Cypress business-workflow suite.
+- Use Vitest Browser Mode with `@vitest/browser-playwright` for component tests that need a real browser. This provider drives browsers for Vitest; it is distinct from the E2E test runner.
+- Use Playwright Test (`@playwright/test`) for black-box E2E workflows for every feature and for cross-browser, accessibility, responsive, focus, and visual checks. Every assignment requirement must map to E2E coverage. Keep one application E2E suite.
 - Every shared UI component needs colocated `*.stories.ts`, representative visual/interaction states, and meaningful black-box component tests through story `play` functions where interactive. Static components still need rendering/accessibility assertions.
 - Use Storybook and Compodoc for the shared component catalog and generated API documentation. Test story controls, aliased/required signal inputs, outputs/models, and zoneless rendering during integration.
-- Use a Storybook test runner supported by the selected Angular renderer. Keep its configuration separate from application Jest and E2E projects; do not assume a Vite-only addon works with the selected renderer.
-- Keep Jest, Cypress, Playwright, and Storybook TypeScript/test discovery configurations isolated to avoid conflicting global types and duplicate test execution.
+- Use a Storybook interaction-test runner supported by the selected Angular renderer. Keep its dependency/configuration checks separate; the Vite-only Vitest addon is not automatically compatible with the current Angular/Webpack renderer.
+- Isolate Vitest unit/Node tests, Vitest browser component tests, Playwright E2E, and Storybook story discovery/types/configuration so each test has one execution owner. Keep browser component specs out of the default Node/jsdom test target.
 
 ## State Management
 

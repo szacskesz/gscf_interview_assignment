@@ -2,7 +2,7 @@
 
 Review date: 13 November 2026.
 
-Decision update: The user accepted the technical findings and then explicitly expanded the desired architecture/tooling. Sections 6-8 record the current decisions and supersede the original recommendations to omit a library workspace, Tailwind, Jest, Cypress, and mandatory Storybook.
+Decision update: Sections 6-8 reflect the user's current architecture and tooling choices: a library workspace, Tailwind, Vitest for unit/component tests, Playwright for E2E, and mandatory Storybook catalog/interaction tests with Compodoc.
 
 Later MSW update: The user requested a separate evaluation of the temporary MSW guide/example. Its accepted HTTP mock architecture and confirmed demo/pending-state decisions are recorded in [the MSW integration review](4-MSW-Integration-Plan.md) and incorporated into sections 6-8 below. This does not change what the older Angular POC actually implemented.
 
@@ -20,7 +20,7 @@ The accepted decisions are now reflected in [the implementation plan](D:/Project
 - Used read-only file access and Git inspection. No checkout, fetch, install, build, test execution, formatting, or source modification was performed in that repository.
 - Current branch: `master`; HEAD: `85545f1fdab312e0ad3a979faa22bfa4627de81a`, dated 28 June 2025, with the subject `Implemented some common validators and pipes`. There are 204 commits reachable from HEAD.
 - Despite the directory and README name, the installed-version declarations reached Angular **18.0.6**, Angular CLI/build tooling **18.0.7**, Nx **19.4.1**, and TypeScript **5.4.5**. These are historical versions, not recommendations for the new application. See [package.json](D:/Projects/angular-17-template-v2/package.json).
-- Existing uncommitted work was treated separately from committed implementation. The reviewed file inventory contains 606 tracked or non-ignored untracked files, including 40 component TypeScript files, 42 spec files, one Storybook story file, and one Cypress spec file. Counts do not establish coverage or quality.
+- Existing uncommitted work was treated separately from committed implementation. The reviewed file inventory contains 606 tracked or non-ignored untracked files, including 40 component TypeScript files, 42 spec files, one Storybook story file, and one end-to-end spec file. Counts do not establish coverage or quality.
 - Statements such as “implemented” mean the code/configuration exists and was inspected. They do not mean it was executed successfully during this review. No current runtime, CI, accessibility, performance, or deployment pass is claimed.
 - The before-and-after content manifest matched for all 606 reviewed files; HEAD and Git status were also unchanged. All 37 original local evidence links resolved when the initial review was checked.
 
@@ -179,11 +179,11 @@ The custom [application executor](D:/Projects/angular-17-template-v2/tools/custo
 
 ### 5.7 Test infrastructure is further along than behavioral coverage
 
-The POC has meaningful tests around parts of the CVA, lifecycle, and reactive utilities. Many UI specs are creation smoke tests; for example, the [number-field spec](D:/Projects/angular-17-template-v2/libs/ui/form/src/lib/number-field/number-field.component.spec.ts:25) only checks that the component exists. The single [story file](D:/Projects/angular-17-template-v2/libs/ui/common/src/lib/nav-button/nav-button.component.stories.ts) supplies two navigation-button stories and a text assertion. The [Cypress spec](D:/Projects/angular-17-template-v2/apps/app/cypress/e2e/app.cy.ts) checks build metadata rather than complete business workflows. No axe integration was found in the inspected source/configuration.
+The POC has meaningful tests around parts of the CVA, lifecycle, and reactive utilities. Many UI specs are creation smoke tests; for example, the [number-field spec](D:/Projects/angular-17-template-v2/libs/ui/form/src/lib/number-field/number-field.component.spec.ts:25) only checks that the component exists. The single [story file](D:/Projects/angular-17-template-v2/libs/ui/common/src/lib/nav-button/nav-button.component.stories.ts) supplies two navigation-button stories and a text assertion. Browser coverage checks build metadata rather than complete business workflows. No axe integration was found in the inspected source/configuration.
 
 The README's division into TypeScript-focused unit tests and browser-based UI tests is reasonable in principle. The problem would be treating class-only tests as sufficient, or requiring Storybook before testing every small component. Angular's [component-testing guidance](https://angular.dev/guide/testing/components-basics) also treats the template and class interaction as part of the component's behavior.
 
-**Updated decision:** use Jest with zoneless TestBed, Cypress for the complete business E2E suite, Playwright for targeted browser/accessibility/visual verification, and mandatory Storybook stories/component tests for shared UI. The earlier recommendation to keep only Vitest and Playwright is superseded. The finding still applies: test money/numbering as domain behavior, blur/submit through rendered controls, and complete workflows in the browser; tooling configuration alone is not behavioral coverage.
+**Current decision:** use Vitest with zoneless TestBed for unit/integration tests, Vitest's Playwright provider for real-browser component tests, Playwright Test for the complete E2E/browser verification suite, and Storybook for shared-component catalog/interaction tests. Test money/numbering as domain behavior, blur/submit through rendered controls, and complete workflows in the browser; tooling configuration alone is not behavioral coverage.
 
 ## 6. Accepted reuse scope and implementation approach
 
@@ -204,10 +204,11 @@ The user wants to preserve more of the POC's development platform than the initi
 | Mobile usability | Required in addition to matching desktop references. | Preserve all columns, usable scrolling/dialogs/errors/actions, touch interaction, and safe notification margins. |
 | Theme colors and styling | Tailwind utilities backed by semantic CSS custom properties. | Small CSS/package-theme integration is allowed; no theme picker, dark-mode requirement, or user-configurable palette. |
 | Formatting | Configure Prettier separately before feature work. | Ignore build/generated/reference files; ESLint has its own integration stage. |
-| Unit tests | Jest and zoneless TestBed, with meaningful specs for every feature. | Prefer focused TypeScript tests, but add DOM integration tests where class-only assertions cannot prove behavior. |
-| Business E2E | Cypress covers every feature and all assignment workflows. | Maintain a traceable requirement-to-test matrix and isolated mock sessions. |
+| Unit/integration tests | Vitest and zoneless TestBed, with meaningful specs for every feature. | Use Angular CLI's supported builder; add DOM integration tests where class-only assertions cannot prove behavior. |
+| Browser component tests | Vitest Browser Mode with the Playwright provider. | Isolate browser-only specs from Node/jsdom tests; focus on behavior that needs a real browser. |
+| Business E2E | Playwright Test covers every feature and all assignment workflows. | Maintain a traceable requirement-to-test matrix and isolated mock sessions. |
 | HTTP mock backend | Adopt MSW through a separate mock library and ordinary Angular HTTP adapter. | Later user request, independent of the historical POC. Repository owns IDs/data; feature store exposes confirmed data and operation state. No localStorage persistence. |
-| Additional browser tests | Playwright covers cross-browser, axe, focus, mobile, and selected visuals. | Avoid duplicating the entire Cypress suite; isolate configurations and global test types. |
+| Additional browser checks | Playwright projects cover cross-browser, axe, focus, mobile, and selected visuals within the E2E suite. | Keep one E2E runner; isolate its configuration/types from Vitest and Storybook. |
 | Component documentation/testing | Storybook plus Compodoc; stories and black-box checks for every shared UI component. | JSDoc covers inputs, outputs, models, aliases, and required values. Compodoc generates documentation, while story `play` functions and a runner test behavior. |
 | Built previews | Use pinned `local-web-server`, HTTP/2, and SPA fallback for separate demo/production outputs. | `serve:dist` serves the optimized MSW demo; `serve:dist:prod` inspects mock-free production, which needs a real API. The user confirmed three profiles. |
 | Tree shaking | Use `sideEffects: false` on genuinely side-effect-free libraries. | Preserve required CSS/initialization entries and inspect production output; a blanket flag is not evidence of optimization. |
@@ -224,7 +225,7 @@ The detailed stage table and exit criteria live in section 11 of the plan. The o
 
 1. Verify version compatibility, then establish the CLI workspace and strict standalone/zoneless baseline.
 2. Add Prettier, ESLint/boundaries, and Tailwind/tokens as separate steps.
-3. Add Jest, Cypress, and Playwright independently, each with an appropriate working integration fixture.
+3. Configure Vitest unit/integration tests, then its Playwright browser component provider, then Playwright Test E2E in separate verified steps.
 4. Integrate MSW infrastructure and development/demo/production profiles with a small HTTP smoke fixture; verify startup and production exclusion before domain work.
 5. Add Storybook, then Compodoc, then the story test runner in separate steps.
 6. Build the small common component kit one component at a time, including its documentation and story checks.
@@ -244,7 +245,7 @@ The [development-readiness review](5-Development-Readiness.md) clarifies that th
 - SSR, deployment automation, and mandatory version bumps for every commit.
 - Replacing package-owned toast behavior or CDK focus management with custom implementations.
 
-The user subsequently requested the MSW evaluation, now documented in [the dedicated review](4-MSW-Integration-Plan.md). Adopt its dynamic startup, HTTP separation, and build isolation patterns with project-specific adaptations. Do not copy its Angular 21 UI, Reactive Forms, floating-point amount checks, persistent storage, custom notifications/focus logic, package ranges, or Vitest configuration. Keep the original assignment and the current Angular 22 rules authoritative.
+The user subsequently requested the MSW evaluation, now documented in [the dedicated review](4-MSW-Integration-Plan.md). Adopt its dynamic startup, HTTP separation, and build isolation patterns with project-specific adaptations. Do not copy its Angular 21 UI, Reactive Forms, floating-point amount checks, persistent storage, custom notifications/focus logic, package ranges, or version-specific test configuration. Keep the original assignment and the current Angular 22 rules authoritative.
 
 ## 7. Best-practice clarifications retained in the revised rules
 
@@ -266,7 +267,7 @@ The TypeScript-focused, white-box unit-test preference is retained without treat
 
 Pipe injection, when genuinely needed, uses a scoped provider and `inject()`. Template imports are only needed when the template uses that pipe; an environment provider is registered at the route/bootstrap scope only when service usage needs it. Pure business transformations and shared formatters can remain plain functions. The exact convention is recorded in the decision register below.
 
-Tailwind, Jest, both browser runners, the library workspace, and signal prefixes are valid project preferences rather than universal best practices. They add configuration and maintenance work; the user explicitly chose that tradeoff. Strict package pinning improves explicit upgrade control but still requires regular deliberate updates.
+The library workspace, Tailwind, and signal prefixes are project preferences. The selected testing stack assigns unit/component checks to Vitest, complete workflows to Playwright Test, and catalog interactions to Storybook. Separate discovery and configuration prevent duplicate execution and conflicting test globals. Strict package pinning improves upgrade control but still requires deliberate updates.
 
 ## 8. Decision register after user feedback
 
@@ -275,8 +276,8 @@ Tailwind, Jest, both browser runners, the library workspace, and signal prefixes
 | `linkedSignal` wording | Accepted and clarified. | Read-only derivation stays `computed`; writable derived state can use `linkedSignal`. |
 | Angular CLI monorepo | Adopted as the implementation approach. | Replaces the original `App/` single-application structure; Nx is still unnecessary. |
 | Tailwind | Explicitly selected. | Supersedes the earlier recommendation to keep SCSS-first styling. |
-| Jest | Explicitly selected. | Replaces application Vitest; zoneless compatibility is an integration gate. |
-| Cypress plus Playwright | Both selected, with distinct responsibilities. | Expands the earlier Playwright-only approach. |
+| Vitest | Explicitly selected for unit/integration and component tests. | Use zoneless TestBed and the CLI-supported builder; real-browser components use the Playwright provider. |
+| Playwright Test | Explicitly selected as the single E2E runner. | Covers business acceptance plus targeted browser/accessibility/responsive checks; it is separate from Vitest's browser provider. |
 | Storybook and Compodoc | Required for the shared kit. | Supersedes optional/future Storybook; add documentation and executable stories before feature assembly. |
 | Signal prefixes | `$signal` and `observable$` selected. | Supersedes plain signal names; filenames remain purpose-based because no suffix convention was re-requested. |
 | Visibility | Private/protected/public by actual consumer. | Public component contracts remain available; tests do not dictate visibility. |

@@ -6,7 +6,7 @@ Status: Planning only
 
 Readiness review: See [development readiness](5-Development-Readiness.md) for the 14 November prerequisite checks, package-resolution findings, and stage-order clarifications. A planned exit criterion is not evidence that its integration has already passed.
 
-Revision: Updated after the POC review, the user's engineering decisions, and the MSW reference review. This revision supersedes the original single-application layout, SCSS-first styling, Vitest selection, optional Storybook recommendation, and direct in-memory store mutations without HTTP. Development/demo/production profiles and temporary pending-request dismissal locks were explicitly confirmed by the user.
+Revision: Updated on 14 November 2026 to use Vitest for unit/integration tests, Vitest with the Playwright browser provider for component tests, Playwright Test for E2E, and Storybook for the component catalog and interaction tests. The agreed library workspace, incremental delivery, MSW profiles, and pending-request behavior remain in place.
 
 ## 1. Objective and source material
 
@@ -37,7 +37,7 @@ Include both success toasts and the accessibility requirements identified as opt
 
 ### User-requested engineering scope
 
-Build a small shared component catalog with Storybook, Compodoc, and component interaction tests before assembling the business features. Add Tailwind, Prettier, Jest, Cypress, and Playwright in separate verified steps. Phone usability is now an explicit project requirement, although the PDF supplies desktop references only. These additions expand the engineering scope, not the business workflows or seed data.
+Build a small shared component catalog with Storybook, Compodoc, and component interaction tests before assembling the business features. Add Tailwind, Prettier, Vitest, its Playwright browser provider, and Playwright Test in separate verified steps. Phone usability is an explicit project requirement, although the PDF supplies desktop references only. These additions expand the engineering scope, not the business workflows or seed data.
 
 Integrate an MSW-based HTTP mock backend in separate infrastructure, handler/repository, and Angular data-access stages. The supplied guide and example were reviewed in [the MSW integration plan](4-MSW-Integration-Plan.md), which records adaptations, API contracts, build isolation, and testing details. The temporary example is reference material, not the application scaffold.
 
@@ -72,9 +72,9 @@ Use a compatible Angular CLI and CDK release from the same major version; verify
 | Dialog infrastructure | Angular CDK Dialog with custom styles | Provides focus and overlay behavior while retaining the supplied appearance. |
 | Notifications | Angular Material `MatSnackBar` with custom content | Reuses an existing package for timing, replacement, positioning, and announcements. |
 | Styling | Tailwind utilities and semantic CSS custom properties | User preference; shared tokens preserve the prototype's palette and responsive behavior. |
-| Unit/integration tests | Jest, compatible `jest-preset-angular`, zoneless TestBed | User preference; a separate integration step replaces generated unit-runner configuration. |
-| Business E2E tests | Cypress | Complete black-box coverage of assignment workflows and future features. |
-| Browser verification | Playwright with axe | Targeted cross-browser, accessibility, focus, responsive, and visual coverage. |
+| Unit/integration tests | Vitest with Angular TestBed and jsdom | Angular CLI's supported setup; zoneless tests for domain and component integration. |
+| Browser component tests | Vitest Browser Mode with `@vitest/browser-playwright` | Real-browser component behavior through Angular's test builder. |
+| E2E and browser verification | Playwright Test with axe | One suite owns complete business workflows and targeted cross-browser, accessibility, focus, responsive, and visual checks. |
 | Shared component catalog | Storybook with Compodoc and executable stories | Documents public APIs and verifies isolated UI behavior before feature assembly. |
 | Static quality | Angular ESLint and Prettier | Consistent TypeScript, templates, styles, and documentation. |
 | Built previews | Pinned `local-web-server`; `serve:dist` for demo and `serve:dist:prod` for production | Separate artifacts/origins, SPA fallback, HTTP/2; demo includes MSW intentionally. |
@@ -107,13 +107,13 @@ Use `@defer` for expensive, nonessential content that can appear after the initi
 
 ### Compatibility checks before each integration
 
-The requested stack is viable in principle, but the versions actually installed must pass their own integration checks. The current [jest-preset-angular source manifest](https://github.com/thymikee/jest-preset-angular/blob/main/package.json) declares Angular 20-22 and Jest 30 compatibility, and its [TestBed guide](https://thymikee.github.io/jest-preset-angular/docs/getting-started/testbed-environment) provides `setupZonelessTestEnv`. This supports using Jest without adding Zone.js; it does not replace checking the published release selected at implementation time.
+Use Angular CLI's `@angular/build:unit-test` builder with Vitest for Angular tests. Extend the generated configuration to cover the app and libraries. Keep Angular compilation under the CLI rather than introducing a separate unsupported Angular transform. Verify the selected Vitest release against the builder's peer range and align its browser/coverage packages. Use jsdom for fast DOM integration and the Playwright browser provider for selected real-browser component tests. [Angular testing setup](https://angular.dev/guide/testing).
 
 The current [Storybook Angular guide](https://storybook.js.org/docs/get-started/frameworks/angular) supports Angular 18-22 and Compodoc integration. Start with its supported Angular renderer and a zoneless signal-input fixture. The historical [signal-input issue](https://github.com/storybookjs/storybook/issues/25784) was closed as completed; retain signal inputs, including aliases and required values, and verify their generated controls/docs rather than carrying over the old exception.
 
-Keep application Jest, Cypress, Playwright, and Storybook test configuration separate, including TypeScript `types`, file patterns, and browser settings. Do not retain Vitest as a second application unit runner. If the chosen Storybook renderer requires a distinct runner, document that dependency separately; never assume a Vite-only addon works with a Webpack renderer. Do not use forced peer resolution to conceal unsupported combinations.
+Keep Vitest unit/Node, Vitest browser component, Playwright E2E, and Storybook configuration separate, including TypeScript types, file patterns, setup hooks, and browser settings. The browser provider runs components under Vitest; `@playwright/test` owns E2E. Storybook interaction tests use a renderer-compatible runner and need their own dependency check. Its Vitest addon requires a Vite-based Storybook framework; the application test runner does not change the Angular/Webpack catalog renderer. Do not use forced peer resolution to conceal unsupported combinations. [Storybook addon requirements](https://storybook.js.org/docs/writing-tests/integrations/vitest-addon#install-and-set-up).
 
-MSW 3.0.5 was the published stable version at the 13 November review. Verify the selected release and its Node/TypeScript requirements again before installation, pin it exactly, and prove browser-worker startup plus a Jest/Node handler test before adding domain workflows. Keep browser and Node adapters separate. See the compatibility evidence in [the MSW review](4-MSW-Integration-Plan.md#2-reference-review).
+MSW 3.0.5 was the published stable version at the 13 November review. Verify the selected release and its Node/TypeScript requirements again before installation, pin it exactly, and prove browser-worker startup plus a Vitest/Node handler test before adding domain workflows. Keep browser and Node adapters separate. See the compatibility evidence in [the MSW review](4-MSW-Integration-Plan.md#2-reference-review).
 
 ## 4. Requirement interpretation and acceptance criteria
 
@@ -347,14 +347,15 @@ styles/
   preview.ts
   test-runner.ts
 testing/
-  jest/setup.ts
+  vitest/
+    setup.ts
+    browser-setup.ts
   msw/
     server.ts
     scenarios.ts
-  cypress/
-    e2e/
-    support/
   playwright/
+    e2e/
+    fixtures/
     accessibility/
     cross-browser/
     visual/
@@ -365,8 +366,7 @@ package-lock.json
 .prettierrc.json
 .prettierignore
 eslint.config.js
-jest.config.ts
-cypress.config.ts
+vitest-base.config.mts
 playwright.config.ts
 tsconfig.json
 tsconfig.compodoc.json
@@ -401,7 +401,7 @@ Build only the kit needed by the assignment: native button/icon-button treatment
 
 Every shared component receives JSDoc on public inputs/outputs/models and a story covering its applicable default, focus, disabled, error, narrow-screen, and content-length states. Interactive stories use `play` functions for black-box behavior assertions. Static stories verify rendering and semantics instead of inventing artificial interactions. Stories are part of completing a component, not documentation deferred until the final application is done.
 
-Compodoc emits JSON for Storybook Autodocs. Verify that signal inputs, aliases, required inputs, models, and outputs appear with useful descriptions. Supply explicit `argTypes` or documentation where extraction is incomplete without replacing modern component APIs. Compodoc documents APIs; it does not execute tests. A supported Storybook runner executes the story assertions. For the documented Angular/Webpack integration, `@storybook/test-runner` is a candidate backed by Jest and Playwright; validate it independently from application Jest. [Storybook test-runner guide](https://storybook.js.org/docs/writing-tests/integrations/test-runner).
+Compodoc emits JSON for Storybook Autodocs. Verify that signal inputs, aliases, required inputs, models, and outputs appear with useful descriptions. Supply explicit `argTypes` or documentation where extraction is incomplete without replacing modern component APIs. Compodoc documents APIs; it does not execute tests. Use a supported runner to execute story assertions in a browser; `@storybook/test-runner` is the current candidate for the Angular/Webpack renderer. Validate its dependencies independently from application Vitest and Playwright E2E. [Storybook test-runner guide](https://storybook.js.org/docs/writing-tests/integrations/test-runner).
 
 Keep the empty-state markup within the overview unless it becomes substantial. Do not build a generic grid, modal framework, toast lifecycle, or broad CVA base class as part of the kit.
 
@@ -604,7 +604,7 @@ Tests should demonstrate observable behavior and protect the business rules. Avo
 
 ### Unit tests
 
-Use Jest for pure functions, the store, and focused feature logic. Every feature receives meaningful colocated `*.spec.ts` coverage. Prefer small TypeScript-focused white-box tests that select important paths and edge cases, without making private members public just for tests. Use `jest-preset-angular` and its zoneless TestBed setup for Angular-dependent tests; do not claim this is the CLI's default runner. Remove or replace unused generated Vitest targets in the dedicated Jest integration stage.
+Use Vitest for pure functions, the store, and focused feature logic. Every feature receives meaningful colocated `*.spec.ts` coverage. Prefer small TypeScript-focused white-box tests that select important paths and edge cases, without making private members public just for tests. Use Angular CLI's supported Vitest builder and zoneless TestBed for Angular-dependent tests. Exercise signals/inputs/DOM events and await `fixture.whenStable()` before assertions. Keep pure Node HTTP-contract tests in an isolated Vitest configuration when they need a different environment.
 
 Test the mock repository separately from the Angular store. Reuse environment-independent handlers with MSW's Node adapter for HTTP contract tests, and use Angular's HTTP testing providers for focused client/resource tests. Do not stack both interception mechanisms on the same request. Reset handler overrides and repository state separately between tests. See [MSW test responsibilities](4-MSW-Integration-Plan.md#7-testing-strategy).
 
@@ -623,7 +623,7 @@ Test the mock repository separately from the Angular store. Reuse environment-in
 
 ### Component integration tests
 
-Use Jest/TestBed with realistic interaction and the production form schema for feature integration. Shared UI components additionally have Storybook `play` tests that exercise their public behavior and appearance. A preference for TypeScript-only unit tests does not exclude DOM tests for bindings, validation timing, and focus:
+Use Vitest/TestBed with realistic interaction and the production form schema for feature integration. Run browser-specific component behavior through Vitest Browser Mode and `@vitest/browser-playwright`, using Angular's supported browser test target. Shared UI components additionally have Storybook `play` tests for their catalog states and public interactions. A preference for TypeScript-only unit tests does not exclude DOM tests for bindings, validation timing, and focus:
 
 - Opening the creation dialog shows the four fields, required markers, exact placeholders, no selected currency, and no errors.
 - Empty submission reveals all four mandatory errors together and does not create a dispute.
@@ -639,9 +639,11 @@ Use Jest/TestBed with realistic interaction and the production form schema for f
 
 Do not re-test every internal behavior of CDK or Material. Test the application's configuration and integration, then confirm user-visible behavior in a real browser.
 
+Colocate browser-only checks as `*.browser.spec.ts`, include them only in the browser component target, and exclude them from the default `*.spec.ts` Node/jsdom selection. TestBed mounts components; the Playwright provider supplies the real browser. Keep these focused tests distinct from Playwright Test's page-level E2E suite. Start with Chromium, adding Firefox/WebKit for cases such as numeric input and focus. Stories own shared-component catalog examples; do not duplicate every story in another runner. [Angular browser testing](https://angular.dev/guide/testing#running-tests-in-a-browser).
+
 ### End-to-end scenarios
 
-Use [Cypress](https://docs.cypress.io/app/end-to-end-testing/writing-your-first-end-to-end-test) as the primary business-workflow E2E runner. Use accessible role/label queries through compatible testing helpers, or stable intent-based selectors where necessary. Keep tests black-box and reset data through isolated page loads. Every feature and every PDF-required behavior must map to at least one E2E scenario:
+Use [Playwright Test](https://playwright.dev/docs/intro) as the single application E2E runner. Use accessible role/label locators and web-first assertions, or stable intent-based selectors where necessary. Keep tests black-box, use isolated browser contexts, and reset mock data through fresh page loads. Every feature and every PDF-required behavior must map to at least one E2E scenario:
 
 1. Load the initial three rows and verify key seed values and `Showing 3/3 rows`.
 2. Open creation, submit empty, fix fields individually, and verify each validation state.
@@ -661,11 +663,11 @@ Use [Cypress](https://docs.cypress.io/app/end-to-end-testing/writing-your-first-
 15. Through controlled MSW scenarios, verify initial-load failure/retry, delayed mutations, the agreed pending dismissal lock, failure recovery, and no success toast on rejection.
 16. Verify worker readiness before the first API request, session reset, and the same happy workflows in the optimized demo artifact. Separately inspect mock-free production behavior without pretending a real API exists.
 
-Run the complete Cypress business suite in a supported Chromium browser. Use [Playwright](https://playwright.dev/docs/intro) for targeted Chromium/Firefox/WebKit checks, particularly numeric-input behavior, keyboard/focus, mobile sizing, and visual comparisons. Cypress remains the traceable owner of business acceptance coverage; the Playwright suite is not a second copy of every business test. Browser engines bundled for Storybook do not by themselves constitute application E2E coverage.
+Run the complete Playwright business suite in Chromium and selected critical workflows in Firefox/WebKit, especially numeric-input behavior, keyboard/focus, mobile sizing, and visual comparisons. Use projects/tags to select browser and verification responsibilities within the same suite. Vitest browser component checks and Storybook interaction checks do not substitute for end-to-end business coverage.
 
-Control the clock and browser environment for deterministic date assertions, with runner-specific setup. A reload should reset the mock data, making every test and demonstration repeatable. Keep an acceptance matrix mapping the requirements in section 4 to concrete Cypress tests and supplementary Playwright checks as tests are implemented.
+Control the clock and browser environment for deterministic date assertions, with runner-specific setup. A reload should reset the mock data, making every test and demonstration repeatable. Keep an acceptance matrix mapping section 4 to concrete Playwright E2E tests, with supporting Vitest/component/story checks as appropriate.
 
-Keep browser service workers enabled for suites using MSW. Use controlled test-only MSW scenarios rather than overlapping Cypress/Playwright response mocks; Node-originated runner requests do not pass through the page's worker. Keep test controls out of demo/production, use fresh contexts for production checks, and avoid fixed sleeps. Shared UI stories remain independent of business HTTP data.
+Keep browser service workers enabled for suites using MSW. Use controlled test-only MSW scenarios rather than overlapping Playwright route mocks; Node-originated runner requests do not pass through the page's worker. Keep test controls out of demo/production, use fresh contexts for production checks, and avoid fixed sleeps. Shared UI stories remain independent of business HTTP data.
 
 ### Visual and accessibility checks
 
@@ -679,25 +681,25 @@ Complete the stages in order. Add one tool or architectural concern per reviewab
 
 | Stage | Work introduced in this step | Exit criteria |
 | --- | --- | --- |
-| 0. Compatibility baseline | Verify stable Angular/CLI, local Node/npm, compatible exact TypeScript, and tool peer ranges; resolve the minimal workspace dependencies and record later-tool transitive conflicts with explicit integration gates. | The workspace baseline resolves without forced/legacy peer options or a hidden downgrade. Known later-tool issues remain visible and block their own integration, not unrelated foundation work; do not claim the complete stack is verified. |
+| 0. Compatibility baseline | Verify stable Angular/CLI, local Node/npm, compatible exact TypeScript, and tool peer ranges; resolve the minimal workspace dependencies and record checks required at later integration stages. | The workspace baseline resolves without forced/legacy peer options or a hidden downgrade. Each later integration validates its own dependency graph and runtime behavior before dependent work proceeds. |
 | 1. CLI workspace | Generate the empty root workspace, `apps/disputes` shell, and only a minimal `ui/common` public-API integration fixture. Add strict/zoneless defaults, exact-save policy, runtime version files, root ignore rules, build output paths, and dependency-order build/watch scripts. Preserve the existing Git repository and documents. | Clean library-then-app build works from no output artifacts; the shell imports the built library public API; no Zone.js runtime or unintended attribution. Repository ignore rules exclude `TMP`, generated output, reports, and dependency folders on every machine. |
 | 2. Prettier | Add formatting config, ignore rules, and format/check scripts only. | Formatting covers owned source/config/docs; generated output and `TMP` are excluded. |
 | 3. ESLint and boundaries | Add Angular ESLint, template checks, and layer/import restrictions. Accommodate the agreed `$signal` fields with clean input/model aliases rather than forbidding those aliases. | Lint passes; a temporary invalid import is rejected and then removed. Update project-specific boundary mappings when later libraries are generated. |
 | 4. Tailwind and tokens | Add Tailwind/PostCSS, CSS-variable colors, locally served Montserrat plus its license, supplied logo assets, and app/library/story source detection. | Shell/fixture render token-backed utilities; a production build retains library-only classes and local fonts. No business feature is implemented yet. |
-| 5. Jest | Isolate and resolve the readiness review's Babel peer finding for the Angular/Jest graph, then integrate the preset, zoneless TestBed, isolated types, and scripts; replace generated unit-runner targets. | Dependency resolution has no unexplained peer mismatches; meaningful signal/DOM and pure-function tests pass without Zone.js; no duplicate application Vitest runner. |
-| 6. Cypress | Add E2E config, support code, isolated types, managed dev-server startup/readiness/cleanup, and browser installation instructions. | Shell/navigation smoke runs reproducibly with condition-based waits; the requirement-to-E2E matrix is prepared for later feature tests. |
-| 7. Playwright | Add an independent browser-test project, axe, managed server startup, viewport/browser settings, and screenshot policy. | Installed Chromium/Firefox/WebKit smoke checks and shell accessibility run without discovering Cypress/Jest tests. Capture visual baselines on a documented, consistent browser/OS environment. |
-| 8. MSW infrastructure | Add exact MSW, generated worker, typed environments, build-time flags, awaited dynamic startup, and separate development/demo/production outputs. Use a minimal temporary HTTP fixture. | Browser first-request smoke and Jest/Node interception work; development/demo include the worker; production excludes mock code/assets. No domain UI is added. |
-| 9. Storybook | Add the supported Angular renderer and its devkit dependencies, shared styles/assets/providers, and catalog configuration; recheck the combined Babel/peer graph. | Resolution introduces no unexplained mismatch; the zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
+| 5. Vitest unit/integration tests | Configure Angular CLI's Vitest test targets for app/library specs, zoneless TestBed, jsdom, isolated types, and unit/CI scripts. Keep pure Node contracts separate where needed. | Compatible dependency resolution and meaningful signal/DOM and pure-function tests pass without Zone.js; all intended library specs are discovered. |
+| 6. Browser component tests | Add the version-matched Vitest Playwright provider, browser binaries, isolated browser-spec selection, and component-test command. | The integration fixture passes a real-browser interaction test; Node/jsdom and browser targets do not run each other's specs. |
+| 7. Playwright E2E | Add `@playwright/test`, E2E fixtures, managed app startup/readiness/cleanup, axe, viewport/browser projects, and screenshot policy. | Shell/navigation and accessibility smoke checks pass; the acceptance matrix is prepared; Chromium/Firefox/WebKit checks do not discover component or story specs. |
+| 8. MSW infrastructure | Add exact MSW, generated worker, typed environments, build-time flags, awaited dynamic startup, and separate development/demo/production outputs. Use a minimal temporary HTTP fixture. | Browser first-request smoke and Vitest/Node interception work; development/demo include the worker; production excludes mock code/assets. No domain UI is added. |
+| 9. Storybook | Add the supported Angular renderer and its devkit dependencies, shared styles/assets/providers, and catalog configuration; check its dependency graph independently. | Resolution introduces no unexplained mismatch; the zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
 | 10. Compodoc | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs. | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits. |
 | 11. Story component tests | Add the renderer-compatible story test runner and isolated configuration. | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command. |
 | 12. Common UI kit | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when needed. Each component includes stories/tests before moving on. | Default, focus, invalid, disabled, busy, mobile, and long-content states are demonstrated; documented APIs have no business-store/mock dependencies. |
-| 13. Core and domain contracts | Add API configuration, date source, domain/DTO models, and pure money/date functions in core/data-access public APIs. | Jest verifies exact validation precedence, raw decimal precision, safe cents, and local dates. Clean dependency-order library builds work. |
-| 14. MSW disputes backend | Add the separate mock library, exact fixtures, in-memory repository, and GET/POST/DELETE handlers; remove the temporary smoke endpoint. | Jest repository/HTTP tests cover seeds/order, payload validation, status codes, prepend/removal, monotonic IDs, empty lists, and session reset; no browser globals in shared handlers. |
+| 13. Core and domain contracts | Add API configuration, date source, domain/DTO models, and pure money/date functions in core/data-access public APIs. | Vitest verifies exact validation precedence, raw decimal precision, safe cents, and local dates. Clean dependency-order library builds work. |
+| 14. MSW disputes backend | Add the separate mock library, exact fixtures, in-memory repository, and GET/POST/DELETE handlers; remove the temporary smoke endpoint. | Vitest repository/HTTP tests cover seeds/order, payload validation, status codes, prepend/removal, monotonic IDs, empty lists, and session reset; no browser globals in shared handlers. |
 | 15. HTTP and signal store | Add the Angular API adapter, resource read model, feature-scoped store, pending/error commands, and isolated test scenario setup. | Tests verify loading/error/empty separation, confirmed updates, failure recovery, one submission path, no stale-read overwrite, and mock-free client imports. |
-| 16. Disputes overview | Add the lazy feature, table, counter, empty/loading/error states, retry, and branded navigation using the completed kit. | Seed values/order match the PDF through MSW; Cypress verifies populated/empty/error rendering; the route is a real lazy boundary. |
-| 17. Creation flow | Add the Signal Forms draft/schema, narrow amount control, awaited `FormRoot` submission, validation, cancellation, pending lock, and success notification. | Specs/Cypress cover required errors, USD/EUR creation, insertion/defaults, cancellation, clean reopening, delayed/failed requests, preserved draft, and toast behavior. |
-| 18. Removal flow | Add record-specific confirmation, dismissals, awaited mutation, pending lock, and focus fallback. | Cypress covers cancellation, failure without local deletion, confirmed/last-row removal, recreation, and ID continuity; Playwright checks focus/busy behavior across engines. |
+| 16. Disputes overview | Add the lazy feature, table, counter, empty/loading/error states, retry, and branded navigation using the completed kit. | Seed values/order match the PDF through MSW; Playwright verifies populated/empty/error rendering; the route is a real lazy boundary. |
+| 17. Creation flow | Add the Signal Forms draft/schema, narrow amount control, awaited `FormRoot` submission, validation, cancellation, pending lock, and success notification. | Vitest/component checks and Playwright E2E cover required errors, USD/EUR creation, insertion/defaults, cancellation, clean reopening, delayed/failed requests, preserved draft, and toast behavior. |
+| 18. Removal flow | Add record-specific confirmation, dismissals, awaited mutation, pending lock, and focus fallback. | Playwright covers cancellation, failure without local deletion, confirmed/last-row removal, recreation, ID continuity, and focus/busy behavior across engines. |
 | 19. Built previews and optimization | Add pinned local server and demo/production preview scripts; review side effects, chunks, images, budgets, and justified deferred content. | Optimized demo works at `/disputes` with MSW; production has no worker/seeds/mock or test code; assets survive optimization; output checks use clean separate paths. |
 | 20. Final integration | Complete acceptance matrix, desktop/mobile visual review, axe scans, manual keyboard/focus checks, and configured suites. | Every assignment behavior has E2E coverage; mobile workflows and async states are accessible; clean builds/checks pass with recorded results. |
 | 21. Handover | Document root commands, build order, tool responsibilities, profiles, reset behavior, choices, limitations, and demo steps. | Another developer can install/build, run suites/catalog, preview the working demo, inspect mock-free production, and explain its real-API requirement. |
@@ -708,7 +710,7 @@ Early tooling uses the minimal integration fixture, not a prematurely implemente
 
 If a version combination fails its compatibility fixture, resolve that integration before layering dependent features on it. Record an evidence-based alternative for the user if the selected tools cannot coexist; do not silently substitute another unit runner, add Zone.js, or disable required checks.
 
-If commits are requested during implementation, each should describe a completed, independently verifiable step in short English, such as `Configure Tailwind tokens`, `Add zoneless Jest tests`, or `Add shared field stories`. Verified tooling integration is a valid milestone; avoid committing broken scaffolding or unrelated changes together.
+If commits are requested during implementation, each should describe a completed, independently verifiable step in short English, such as `Configure Tailwind tokens`, `Add zoneless Vitest tests`, or `Add shared field stories`. Verified tooling integration is a valid milestone; avoid committing broken scaffolding or unrelated changes together.
 
 ### Demo/production previews and tree-shaking verification
 
@@ -734,7 +736,7 @@ Use `sideEffects: false` for packages whose modules are safe to discard when unu
 | Workspace | Root Angular CLI workspace, `apps/disputes`, and the four requested library groups. | Explicit user preference; CLI supports the layout without Nx. |
 | Delivery order | Integrate each tool separately, finish the shared kit with stories, then implement features. | Explicit user request for gradual integration and reviewable stages. |
 | Styling | Tailwind with semantic CSS custom properties. | Replaces the earlier SCSS-first choice. |
-| Test responsibilities | Jest for units/integration, Cypress for all business workflows, Playwright for targeted browser checks, story runner for common UI. | Keeps all requested tools while avoiding redundant ownership. |
+| Test responsibilities | Vitest for units/integration, Vitest with the Playwright provider for browser components, Playwright Test for all E2E/browser workflows, and Storybook for catalog interactions. | Explicit user decision on 14 November; each suite has a distinct owner and isolated discovery. |
 | Component documentation | Mandatory shared-component stories and JSDoc/Compodoc API documentation. | Explicit user request. |
 | Form submission | `FormRoot` and Signal Forms `submit()`, shared by Enter and the submit button. | Explicitly confirmed after checking the current API. |
 | Naming/visibility | `$signal`, `observable$`, private implementation, protected template members, public contracts. | Latest user preference supersedes the review's original signal-naming recommendation. |
@@ -767,7 +769,7 @@ These decisions are sufficient to start implementation. Revisit a decision if fu
 The application README should contain:
 
 - Supported Node/npm versions and commands to install and start from the repository root.
-- Library dependency order/watch workflow, production build/preview, lint, formatting, Jest, Cypress, Playwright, Storybook, Compodoc, and story-test commands.
+- Library dependency order/watch workflow, production build/preview, lint, formatting, Vitest unit/browser component tests, Playwright E2E, Storybook, Compodoc, and story-test commands.
 - A short architecture explanation, including why signals and Signal Forms fit this scope.
 - The division between CDK/Material behavior and application-specific presentation.
 - Money/date handling, ID allocation, persistence behavior, and documented ambiguities.
@@ -775,7 +777,7 @@ The application README should contain:
 - Actual verification results and any known limitations.
 - A concise demonstration script covering creation errors, successful creation, removal cancellation, confirmed removal, and recovery from an empty list.
 
-Introduce scripts as their stage is completed: `start`, `build:libs`, `build`, `build:dev`, `build:demo`, `build:prod`, `mock:worker`, `serve:dist`, `serve:dist:prod`, `lint`, `format`, `format:check`, `test`, `test:ci`, `test:e2e` (Cypress), `test:e2e:open`, `test:browser` (Playwright), `storybook`, `build-storybook`, `docs:components`, and `test:stories`. Document clean library builds and watch mode explicitly. The README must use the real scripts once they exist and explain browser installation and local HTTPS behavior.
+Introduce scripts as their stage is completed: `start`, `build:libs`, `build`, `build:dev`, `build:demo`, `build:prod`, `mock:worker`, `serve:dist`, `serve:dist:prod`, `lint`, `format`, `format:check`, `test` and `test:ci` (Vitest), `test:components` (Vitest Browser Mode), `test:e2e`, `test:e2e:ui`, and `test:e2e:cross-browser` (Playwright Test), `storybook`, `build-storybook`, `docs:components`, and `test:stories`. Document clean library builds and watch mode explicitly. The README must use the real scripts once they exist and explain browser installation and local HTTPS behavior.
 
 For the assignment's 40-minute presentation slot, prepare approximately five minutes on requirements and assumptions, ten minutes of live workflows, ten minutes on architecture/forms/state, ten minutes on testing/accessibility, and five minutes on tradeoffs and possible next steps. The separate team introduction, questions, and wrap-up remain outside that slot.
 
@@ -785,7 +787,7 @@ For the assignment's 40-minute presentation slot, prepare approximately five min
 - [ ] The Angular CLI workspace uses the agreed `apps`/`libs` layout, public APIs, enforced dependency boundaries, and a clean dependency-order build.
 - [ ] Tailwind and CSS-variable tokens render consistently in the app and shared component catalog.
 - [ ] Every shared UI component has documented public APIs, Storybook states, and meaningful story checks.
-- [ ] Jest, Cypress, Playwright, and story tests run with isolated configuration; Angular code remains zoneless.
+- [ ] Vitest unit/browser component tests, Playwright E2E, and Storybook interaction tests run with isolated configuration; Angular code remains zoneless.
 - [ ] Every assignment-required workflow maps to passing E2E coverage.
 - [ ] The optimized demo completes workflows with MSW; separate production output contains no mocks, seeds, worker asset, or test controls.
 - [ ] Worker readiness, session reset, HTTP contracts, loading/error states, and confirmed-only mutations are verified.
