@@ -1,0 +1,14 @@
+/TMP/
+node_modules/
+/dist/
+/out-tsc/
+/.angular/
+/.compodoc/
+/storybook-static/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,86 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm",
+    "analytics": false
+  },
+  "newProjectRoot": "apps",
+  "projects": {
+    "disputes": {
+      "projectType": "application",
+      "root": "apps/disputes",
+      "sourceRoot": "apps/disputes/src",
+      "prefix": "gscf",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "apps/disputes/src/main.ts",
+            "tsConfig": "apps/disputes/tsconfig.app.json",
+            "styles": [
+              "apps/disputes/src/styles.css"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "outputPath": "dist/apps/disputes/production"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "outputPath": "dist/apps/disputes/development"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "disputes:build:production"
+            },
+            "development": {
+              "buildTarget": "disputes:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    },
+    "ui-common": {
+      "projectType": "library",
+      "root": "libs/ui/common",
+      "sourceRoot": "libs/ui/common/src",
+      "prefix": "gscf",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/ui/common/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/ui/common/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    }
+  }
+}
