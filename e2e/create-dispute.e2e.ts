@@ -3,7 +3,9 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function openCreate(page: Page) {
   await page.getByRole('button', { name: 'New Dispute' }).click();
-  return page.getByRole('dialog', { name: 'Create a dispute' });
+  const dialog = page.getByRole('dialog', { name: 'Create a dispute' });
+  await expect(dialog.getByRole('textbox', { name: 'Buyer' })).toBeFocused();
+  return dialog;
 }
 
 test('discards cancelled drafts and restores focus for each dismissal method', async ({ page }) => {
@@ -36,6 +38,10 @@ test(
     const amount = dialog.getByRole('spinbutton', { name: 'Dispute Amount' });
     await expect(buyer).toBeFocused();
     await expect(dialog.getByText('Enter a buyer name.')).toHaveCount(0);
+    const reason = dialog.getByRole('textbox', { name: 'Dispute Reason' });
+    await reason.focus();
+    await expect(buyer).toHaveAccessibleDescription('Enter a buyer name.');
+    await expect(reason).not.toHaveAttribute('aria-describedby');
     await dialog.getByRole('button', { name: 'Create Dispute' }).click();
     await expect(buyer).toBeFocused();
     for (const error of [
@@ -65,6 +71,9 @@ test('has no axe violations in the invalid create dialog', { tag: '@mobile' }, a
   const dialog = await openCreate(page);
   await dialog.getByRole('button', { name: 'Create Dispute' }).click();
   await expect(dialog.getByText('Select a currency.')).toBeVisible();
+  await expect(dialog.getByRole('group', { name: 'Currency' })).toHaveAccessibleDescription(
+    'Select a currency.',
+  );
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });

@@ -44,6 +44,7 @@
     <gscf-field-frame
       label="Dispute Amount"
       controlId="dispute-amount"
+      [numberInput]="true"
       [required]="true"
       [error]="$amountError()"
     >
@@ -58,10 +59,11 @@
       label="Currency"
       controlId="dispute-currency"
       kind="group"
+      [disabled]="$busy()"
       [required]="true"
       [error]="$currencyError()"
     >
-      <fieldset aria-label="Currency choices" [disabled]="$busy()" class="flex flex-wrap gap-4">
+      <div class="flex flex-wrap gap-4">
         <label class="inline-flex min-h-11 cursor-pointer items-center gap-2">
           <input
             gscfRadioInput
@@ -82,7 +84,7 @@
           />
           EUR
         </label>
-      </fieldset>
+      </div>
     </gscf-field-frame>
     @if ($failure(); as error) {
       <p role="alert" class="text-sm text-danger">{{ error }}</p>

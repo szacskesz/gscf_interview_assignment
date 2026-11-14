@@ -6,7 +6,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary: 'bg-primary px-4 text-surface hover:bg-control-hover',
   secondary: 'border border-primary px-4 text-primary hover:bg-new',
   danger: 'bg-danger px-4 text-surface hover:bg-red-800',
-  'text-danger': 'px-2 text-danger hover:bg-red-50',
+  'text-danger': 'px-2 text-danger underline underline-offset-2 hover:bg-red-50',
   icon: 'min-w-11 text-muted hover:bg-disabled',
 };
 

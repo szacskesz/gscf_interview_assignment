@@ -4,7 +4,7 @@ import { Directive } from '@angular/core';
   selector: 'input[gscfTextInput]',
   host: {
     class:
-      'min-h-11 w-full rounded-md border border-control bg-surface px-3 text-ink placeholder:text-placeholder enabled:hover:border-control-hover focus-visible:outline-2 focus-visible:outline-primary aria-invalid:border-danger disabled:bg-disabled',
+      'min-h-11 w-full rounded-md border border-control bg-surface px-3 text-ink placeholder:text-placeholder enabled:hover:border-control-hover focus:outline-2 focus:outline-primary aria-invalid:border-danger aria-invalid:pe-10 disabled:bg-disabled',
   },
 })
 export class TextInput {}

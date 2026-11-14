@@ -6,6 +6,7 @@ export default defineConfig({
   testDir: './e2e',
   testMatch: '**/*.e2e.ts',
   fullyParallel: true,
+  workers: 4,
   forbidOnly: Boolean(process.env['CI']),
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {

@@ -7,6 +7,14 @@ test(
     tag: ['@cross-browser', '@mobile'],
   },
   async ({ page }) => {
+    const failures: string[] = [];
+    page.on('pageerror', (error) => failures.push(error.message));
+    page.on('console', (message) => {
+      if (message.type() === 'error') failures.push(message.text());
+    });
+    page.on('response', (response) => {
+      if (response.status() >= 400) failures.push(`${response.status()} ${response.url()}`);
+    });
     await page.goto('/');
     await expect(page).toHaveURL(/\/disputes$/);
     await expect(page).toHaveTitle('Disputes');
@@ -18,6 +26,13 @@ test(
       'page',
     );
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(4);
+    await page.evaluate(() => document.fonts.ready);
+    expect(
+      await page
+        .getByRole('img', { name: 'GSCF' })
+        .evaluate((image: HTMLImageElement) => image.naturalWidth),
+    ).toBeGreaterThan(0);
+    expect(failures).toEqual([]);
   },
 );
 

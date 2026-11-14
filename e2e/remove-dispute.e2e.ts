@@ -3,7 +3,9 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function openRemove(page: Page, number: number) {
   await page.getByRole('button', { name: `Remove dispute ${number}` }).click();
-  return page.getByRole('dialog', { name: `Remove dispute ${number}` });
+  const dialog = page.getByRole('dialog', { name: `Remove dispute ${number}` });
+  await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+  return dialog;
 }
 
 test(

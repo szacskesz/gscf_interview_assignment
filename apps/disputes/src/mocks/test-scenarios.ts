@@ -4,8 +4,13 @@ import { delay } from 'msw/utils/delay';
 export function testScenarioHandlers(url: string) {
   const scenario = new URLSearchParams(location.search).get('scenario');
   switch (scenario) {
-    case 'empty':
-      return [http.get(url, () => HttpResponse.json([]))];
+    case 'read-delay':
+      return [
+        http.get(url, async () => {
+          await delay(700);
+          return HttpResponse.json([]);
+        }),
+      ];
     case 'read-error':
       return [http.get(url, () => new HttpResponse(null, { status: 503 }), { once: true })];
     case 'create-error':

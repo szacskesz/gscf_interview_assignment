@@ -22,10 +22,10 @@
     }
     @case ('ready') {
       @if (store.$rows().length) {
-        <gscf-disputes-table [rows]="store.$rows()" (removalRequested)="removeDispute($event)" />
-        <p class="mt-3 text-sm text-counter" role="status">
+        <p class="mb-4 text-sm text-counter" role="status">
           Showing {{ store.$rows().length }}/{{ store.$rows().length }} rows
         </p>
+        <gscf-disputes-table [rows]="store.$rows()" (removalRequested)="removeDispute($event)" />
       } @else {
         <div class="py-16 text-center">
           <h2 class="text-lg font-semibold text-brand">No disputes</h2>

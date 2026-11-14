@@ -8,7 +8,10 @@ import { Icon } from '@gscf/ui-common';
   host: { class: 'block text-sm' },
   template: `
     @if ($kind() === 'group') {
-      <fieldset [attr.aria-describedby]="$error() ? $controlId() + '-error' : null">
+      <fieldset
+        [disabled]="$disabled()"
+        [attr.aria-describedby]="$error() ? $controlId() + '-error' : null"
+      >
         <legend class="mb-1.5 font-semibold">
           {{ $label() }}
           @if ($required()) {
@@ -28,12 +31,19 @@ import { Icon } from '@gscf/ui-common';
     }
 
     <ng-template #fieldContents>
-      <ng-content />
+      <div class="relative">
+        <ng-content />
+        @if ($error() && $kind() === 'field') {
+          <gscf-icon
+            name="warning"
+            class="pointer-events-none absolute top-3 text-danger"
+            [class.inset-e-3]="!$numberInput()"
+            [class.inset-e-8]="$numberInput()"
+          />
+        }
+      </div>
       @if ($error()) {
-        <p [id]="$controlId() + '-error'" class="mt-1 flex items-start gap-1 text-danger">
-          <gscf-icon name="warning" />
-          <span>{{ $error() }}</span>
-        </p>
+        <p [id]="$controlId() + '-error'" class="mt-1 text-danger">{{ $error() }}</p>
       }
     </ng-template>
   `,
@@ -53,4 +63,10 @@ export class FieldFrame {
 
   /** Displays the current error message below the controls. */
   readonly $error = input<string | null>(null, { alias: 'error' });
+
+  /** Leaves space for the native number input's stepper next to its warning icon. */
+  readonly $numberInput = input(false, { alias: 'numberInput' });
+
+  /** Disables the projected controls when the frame is a fieldset. */
+  readonly $disabled = input(false, { alias: 'disabled' });
 }

@@ -44,10 +44,14 @@ test('shows the exact seed order, dates, amounts, and status', async ({ page }) 
     'Remove',
   ]);
   await expect(page.getByText('Showing 3/3 rows')).toBeVisible();
+  await expect(page.getByRole('status')).toHaveText('Showing 3/3 rows');
+  await expect(page.locator('main [role="status"] + gscf-disputes-table')).toBeVisible();
 });
 
 test('renders empty and read-error states and retries a failed request', async ({ page }) => {
-  await page.goto('/disputes?scenario=empty');
+  await page.goto('/disputes?scenario=read-delay');
+  await expect(page.getByRole('status')).toHaveText('Loading disputes…');
+  await expect(page.getByRole('button', { name: 'New Dispute' })).toBeDisabled();
   await expect(page.getByRole('heading', { name: 'No disputes' })).toBeVisible();
   await expect(page.getByRole('table')).toHaveCount(0);
   await expect(page.getByText(/Showing .* rows/)).toHaveCount(0);

@@ -69,8 +69,12 @@
 .gscf-success-toast {
   --mat-snack-bar-container-color: var(--gscf-neutral-0);
   --mat-snack-bar-supporting-text-color: var(--gscf-neutral-110);
+  --mat-snack-bar-supporting-text-font: Montserrat, ui-sans-serif, system-ui, sans-serif;
 }
 
 .gscf-success-toast .mat-mdc-snackbar-surface {
-  border: 3px solid var(--gscf-green-60);
+  border-radius: 0.5rem;
+  box-shadow:
+    0 0 0 3px var(--gscf-green-60),
+    0 4px 10px rgb(0 0 0 / 16%);
 }

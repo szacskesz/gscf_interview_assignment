@@ -11,12 +11,12 @@ interface NotificationData {
   selector: 'gscf-success-notification',
   imports: [Icon],
   template: `
-    <div class="flex gap-3">
-      <gscf-icon class="mt-0.5 text-success" name="check" />
-      <div>
+    <div class="flex justify-between gap-3">
+      <div class="wrap-anywhere">
         <p class="font-semibold">{{ data.title }}</p>
         <p>{{ data.message }}</p>
       </div>
+      <gscf-icon class="mt-0.5 text-success" name="check" />
     </div>
   `,
 })

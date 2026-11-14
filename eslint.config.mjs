@@ -9,6 +9,33 @@ const privateImports = {
   group: ['@gscf/*/*', '**/dist/**'],
   message: 'Import the library by its package public API, such as @gscf/ui-common.',
 };
+const packageNames = [
+  '@gscf/core',
+  '@gscf/disputes-data-access',
+  '@gscf/disputes-mock',
+  '@gscf/disputes-feature',
+  '@gscf/ui-common',
+  '@gscf/ui-form',
+  '@gscf/ui-notifications',
+];
+
+function restrictPackages(files, allowed, ignores = []) {
+  const prohibited = packageNames.filter((name) => !allowed.includes(name));
+  return {
+    files,
+    ignores,
+    rules: {
+      'no-restricted-imports': ['error', { paths: prohibited, patterns: [privateImports] }],
+      'no-restricted-syntax': [
+        'error',
+        ...prohibited.map((name) => ({
+          selector: `ImportExpression[source.value="${name}"]`,
+          message: `This layer cannot depend on ${name}.`,
+        })),
+      ],
+    },
+  };
+}
 
 export default defineConfig(
   globalIgnores([
@@ -46,68 +73,27 @@ export default defineConfig(
       ],
     },
   },
-  {
-    files: ['libs/core/**/*.ts', 'libs/data-access/**/*.ts', 'libs/ui/common/**/*.ts'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              name: '@gscf/ui-common',
-              message: 'Only application and feature consumers may import this UI library.',
-            },
-          ],
-          patterns: [privateImports],
-        },
-      ],
-    },
-  },
-  {
-    files: ['libs/ui/form/**/*.ts', 'libs/ui/notifications/**/*.ts'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        { paths: ['@gscf/ui-form', '@gscf/ui-notifications'], patterns: [privateImports] },
-      ],
-    },
-  },
-  {
-    files: [
-      'libs/core/**/*.ts',
-      'libs/data-access/disputes/**/*.ts',
-      'libs/ui/**/*.ts',
-      'libs/feature/**/*.ts',
-    ],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector:
-            ':matches(ImportDeclaration, ImportExpression)[source.value="@gscf/disputes-mock"]',
-          message: 'Only the guarded app bootstrap may use the mock library.',
-        },
-      ],
-    },
-  },
-  {
-    files: ['libs/core/**/*.ts', 'libs/data-access/disputes/**/*.ts', 'libs/ui/**/*.ts'],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector:
-            ':matches(ImportDeclaration, ImportExpression)[source.value="@gscf/disputes-mock"]',
-          message: 'Only the guarded app bootstrap may use the mock library.',
-        },
-        {
-          selector:
-            ':matches(ImportDeclaration, ImportExpression)[source.value="@gscf/disputes-data-access"]',
-          message: 'Use the domain API only from the feature and mock backend.',
-        },
-      ],
-    },
-  },
+  restrictPackages(['libs/core/**/*.ts'], []),
+  restrictPackages(['libs/data-access/disputes/**/*.ts', 'libs/ui/common/**/*.ts'], ['@gscf/core']),
+  restrictPackages(
+    ['libs/data-access/disputes-mock/**/*.ts'],
+    ['@gscf/core', '@gscf/disputes-data-access'],
+  ),
+  restrictPackages(
+    ['libs/ui/form/**/*.ts', 'libs/ui/notifications/**/*.ts'],
+    ['@gscf/core', '@gscf/ui-common'],
+  ),
+  restrictPackages(
+    ['libs/feature/**/*.ts'],
+    packageNames.filter(
+      (name) => !['@gscf/disputes-feature', '@gscf/disputes-mock'].includes(name),
+    ),
+  ),
+  restrictPackages(
+    ['apps/**/*.ts'],
+    packageNames.filter((name) => name !== '@gscf/disputes-mock'),
+    ['apps/disputes/src/mocks/start-mock-api.ts'],
+  ),
   {
     files: ['apps/**/src/app/**/*.html', 'libs/**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
