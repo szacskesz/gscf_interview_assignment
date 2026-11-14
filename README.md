@@ -38,3 +38,5 @@ Development and the optimized demo start the MSW worker before bootstrapping Ang
 Use `npm run storybook` to open the shared component catalog on port 6006, or `npm run build:storybook` to build it into `dist/storybook/ui`. The catalog uses Angular's Webpack support, which is deprecated in Angular 22. The application uses the Angular esbuild builder and both run zoneless.
 
 The catalog commands generate Compodoc JSON before loading Storybook Autodocs. Use `npm run docs:components` to regenerate the metadata separately. The generated JSON is ignored by Git.
+
+Use `npm run test:stories` to start the catalog on port 6007 and run its rendering and `play` checks in Playwright Chromium. The catalog index drives discovery, and Storybook reports each story's result. Application E2E tests have their own configuration and command.

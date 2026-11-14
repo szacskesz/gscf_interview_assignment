@@ -137,6 +137,7 @@
         "storybook": {
           "builder": "@storybook/angular:start-storybook",
           "options": {
+            "browserTarget": "disputes:build:production",
             "configDir": ".storybook",
             "tsConfig": ".storybook/tsconfig.json",
             "compodoc": false,

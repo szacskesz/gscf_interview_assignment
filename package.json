@@ -24,7 +24,8 @@
     "storybook": "npm run docs:components && ng run disputes:storybook",
     "build:storybook": "npm run docs:components && ng run disputes:build-storybook",
     "test:storybook:types": "npm run docs:components && tsc --noEmit -p .storybook/tsconfig.json",
-    "docs:components": "compodoc -p .storybook/tsconfig.compodoc.json -e json -d .compodoc --silent"
+    "docs:components": "compodoc -p .storybook/tsconfig.compodoc.json -e json -d .compodoc --silent",
+    "test:stories": "playwright test --config .storybook/playwright.config.ts"
   },
   "private": true,
   "packageManager": "npm@11.19.1",
