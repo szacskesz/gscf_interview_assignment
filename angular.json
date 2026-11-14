@@ -26,7 +26,8 @@
             ],
             "styles": ["apps/disputes/src/styles.css"],
             "define": {
-              "COMPILE_TIME_ENABLE_MOCK": "false"
+              "COMPILE_TIME_ENABLE_MOCK": "false",
+              "COMPILE_TIME_ENABLE_TEST_SCENARIOS": "false"
             }
           },
           "configurations": {
@@ -52,7 +53,8 @@
               "sourceMap": true,
               "outputPath": "dist/apps/disputes/development",
               "define": {
-                "COMPILE_TIME_ENABLE_MOCK": "true"
+                "COMPILE_TIME_ENABLE_MOCK": "true",
+                "COMPILE_TIME_ENABLE_TEST_SCENARIOS": "false"
               },
               "fileReplacements": [
                 {
@@ -88,7 +90,8 @@
               "outputHashing": "all",
               "outputPath": "dist/apps/disputes/demo",
               "define": {
-                "COMPILE_TIME_ENABLE_MOCK": "true"
+                "COMPILE_TIME_ENABLE_MOCK": "true",
+                "COMPILE_TIME_ENABLE_TEST_SCENARIOS": "false"
               },
               "fileReplacements": [
                 {
@@ -107,6 +110,12 @@
                   "output": "/"
                 }
               ]
+            },
+            "e2e": {
+              "define": {
+                "COMPILE_TIME_ENABLE_MOCK": "true",
+                "COMPILE_TIME_ENABLE_TEST_SCENARIOS": "true"
+              }
             }
           },
           "defaultConfiguration": "production"
@@ -122,6 +131,9 @@
             },
             "demo": {
               "buildTarget": "disputes:build:demo"
+            },
+            "e2e": {
+              "buildTarget": "disputes:build:development,e2e"
             }
           },
           "defaultConfiguration": "development"
@@ -297,6 +309,26 @@
             },
             "development": {
               "tsConfig": "libs/data-access/disputes-mock/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "disputes-feature": {
+      "projectType": "library",
+      "root": "libs/feature/disputes",
+      "sourceRoot": "libs/feature/disputes/src",
+      "prefix": "gscf",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/feature/disputes/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/feature/disputes/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"

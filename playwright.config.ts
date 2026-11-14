@@ -20,7 +20,7 @@ export default defineConfig({
     { name: 'mobile', grep: /@mobile/, use: { ...devices['iPhone 13'] } },
   ],
   webServer: {
-    command: 'npm start -- --host 127.0.0.1 --port 4201',
+    command: 'npm start -- --configuration e2e --host 127.0.0.1 --port 4201',
     url: baseURL,
     reuseExistingServer: false,
     timeout: 60_000,

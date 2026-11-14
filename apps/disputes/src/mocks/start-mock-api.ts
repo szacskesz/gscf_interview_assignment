@@ -2,6 +2,8 @@ import { apiPath, localCalendarDate } from '@gscf/core';
 import { createDisputesHandlers, DisputesRepository } from '@gscf/disputes-mock';
 import { setupWorker } from 'msw/browser';
 
+declare const COMPILE_TIME_ENABLE_TEST_SCENARIOS: boolean;
+
 export async function startMockApi(apiBasePath: string): Promise<void> {
   if (!('serviceWorker' in navigator)) {
     throw new Error('The mock API requires a browser with service worker support.');
@@ -10,9 +12,12 @@ export async function startMockApi(apiBasePath: string): Promise<void> {
   const apiBaseUrl = new URL(apiBasePath, window.location.origin);
   const workerUrl = new URL('mockServiceWorker.js', document.baseURI);
   const disputesUrl = apiPath(apiBaseUrl.href, 'disputes');
-  const worker = setupWorker(
-    ...createDisputesHandlers(disputesUrl, new DisputesRepository(localCalendarDate)),
-  );
+  const handlers = createDisputesHandlers(disputesUrl, new DisputesRepository(localCalendarDate));
+  if (COMPILE_TIME_ENABLE_TEST_SCENARIOS) {
+    const { testScenarioHandlers } = await import('./test-scenarios');
+    handlers.unshift(...testScenarioHandlers(disputesUrl));
+  }
+  const worker = setupWorker(...handlers);
   const registration = await worker.start({
     serviceWorker: { url: workerUrl.href },
     quiet: true,

@@ -18,7 +18,8 @@
       "@gscf/ui-notifications": ["./dist/libs/ui/notifications"],
       "@gscf/core": ["./dist/libs/core"],
       "@gscf/disputes-data-access": ["./dist/libs/data-access/disputes"],
-      "@gscf/disputes-mock": ["./dist/libs/data-access/disputes-mock"]
+      "@gscf/disputes-mock": ["./dist/libs/data-access/disputes-mock"],
+      "@gscf/disputes-feature": ["./dist/libs/feature/disputes"]
     }
   },
   "angularCompilerOptions": {
@@ -58,6 +59,9 @@
     },
     {
       "path": "./libs/data-access/disputes-mock/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/feature/disputes/tsconfig.lib.json"
     }
   ]
 }

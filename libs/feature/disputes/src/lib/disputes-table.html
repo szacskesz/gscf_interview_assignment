@@ -1,0 +1,48 @@
+<div
+  role="region"
+  aria-label="Disputes table"
+  tabindex="0"
+  class="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+>
+  <table class="w-full min-w-[62rem] text-left text-sm [&_th]:px-3 [&_td]:px-3 [&_td]:py-3">
+    <thead class="border-y border-divider text-muted">
+      <tr>
+        <th scope="col" class="py-3 whitespace-nowrap">Dispute No.</th>
+        <th scope="col">Buyer</th>
+        <th scope="col">Status</th>
+        <th scope="col" class="whitespace-nowrap">Dispute Date</th>
+        <th scope="col" class="text-right">Amount</th>
+        <th scope="col">Currency</th>
+        <th scope="col">Dispute Reason</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of $displayRows(); track row.number) {
+        <tr class="border-b border-divider">
+          <td>{{ row.number }}</td>
+          <td class="max-w-52 wrap-anywhere">{{ row.buyer }}</td>
+          <td>
+            <gscf-badge [tone]="row.status === 'New' ? 'blue' : 'yellow'">{{
+              row.status
+            }}</gscf-badge>
+          </td>
+          <td class="whitespace-nowrap">{{ row.dateLabel }}</td>
+          <td class="text-right whitespace-nowrap tabular-nums">{{ row.amountLabel }}</td>
+          <td>{{ row.currency }}</td>
+          <td class="max-w-80 wrap-anywhere">{{ row.reason }}</td>
+          <td>
+            <button
+              type="button"
+              gscfButton="text-danger"
+              disabled
+              [attr.aria-label]="'Remove dispute ' + row.number"
+            >
+              <gscf-icon name="remove" /> Remove
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
