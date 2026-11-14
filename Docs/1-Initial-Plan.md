@@ -805,4 +805,4 @@ For the assignment's 40-minute presentation slot, prepare approximately five min
 - [ ] The running app has no unexplained console errors or missing assets in the verified workflows.
 - [ ] Setup, decisions, assumptions, verification, and the interview walkthrough are documented in English.
 
-This document defines planned implementation and acceptance checks. It does not claim that the application or its tests have already been built or executed.
+The [delivery verification](6-Delivery-Verification.md) records the results of checking the implemented application against this checklist and the original assignment PDF.

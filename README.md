@@ -69,6 +69,8 @@ Both previews bind to loopback and use the local server's self-signed TLS certif
 
 Use `npm run build:libs` for production library artifacts and `npm run build:libs:dev` for development artifacts. The scripts build shared UI, core, data access, mock data access, and the feature in dependency order. For a specific library, start `npm run ng -- build <project> --configuration development --watch` after building its dependencies.
 
+The [delivery verification](Docs/6-Delivery-Verification.md) records the separate Definition of Done and assignment PDF reviews, including the remaining manual accessibility checks.
+
 ## Interview walkthrough
 
 1. Open the demo and confirm the three records and the row counter.
