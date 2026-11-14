@@ -9,7 +9,7 @@ npm ci
 npm start
 ```
 
-Open http://localhost:4200. The shell renders a temporary signal-driven button from the built shared library.
+Open http://localhost:4200/disputes. The overview loads the assignment records in the development mock backend.
 
 Use `npm run watch:libs` in a second terminal when editing the library. If the development server does not pick up a rebuilt library, restart `npm start`.
 
@@ -40,3 +40,10 @@ Use `npm run storybook` to open the shared component catalog on port 6006, or `n
 The catalog commands generate Compodoc JSON before loading Storybook Autodocs. Use `npm run docs:components` to regenerate the metadata separately. The generated JSON is ignored by Git.
 
 Use `npm run test:stories` to start the catalog on port 6007 and run its rendering and `play` checks in Playwright Chromium. The catalog index drives discovery, and Storybook reports each story's result. Application E2E tests have their own configuration and command.
+
+## Build and preview
+
+- `npm run build:demo` and `npm run serve:dist` open the self-contained optimized demo at `https://127.0.0.1:4300/disputes`.
+- `npm run build:prod` and `npm run serve:dist:prod` open the mock-free build at `https://127.0.0.1:4301/disputes`. Serve a real API under `/api` for the production data workflows.
+
+Both previews bind to loopback and use the local server's self-signed TLS certificate for HTTP/2. Use the development server on localhost if your browser rejects the preview certificate or prevents service worker registration with it.
