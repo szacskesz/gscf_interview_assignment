@@ -73,6 +73,19 @@ export default defineConfig(
     },
   },
   {
+    files: ['libs/core/**/*.ts', 'libs/data-access/**/*.ts', 'libs/ui/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportDeclaration[source.value="@gscf/disputes-data-access"]',
+          message:
+            'Core, UI and data-access internals cannot depend on the disputes package entry.',
+        },
+      ],
+    },
+  },
+  {
     files: ['apps/**/src/app/**/*.html', 'libs/**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
   },

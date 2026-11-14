@@ -234,6 +234,46 @@
           "defaultConfiguration": "production"
         }
       }
+    },
+    "core": {
+      "projectType": "library",
+      "root": "libs/core",
+      "sourceRoot": "libs/core/src",
+      "prefix": "gscf",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/core/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/core/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "disputes-data-access": {
+      "projectType": "library",
+      "root": "libs/data-access/disputes",
+      "sourceRoot": "libs/data-access/disputes/src",
+      "prefix": "gscf",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/data-access/disputes/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/data-access/disputes/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
     }
   }
 }
