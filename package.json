@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint apps libs --max-warnings 0",
     "test": "npm run build:libs && ng test --watch=false",
-    "test:watch": "npm run build:libs && ng test disputes --watch"
+    "test:watch": "npm run build:libs && ng test disputes --watch",
+    "test:components": "ng test ui-common --configuration browser --watch=false"
   },
   "private": true,
   "packageManager": "npm@11.19.1",
@@ -31,11 +32,13 @@
     "@angular/compiler-cli": "22.2.6",
     "@eslint/js": "10.0.1",
     "@tailwindcss/postcss": "4.3.5",
+    "@vitest/browser-playwright": "5.1.0",
     "angular-eslint": "22.6.0",
     "eslint": "10.15.0",
     "eslint-plugin-boundaries": "7.4.3",
     "jsdom": "31.0.1",
     "ng-packagr": "22.2.6",
+    "playwright": "1.65.1",
     "postcss": "8.5.32",
     "prettier": "3.10.1",
     "tailwindcss": "4.3.5",

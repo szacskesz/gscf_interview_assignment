@@ -98,6 +98,14 @@
             "tsConfig": "libs/ui/common/tsconfig.spec.json",
             "exclude": ["**/*.browser.spec.ts"],
             "isolate": true
+          },
+          "configurations": {
+            "browser": {
+              "tsConfig": "libs/ui/common/tsconfig.browser-spec.json",
+              "include": ["**/*.browser.spec.ts"],
+              "exclude": [],
+              "browsers": ["ChromiumHeadless"]
+            }
           }
         }
       }

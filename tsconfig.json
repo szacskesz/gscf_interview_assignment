@@ -37,6 +37,9 @@
     },
     {
       "path": "./libs/ui/common/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/ui/common/tsconfig.browser-spec.json"
     }
   ]
 }

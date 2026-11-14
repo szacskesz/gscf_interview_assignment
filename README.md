@@ -26,3 +26,5 @@ Use `npm run lint` for TypeScript, Angular template accessibility, and library i
 The global stylesheet defines the GSCF theme and scans application and library sources, including colocated stories. It serves [Montserrat](https://github.com/JulietaUla/Montserrat/tree/cc8daf2e7085006b9c112542fc82b58afc13521d) from local assets with its SIL Open Font License.
 
 Use `npm test` for the zoneless Vitest suite in CI or locally. It builds libraries first, then runs the Angular CLI test targets in jsdom. Use `npm run test:watch` to watch application specs.
+
+Run `npx playwright install chromium` once, then use `npm run test:components` for Vitest component tests in Chromium. The browser target runs only `*.browser.spec.ts` files.
