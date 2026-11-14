@@ -1,4 +1,6 @@
 @import 'tailwindcss' source(none);
+@import '@angular/cdk/overlay-prebuilt.css';
+@import '@angular/material/prebuilt-themes/azure-blue.css';
 @source '../../';
 @source '../../../libs';
 @source '../../../.storybook';
@@ -58,4 +60,17 @@
   body {
     @apply bg-surface font-sans text-ink;
   }
+}
+
+.gscf-dialog-backdrop {
+  background: var(--gscf-backdrop);
+}
+
+.gscf-success-toast {
+  --mat-snack-bar-container-color: var(--gscf-neutral-0);
+  --mat-snack-bar-supporting-text-color: var(--gscf-neutral-110);
+}
+
+.gscf-success-toast .mat-mdc-snackbar-surface {
+  border: 3px solid var(--gscf-green-60);
 }

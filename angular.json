@@ -194,6 +194,46 @@
           }
         }
       }
+    },
+    "ui-form": {
+      "projectType": "library",
+      "root": "libs/ui/form",
+      "sourceRoot": "libs/ui/form/src",
+      "prefix": "gscf",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/ui/form/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/ui/form/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    },
+    "ui-notifications": {
+      "projectType": "library",
+      "root": "libs/ui/notifications",
+      "sourceRoot": "libs/ui/notifications/src",
+      "prefix": "gscf",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/ui/notifications/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/ui/notifications/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
     }
   }
 }

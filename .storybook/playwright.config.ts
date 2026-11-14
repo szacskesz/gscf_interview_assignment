@@ -8,6 +8,7 @@ export default defineConfig({
   outputDir: '../test-results/stories',
   webServer: {
     command: 'npm run storybook -- --port 6007 --ci',
+    stdout: 'pipe',
     cwd: '..',
     url: `${baseURL}/index.json`,
     reuseExistingServer: false,

@@ -1,5 +1,3 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -15,7 +13,9 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@gscf/ui-common": ["./dist/libs/ui/common"]
+      "@gscf/ui-common": ["./dist/libs/ui/common"],
+      "@gscf/ui-form": ["./dist/libs/ui/form"],
+      "@gscf/ui-notifications": ["./dist/libs/ui/notifications"]
     }
   },
   "angularCompilerOptions": {
@@ -40,6 +40,12 @@
     },
     {
       "path": "./libs/ui/common/tsconfig.browser-spec.json"
+    },
+    {
+      "path": "./libs/ui/form/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/ui/notifications/tsconfig.lib.json"
     }
   ]
 }

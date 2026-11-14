@@ -64,6 +64,15 @@ export default defineConfig(
     },
   },
   {
+    files: ['libs/ui/form/**/*.ts', 'libs/ui/notifications/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { paths: ['@gscf/ui-form', '@gscf/ui-notifications'], patterns: [privateImports] },
+      ],
+    },
+  },
+  {
     files: ['apps/**/src/app/**/*.html', 'libs/**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
   },
