@@ -28,3 +28,7 @@ The global stylesheet defines the GSCF theme and scans application and library s
 Use `npm test` for the zoneless Vitest suite in CI or locally. It builds libraries first, then runs the Angular CLI test targets in jsdom. Use `npm run test:watch` to watch application specs.
 
 Run `npx playwright install chromium` once, then use `npm run test:components` for Vitest component tests in Chromium. The browser target runs only `*.browser.spec.ts` files.
+
+Run `npx playwright install chromium firefox webkit` once for E2E, then use `npm run test:e2e`. Playwright starts and stops the application server on port 4201. Chromium runs the full suite, while the browser and mobile projects select tagged workflows. See the [acceptance matrix](e2e/acceptance.md).
+
+If Windows reports a Firefox side-by-side assembly error from the default Playwright cache, set `PLAYWRIGHT_BROWSERS_PATH` to a new writable directory before installing the browsers and running the suite. Use the same path for both commands.
