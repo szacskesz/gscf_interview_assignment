@@ -21,37 +21,37 @@ Read the supplied [v2 guide](../TMP/MSW_Angular_atultetesi_utmutato.md) and the 
 
 The example targets Angular 21, TypeScript 5.9, Reactive Forms, and persistent localStorage. Our application uses the verified current Angular 22 stack with Signal Forms, Vitest, and Playwright. On the review date, npm reports MSW **3.0.5**, Node **>=22.12.0**, and a TypeScript peer range **>=5.9.x**. The planned Node 24 / TypeScript 6 baseline fits those ranges; recheck published dependencies and the selected test environment at integration time. Pin the exact installed release. [Published package metadata](https://registry.npmjs.org/msw/latest).
 
-| Reference pattern or finding | Project decision |
-| --- | --- |
-| HTTP client service separate from mock implementation | Adopt. Feature/UI code never imports handlers or the repository. |
-| One entry point, conditional dynamic import, awaited worker startup | Adopt. Start interception before Angular can issue its first request. |
-| Build-time flag plus environment configuration; production worker exclusion | Adopt and verify emitted output. Add the confirmed optimized demo profile. |
-| MSW 3 entry points and `onUnhandledFrame` | Adopt the selected release's API, not old MSW 2 snippets. |
-| Three seeds, status/date assignment, monotonically increasing IDs | Preserve the intent; adapt fields and money representation to our domain contract. |
-| `window.localStorage` read at handler-module initialization | Replace with a fresh in-memory repository supplied to a handler factory. Shared handlers must also run in Node tests. |
-| Empty persisted list is not reseeded | Preserve the empty-list invariant within a session. Full reload deliberately starts a new session. |
-| Numeric `amount` and `String(number)` precision validation | Do not copy. Number conversion loses literal precision: `1.230` becomes `1.23`. Keep raw decimal text through validation and store integer cents. |
-| Repository sorts all reads by number | Keep the supplied order and explicit prepend behavior. No additional sorting feature is needed. |
-| Reactive Forms, explicit standalone/OnPush, custom toast timer and focus restoration | Do not port the UI. Use the agreed Angular defaults, Signal Forms, Material notifications, and CDK dialogs/focus policy. |
-| Fixed 350/450 ms delays | No mandatory artificial delay. Enable deterministic delays only for deliberate loading/pending test scenarios. |
-| Blanket bypass of unhandled traffic | Fail unmatched requests to the configured mock API; allow unrelated assets and development-server traffic. |
-| Caret/tilde package ranges, development-default build, copied scripts | Replace with exact versions and project-specific commands; keep the ordinary build production-oriented. |
-| Optional PATCH example | Omit. Only list, create, and remove are required. |
+| Reference pattern or finding                                                         | Project decision                                                                                                                                  |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP client service separate from mock implementation                                | Adopt. Feature/UI code never imports handlers or the repository.                                                                                  |
+| One entry point, conditional dynamic import, awaited worker startup                  | Adopt. Start interception before Angular can issue its first request.                                                                             |
+| Build-time flag plus environment configuration; production worker exclusion          | Adopt and verify emitted output. Add the confirmed optimized demo profile.                                                                        |
+| MSW 3 entry points and `onUnhandledFrame`                                            | Adopt the selected release's API, not old MSW 2 snippets.                                                                                         |
+| Three seeds, status/date assignment, monotonically increasing IDs                    | Preserve the intent; adapt fields and money representation to our domain contract.                                                                |
+| `window.localStorage` read at handler-module initialization                          | Replace with a fresh in-memory repository supplied to a handler factory. Shared handlers must also run in Node tests.                             |
+| Empty persisted list is not reseeded                                                 | Preserve the empty-list invariant within a session. Full reload deliberately starts a new session.                                                |
+| Numeric `amount` and `String(number)` precision validation                           | Do not copy. Number conversion loses literal precision: `1.230` becomes `1.23`. Keep raw decimal text through validation and store integer cents. |
+| Repository sorts all reads by number                                                 | Keep the supplied order and explicit prepend behavior. No additional sorting feature is needed.                                                   |
+| Reactive Forms, explicit standalone/OnPush, custom toast timer and focus restoration | Do not port the UI. Use the agreed Angular defaults, Signal Forms, Material notifications, and CDK dialogs/focus policy.                          |
+| Fixed 350/450 ms delays                                                              | No mandatory artificial delay. Enable deterministic delays only for deliberate loading/pending test scenarios.                                    |
+| Blanket bypass of unhandled traffic                                                  | Fail unmatched requests to the configured mock API; allow unrelated assets and development-server traffic.                                        |
+| Caret/tilde package ranges, development-default build, copied scripts                | Replace with exact versions and project-specific commands; keep the ordinary build production-oriented.                                           |
+| Optional PATCH example                                                               | Omit. Only list, create, and remove are required.                                                                                                 |
 
 The reference README's suggestion to delete the lockfile is not an upgrade policy for this repository. Preserve the committed lockfile and use deliberate dependency updates and `npm ci`.
 
 ## 3. Placement and dependency direction
 
-| Location | Responsibility |
-| --- | --- |
-| `apps/disputes/src/environments/` | Typed API base URL and mock-mode settings for each profile. Values are public build configuration, never secrets. |
-| `apps/disputes/src/main.ts`, `define-flags.d.ts` | Conditional startup and declared build-time flags. |
-| `apps/disputes/src/mocks/browser.ts` | Browser-only composition: construct the repository/handlers and start `setupWorker`. |
-| `apps/disputes/public/mockServiceWorker.js` | Generated worker served only by mock-enabled builds. |
-| `libs/core` | Small API configuration token and pure current-date source, where shared infrastructure is needed. No domain imports. |
-| `libs/data-access/disputes` | Domain/DTO types, pure amount/date validation, Angular HTTP API adapter, feature-scoped signal store. Its normal public API exports no mocks or seeds. |
-| `libs/data-access/disputes-mock` | Separate CLI library with seed records, in-memory repository, handler factory, and focused specs. Depends on the disputes library's public domain API and core; never the reverse. |
-| `testing/msw/` | Node test setup and controlled error/delay scenarios. Excluded from application/library public APIs. |
+| Location                                         | Responsibility                                                                                                                                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/disputes/src/environments/`                | Typed API base URL and mock-mode settings for each profile. Values are public build configuration, never secrets.                                                                  |
+| `apps/disputes/src/main.ts`, `define-flags.d.ts` | Conditional startup and declared build-time flags.                                                                                                                                 |
+| `apps/disputes/src/mocks/browser.ts`             | Browser-only composition: construct the repository/handlers and start `setupWorker`.                                                                                               |
+| `apps/disputes/public/mockServiceWorker.js`      | Generated worker served only by mock-enabled builds.                                                                                                                               |
+| `libs/core`                                      | Small API configuration token and pure current-date source, where shared infrastructure is needed. No domain imports.                                                              |
+| `libs/data-access/disputes`                      | Domain/DTO types, pure amount/date validation, Angular HTTP API adapter, feature-scoped signal store. Its normal public API exports no mocks or seeds.                             |
+| `libs/data-access/disputes-mock`                 | Separate CLI library with seed records, in-memory repository, handler factory, and focused specs. Depends on the disputes library's public domain API and core; never the reverse. |
+| `testing/msw/`                                   | Node test setup and controlled error/delay scenarios. Excluded from application/library public APIs.                                                                               |
 
 Generate these projects only when their implementation stage begins. Use built public library entry points, including for the dynamic browser adapter's mock-library import. Explicit build ordering covers core, disputes data access, mock adapter dependencies, UI, features, and app as needed. The mock library supports mock-enabled application builds, not the real API client.
 
@@ -61,11 +61,11 @@ Enforce the one-way dependency with lint checks. A production feature, store, AP
 
 Use same-origin `/api/disputes` by default, with one injected API base URL configured by the app. Resolve URLs consistently in the Angular adapter and mock composition; Node tests use an explicit test origin.
 
-| Request | Success | Failure contract |
-| --- | --- | --- |
-| `GET /api/disputes` | `200` with an ordered `Dispute[]` | A controlled failure scenario can return `500`; UI offers retry. |
-| `POST /api/disputes` | `201` with the complete created `Dispute` | `400` malformed JSON; `422` invalid fields. No mutation or ID allocation on validation failure. |
-| `DELETE /api/disputes/:number` | `204`, no body | `400` invalid positive-integer identifier; `404` absent dispute. Neither changes another row. |
+| Request                        | Success                                   | Failure contract                                                                                |
+| ------------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `GET /api/disputes`            | `200` with an ordered `Dispute[]`         | A controlled failure scenario can return `500`; UI offers retry.                                |
+| `POST /api/disputes`           | `201` with the complete created `Dispute` | `400` malformed JSON; `422` invalid fields. No mutation or ID allocation on validation failure. |
+| `DELETE /api/disputes/:number` | `204`, no body                            | `400` invalid positive-integer identifier; `404` absent dispute. Neither changes another row.   |
 
 The create request contains only `buyer`, `reason`, `amount` as an ungrouped decimal **string**, and `currency`. Preserve that string until the shared pure validation accepts it; convert valid values into safe integer `amountMinorUnits`. The response/domain model retains `amountMinorUnits` and a validated `YYYY-MM-DD` date. Never send a floating-point amount as the authority or accept client-supplied number/status/date fields as authoritative.
 
@@ -87,11 +87,11 @@ Use MSW 3's `http`/`HttpResponse` from `msw/http`, `setupWorker` from `msw/brows
 4. Scope matching and unhandled-request checks to the configured API origin/path. Use the supported `onUnhandledFrame` callback and inferred types, allowing unrelated assets/HMR; avoid experimental type imports solely for this callback. Keep readiness protection enabled. [Worker startup options](https://mswjs.io/api/setup-worker/start).
 5. Serve the worker at a URL whose scope covers the application; resolve it against the configured base path. Verify the response is JavaScript rather than the SPA fallback. Use localhost or HTTPS, including for phone testing on another device.
 
-| Profile | Optimization | Mock flag / environment mode | Worker and mock code | Output browser directory |
-| --- | --- | --- | --- | --- |
-| `development` | Development settings | `true` / enabled | Included | `dist/apps/disputes/development/browser` |
-| `demo` | Production-style optimization, hashing, budgets | `true` / enabled | Included intentionally | `dist/apps/disputes/demo/browser` |
-| `production` | Production optimization, hashing, budgets | `false` / disabled | Excluded | `dist/apps/disputes/production/browser` |
+| Profile       | Optimization                                    | Mock flag / environment mode | Worker and mock code   | Output browser directory                 |
+| ------------- | ----------------------------------------------- | ---------------------------- | ---------------------- | ---------------------------------------- |
+| `development` | Development settings                            | `true` / enabled             | Included               | `dist/apps/disputes/development/browser` |
+| `demo`        | Production-style optimization, hashing, budgets | `true` / enabled             | Included intentionally | `dist/apps/disputes/demo/browser`        |
+| `production`  | Production optimization, hashing, budgets       | `false` / disabled           | Excluded               | `dist/apps/disputes/production/browser`  |
 
 Keep `ng serve`/`start` on development. Keep `ng build`/`build` on production; expose explicit `build:dev`, `build:demo`, and `build:prod` scripts. The interview path is `build:demo` followed by `serve:dist`. Add `serve:dist:prod` for inspecting the mock-free artifact; it cannot complete data workflows without an actual API. Use different preview ports/origins and document them.
 

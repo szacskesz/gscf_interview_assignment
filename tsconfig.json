@@ -15,9 +15,7 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@gscf/ui-common": [
-        "./dist/libs/ui/common"
-      ]
+      "@gscf/ui-common": ["./dist/libs/ui/common"]
     }
   },
   "angularCompilerOptions": {

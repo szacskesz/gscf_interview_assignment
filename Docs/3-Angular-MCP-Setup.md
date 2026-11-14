@@ -23,16 +23,16 @@ The configuration is scoped to this repository. Existing user-level MCP servers 
 
 ## Verification performed
 
-| Check | Observed result |
-| --- | --- |
-| `ng mcp --help` through the pinned package | Successful; launcher and options available. |
-| `codex mcp get angular-cli --json` | Server recognized as enabled with the expected command and timeouts. |
-| MCP initialization using the saved configuration | Successful; server reported `angular-cli-server`, version `22.2.7`, protocol `2025-06-18`. |
-| `tools/list` | Nine tools discovered. |
-| `list_projects` | Successful; found the temporary MSW POC described below. |
-| `get_best_practices` without a workspace | Returned the generic guide successfully. |
-| `search_documentation` for `Signal Forms FormRoot`, version `22` | Returned relevant Angular 22 documentation successfully. |
-| Verification process shutdown | Exited cleanly without stderr output. |
+| Check                                                            | Observed result                                                                            |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `ng mcp --help` through the pinned package                       | Successful; launcher and options available.                                                |
+| `codex mcp get angular-cli --json`                               | Server recognized as enabled with the expected command and timeouts.                       |
+| MCP initialization using the saved configuration                 | Successful; server reported `angular-cli-server`, version `22.2.7`, protocol `2025-06-18`. |
+| `tools/list`                                                     | Nine tools discovered.                                                                     |
+| `list_projects`                                                  | Successful; found the temporary MSW POC described below.                                   |
+| `get_best_practices` without a workspace                         | Returned the generic guide successfully.                                                   |
+| `search_documentation` for `Signal Forms FormRoot`, version `22` | Returned relevant Angular 22 documentation successfully.                                   |
+| Verification process shutdown                                    | Exited cleanly without stderr output.                                                      |
 
 Available tools at verification: `ai_tutor`, `get_best_practices`, `search_documentation`, `list_projects`, `onpush_zoneless_migration`, `run_target`, `devserver_start`, `devserver_stop`, and `devserver_wait_for_build`.
 

@@ -1,0 +1,11 @@
+TMP/
+dist/
+out-tsc/
+.angular/
+.compodoc/
+storybook-static/
+coverage/
+playwright-report/
+test-results/
+node_modules/
+package-lock.json

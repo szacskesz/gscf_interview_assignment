@@ -1,0 +1,16 @@
+{
+  "singleQuote": true,
+  "endOfLine": "auto",
+  "printWidth": 100,
+  "overrides": [
+    {
+      "files": "apps/**/*.html",
+      "excludeFiles": "**/index.html",
+      "options": { "parser": "angular" }
+    },
+    {
+      "files": "libs/**/*.html",
+      "options": { "parser": "angular" }
+    }
+  ]
+}

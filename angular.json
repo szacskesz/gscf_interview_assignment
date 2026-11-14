@@ -18,9 +18,7 @@
           "options": {
             "browser": "apps/disputes/src/main.ts",
             "tsConfig": "apps/disputes/tsconfig.app.json",
-            "styles": [
-              "apps/disputes/src/styles.css"
-            ]
+            "styles": ["apps/disputes/src/styles.css"]
           },
           "configurations": {
             "production": {

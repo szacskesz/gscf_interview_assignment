@@ -57,27 +57,27 @@ The readiness check selected **TypeScript 6.0.3**, not the registry's newer Type
 
 Use a compatible Angular CLI and CDK release from the same major version; verify their own release numbers and peer dependencies instead of assuming every package has the same patch number.
 
-| Area | Proposed choice | Reason |
-| --- | --- | --- |
-| Framework | Angular 22, latest stable patch | Matches the requested current Angular stack. |
-| Runtime | Node.js 24, a supported patch at or above 24.15.0 | Meets Angular 22's published compatibility range. |
-| Language | Strict TypeScript 6.0.x | Angular 22 currently requires TypeScript `>=6.0.0 <6.1.0`. |
-| Package management | npm, exact direct dependency versions, committed `package-lock.json` | Reproducible `npm ci`; configure `save-exact=true` and review upgrades explicitly. |
-| Workspace | Angular CLI multi-project workspace with `apps/` and `libs/` | Supports the requested library layout without Nx or custom builders. |
-| Application model | Standalone components and application providers | Keeps imports and dependencies explicit. |
-| Change detection | Zoneless, with OnPush-compatible components | Fits signal-driven state and avoids a Zone.js dependency. |
-| Forms | Stable Angular Signal Forms | Integrates typed form values, validation, and interaction state. |
-| State | Feature-local signal store with an HTTP resource read model and operation state | Exposes server-confirmed data; the mock repository owns IDs and records. |
-| HTTP and mock backend | Angular `httpResource` for reads, `HttpClient` for mutations, MSW 3 | Keeps UI independent of mocks while testing the actual HTTP boundary. |
-| Dialog infrastructure | Angular CDK Dialog with custom styles | Provides focus and overlay behavior while retaining the supplied appearance. |
-| Notifications | Angular Material `MatSnackBar` with custom content | Reuses an existing package for timing, replacement, positioning, and announcements. |
-| Styling | Tailwind utilities and semantic CSS custom properties | User preference; shared tokens preserve the prototype's palette and responsive behavior. |
-| Unit/integration tests | Vitest with Angular TestBed and jsdom | Angular CLI's supported setup; zoneless tests for domain and component integration. |
-| Browser component tests | Vitest Browser Mode with `@vitest/browser-playwright` | Real-browser component behavior through Angular's test builder. |
-| E2E and browser verification | Playwright Test with axe | One suite owns complete business workflows and targeted cross-browser, accessibility, focus, responsive, and visual checks. |
-| Shared component catalog | Storybook with Compodoc and executable stories | Documents public APIs and verifies isolated UI behavior before feature assembly. |
-| Static quality | Angular ESLint and Prettier | Consistent TypeScript, templates, styles, and documentation. |
-| Built previews | Pinned `local-web-server`; `serve:dist` for demo and `serve:dist:prod` for production | Separate artifacts/origins, SPA fallback, HTTP/2; demo includes MSW intentionally. |
+| Area                         | Proposed choice                                                                       | Reason                                                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Framework                    | Angular 22, latest stable patch                                                       | Matches the requested current Angular stack.                                                                                |
+| Runtime                      | Node.js 24, a supported patch at or above 24.15.0                                     | Meets Angular 22's published compatibility range.                                                                           |
+| Language                     | Strict TypeScript 6.0.x                                                               | Angular 22 currently requires TypeScript `>=6.0.0 <6.1.0`.                                                                  |
+| Package management           | npm, exact direct dependency versions, committed `package-lock.json`                  | Reproducible `npm ci`; configure `save-exact=true` and review upgrades explicitly.                                          |
+| Workspace                    | Angular CLI multi-project workspace with `apps/` and `libs/`                          | Supports the requested library layout without Nx or custom builders.                                                        |
+| Application model            | Standalone components and application providers                                       | Keeps imports and dependencies explicit.                                                                                    |
+| Change detection             | Zoneless, with OnPush-compatible components                                           | Fits signal-driven state and avoids a Zone.js dependency.                                                                   |
+| Forms                        | Stable Angular Signal Forms                                                           | Integrates typed form values, validation, and interaction state.                                                            |
+| State                        | Feature-local signal store with an HTTP resource read model and operation state       | Exposes server-confirmed data; the mock repository owns IDs and records.                                                    |
+| HTTP and mock backend        | Angular `httpResource` for reads, `HttpClient` for mutations, MSW 3                   | Keeps UI independent of mocks while testing the actual HTTP boundary.                                                       |
+| Dialog infrastructure        | Angular CDK Dialog with custom styles                                                 | Provides focus and overlay behavior while retaining the supplied appearance.                                                |
+| Notifications                | Angular Material `MatSnackBar` with custom content                                    | Reuses an existing package for timing, replacement, positioning, and announcements.                                         |
+| Styling                      | Tailwind utilities and semantic CSS custom properties                                 | User preference; shared tokens preserve the prototype's palette and responsive behavior.                                    |
+| Unit/integration tests       | Vitest with Angular TestBed and jsdom                                                 | Angular CLI's supported setup; zoneless tests for domain and component integration.                                         |
+| Browser component tests      | Vitest Browser Mode with `@vitest/browser-playwright`                                 | Real-browser component behavior through Angular's test builder.                                                             |
+| E2E and browser verification | Playwright Test with axe                                                              | One suite owns complete business workflows and targeted cross-browser, accessibility, focus, responsive, and visual checks. |
+| Shared component catalog     | Storybook with Compodoc and executable stories                                        | Documents public APIs and verifies isolated UI behavior before feature assembly.                                            |
+| Static quality               | Angular ESLint and Prettier                                                           | Consistent TypeScript, templates, styles, and documentation.                                                                |
+| Built previews               | Pinned `local-web-server`; `serve:dist` for demo and `serve:dist:prod` for production | Separate artifacts/origins, SPA fallback, HTTP/2; demo includes MSW intentionally.                                          |
 
 Angular's [compatibility matrix](https://angular.dev/reference/versions) is the source for runtime and language versions. Use the CLI-compatible RxJS 7.x dependency where required; it does not need to become the application's state-management mechanism. Check the development machine's Node/npm versions before scaffolding and document the supported runtime in the README and version configuration.
 
@@ -125,11 +125,11 @@ The initial screen must show the dark blue navigation bar, GSCF logo, active Dis
 
 Use these columns, in this order: `Dispute No.`, `Buyer`, `Status`, `Dispute Date`, `Amount`, `Currency`, `Dispute Reason`, and `Actions`.
 
-| Dispute No. | Buyer | Status | Dispute Date | Amount | Currency | Dispute Reason |
-| --- | --- | --- | --- | --- | --- | --- |
-| 6228 | Alpine Logistics AG | New | 25 Apr 2026 | 24,000,000.00 | USD | Copy of Invoices |
-| 6227 | Northwind Traders | New | 22 Apr 2026 | 16,450,000.00 | USD | Freight: Freight Charges Disputed |
-| 6224 | Helvetia Foods GmbH | Acknowledged | 18 Sep 2026 | 18,350,500.00 | USD | Tax: When either the invoice didn't include tax or tax is not applicable |
+| Dispute No. | Buyer               | Status       | Dispute Date | Amount        | Currency | Dispute Reason                                                           |
+| ----------- | ------------------- | ------------ | ------------ | ------------- | -------- | ------------------------------------------------------------------------ |
+| 6228        | Alpine Logistics AG | New          | 25 Apr 2026  | 24,000,000.00 | USD      | Copy of Invoices                                                         |
+| 6227        | Northwind Traders   | New          | 22 Apr 2026  | 16,450,000.00 | USD      | Freight: Freight Charges Disputed                                        |
+| 6224        | Helvetia Foods GmbH | Acknowledged | 18 Sep 2026  | 18,350,500.00 | USD      | Tax: When either the invoice didn't include tax or tax is not applicable |
 
 Preserve this order, even though it is not chronological by dispute date. Use status badges matching the figures. Right-align amounts and use tabular numerals where supported. Allow long reasons to wrap without obscuring the Actions column.
 
@@ -160,14 +160,14 @@ An untouched form opens without errors. Blurring an invalid field reveals that f
 
 Treat whitespace-only buyer names and reasons as empty. Trim surrounding whitespace when saving, while preserving internal spacing and punctuation. Do not introduce arbitrary business length limits that the assignment does not specify.
 
-| Field or condition | Exact required message |
-| --- | --- |
-| Buyer empty | `Enter a buyer name.` |
-| Dispute Reason empty | `Enter a dispute reason.` |
-| Dispute Amount empty | `Enter a dispute amount.` |
-| Dispute Amount zero or negative | `Enter an amount greater than 0.` |
+| Field or condition                         | Exact required message                   |
+| ------------------------------------------ | ---------------------------------------- |
+| Buyer empty                                | `Enter a buyer name.`                    |
+| Dispute Reason empty                       | `Enter a dispute reason.`                |
+| Dispute Amount empty                       | `Enter a dispute amount.`                |
+| Dispute Amount zero or negative            | `Enter an amount greater than 0.`        |
 | Dispute Amount with more than two decimals | `Enter an amount with up to 2 decimals.` |
-| Currency unselected | `Select a currency.` |
+| Currency unselected                        | `Select a currency.`                     |
 
 The amount validator reports one error at a time. For valid numeric syntax, evaluate missing value first, nonpositive value second, and decimal precision third. For example, `-12.345` must show the greater-than-zero message. Never round an invalid amount into a valid value.
 
@@ -175,16 +175,16 @@ Also reject malformed, non-finite, or unrepresentable numeric input. The PDF doe
 
 Replicate the field states in Figure 2.0:
 
-| State | Planned treatment |
-| --- | --- |
-| Default | Neutral border, gray placeholder, required marker, no error. |
-| Hover | Darker border and text cursor without changing label or message. |
-| Focused | Visible blue focus treatment; placeholder remains until typing starts. |
-| Focused while typing | Focus treatment and the current value. |
-| Filled and blurred | Normal border and retained valid value. |
-| Empty with error | Red border, warning icon, required marker, and red error text below. |
-| Focused with error | Error remains until corrected, with an independently visible focus indication. |
-| Invalid amount | The relevant single error message and preserved input; no silent rounding. |
+| State                | Planned treatment                                                              |
+| -------------------- | ------------------------------------------------------------------------------ |
+| Default              | Neutral border, gray placeholder, required marker, no error.                   |
+| Hover                | Darker border and text cursor without changing label or message.               |
+| Focused              | Visible blue focus treatment; placeholder remains until typing starts.         |
+| Focused while typing | Focus treatment and the current value.                                         |
+| Filled and blurred   | Normal border and retained valid value.                                        |
+| Empty with error     | Red border, warning icon, required marker, and red error text below.           |
+| Focused with error   | Error remains until corrected, with an independently visible focus indication. |
+| Invalid amount       | The relevant single error message and preserved input; no silent rounding.     |
 
 For currency errors, show red radio outlines and the group-level message as in Figure 1.3a. Do not invent an input box around the radio group.
 
@@ -234,10 +234,10 @@ Creating from the empty state restores the table with one row and `Showing 1/1 r
 
 Show toasts at the bottom right using the supplied green outline and check icon:
 
-| Operation | Title | Body example |
-| --- | --- | --- |
-| Create | `Dispute created` | `Dispute 6229 has been created.` |
-| Remove | `Dispute removed` | `Dispute 6228 has been removed.` |
+| Operation | Title             | Body example                     |
+| --------- | ----------------- | -------------------------------- |
+| Create    | `Dispute created` | `Dispute 6229 has been created.` |
+| Remove    | `Dispute removed` | `Dispute 6228 has been removed.` |
 
 Creation toasts disappear after five seconds as required. Use the same duration for removal as a documented consistency decision. A new operation replaces the previous toast. Delegate notification lifetime, replacement, positioning, dismissal, and live announcements to Angular Material's `MatSnackBar`; do not implement a custom toast engine or timer service.
 
@@ -378,14 +378,14 @@ README.md
 
 Each CLI library also has its generated package/build/TypeScript configuration. Shared components colocate their `*.stories.ts`, focused `*.spec.ts` where needed, templates, and optional CSS. The tree lists locations, not a requirement to wrap every native element. Use native-element directives where they preserve semantics more simply than wrapper components.
 
-| Layer | Responsibility | Allowed application-layer dependencies |
-| --- | --- | --- |
-| `libs/core` | Cross-cutting infrastructure and tokens, such as the controllable current-date source. | No feature, data-access, or UI imports. |
-| `libs/data-access/disputes` | Domain/DTO models, pure helpers, HTTP adapter, feature-scoped store. | Core; no mock/UI/feature imports. |
-| `libs/data-access/disputes-mock` | MSW handlers, exact fixtures, and in-memory mock repository. | Core and disputes domain public API; no UI/feature imports and no reverse dependency. |
-| `libs/ui/*` | Presentational components and UI-only adapters/behavior. | Other explicitly approved UI libraries and small core tokens; no feature stores. |
-| `libs/feature/*` | Business pages, form schemas, dialogs, and orchestration. | Core, UI, and its own data-access library. |
-| `apps/*` | Bootstrap, global providers/assets, shell, and feature route registration. | Public APIs of the layers above; business features are lazy imports. |
+| Layer                            | Responsibility                                                                         | Allowed application-layer dependencies                                                |
+| -------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `libs/core`                      | Cross-cutting infrastructure and tokens, such as the controllable current-date source. | No feature, data-access, or UI imports.                                               |
+| `libs/data-access/disputes`      | Domain/DTO models, pure helpers, HTTP adapter, feature-scoped store.                   | Core; no mock/UI/feature imports.                                                     |
+| `libs/data-access/disputes-mock` | MSW handlers, exact fixtures, and in-memory mock repository.                           | Core and disputes domain public API; no UI/feature imports and no reverse dependency. |
+| `libs/ui/*`                      | Presentational components and UI-only adapters/behavior.                               | Other explicitly approved UI libraries and small core tokens; no feature stores.      |
+| `libs/feature/*`                 | Business pages, form schemas, dialogs, and orchestration.                              | Core, UI, and its own data-access library.                                            |
+| `apps/*`                         | Bootstrap, global providers/assets, shell, and feature route registration.             | Public APIs of the layers above; business features are lazy imports.                  |
 
 Only the app's guarded dynamic mock adapter and tests may consume the mock library. Keep seeds/handlers out of normal data-access barrels and production imports. The mock library is generated in its own stage, not as part of the shared UI kit.
 
@@ -407,18 +407,18 @@ Keep the empty-state markup within the overview unless it becomes substantial. D
 
 ### Responsibilities and data flow
 
-| Part | Responsibility |
-| --- | --- |
-| Application shell | Navigation, route outlet, and global styling. |
-| Disputes overview | Coordinates user actions, opens dialogs, invokes store commands, and requests notifications. |
-| Disputes table | Displays immutable records and emits a removal request with the selected dispute. |
-| Creation dialog | Owns the isolated draft/validation and awaits the create command before closing. |
-| Removal dialog | Presents the selected record, requests removal only on confirmation, and stays open until the result. |
-| Disputes store | Owns the feature's HTTP read model, derived UI state, and pending/error command state. |
-| Disputes API adapter | Encapsulates resource/HTTP URLs, typed requests, and validated responses; knows nothing about MSW. |
-| Mock repository and handlers | Own session data, validate HTTP requests, allocate IDs/status/date, and return API responses. |
-| Amount/date functions | Perform deterministic normalization and display formatting. |
-| Notification adapter | Supplies application copy and appearance to `MatSnackBar`. |
+| Part                         | Responsibility                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Application shell            | Navigation, route outlet, and global styling.                                                         |
+| Disputes overview            | Coordinates user actions, opens dialogs, invokes store commands, and requests notifications.          |
+| Disputes table               | Displays immutable records and emits a removal request with the selected dispute.                     |
+| Creation dialog              | Owns the isolated draft/validation and awaits the create command before closing.                      |
+| Removal dialog               | Presents the selected record, requests removal only on confirmation, and stays open until the result. |
+| Disputes store               | Owns the feature's HTTP read model, derived UI state, and pending/error command state.                |
+| Disputes API adapter         | Encapsulates resource/HTTP URLs, typed requests, and validated responses; knows nothing about MSW.    |
+| Mock repository and handlers | Own session data, validate HTTP requests, allocate IDs/status/date, and return API responses.         |
+| Amount/date functions        | Perform deterministic normalization and display formatting.                                           |
+| Notification adapter         | Supplies application copy and appearance to `MatSnackBar`.                                            |
 
 The overview provides the store from `libs/data-access/disputes` for the feature. Use `@Service({ autoProvided: false })` with the explicit overview provider so its lifetime remains feature-scoped. It exposes readonly signals, while presentational components receive data through typed inputs. Pass the same feature command context into dialogs rather than creating a second store there. Dialog results are typed; a dismissal result must never be interpreted as confirmation. Only store commands issue mutations, and only successful API responses update the UI collection.
 
@@ -561,26 +561,26 @@ Use Tailwind utilities as the primary styling language, mapped to the semantic v
 
 Configure Tailwind source detection for `apps/`, every UI/feature library, and the story files. Use complete utility names in variant maps rather than concatenated fragments. Confirm that a library-only class appears in both the application build and Storybook build. Share the same token/font stylesheet with the catalog. See [Tailwind source detection](https://tailwindcss.com/docs/detecting-classes-in-source-files).
 
-| Prototype token | Value | Use |
-| --- | --- | --- |
-| `gscf/neutral/110` | `#292929` | Body text, labels, values, and table cells. |
-| `gscf/neutral/80` | `#525252` | Table headings and secondary icons. |
-| `gscf/neutral/90` | `#464646` | Row counter. |
-| `gscf/neutral/70` | `#656565` | Placeholders. |
-| `gscf/neutral/60` | `#7C7C7C` | Default input and radio borders. |
-| `gscf/neutral/30` | `#DCDCDC` | Table dividers and cell borders. |
-| `gscf/neutral/20` | `#EDEDED` | Disabled input background if needed. |
-| `gscf/neutral/40` | `#BDBDBD` | Disabled placeholder if needed. |
-| `gscf/neutral/0` | `#FFFFFF` | Page/modal surfaces and filled-button text. |
-| `gscf/blue/90` | `#13375A` | Navigation and headings. |
-| `gscf/blue/100` | `#0E2743` | Input hover border. |
-| `gscf/blue/A70` | `#0055A4` | Primary actions, secondary borders/text, focus, selected radios, and New badge text. |
-| `gscf/blue/10` | `#E5EEF9` | New badge background. |
-| `gscf/yellow/10` | `#FEF9C3` | Acknowledged badge background. |
-| `gscf/yellow/80` | `#854D0E` | Acknowledged badge text. |
-| `gscf/red/70` | `#B91C1C` | Errors, required markers, removal actions, and danger button. |
-| `gscf/green/60` | `#3A8B25` | Toast check icon and 3 px outline. |
-| Backdrop | `#0D1A33` at 50% opacity | Modal dimming layer. |
+| Prototype token    | Value                    | Use                                                                                  |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------------ |
+| `gscf/neutral/110` | `#292929`                | Body text, labels, values, and table cells.                                          |
+| `gscf/neutral/80`  | `#525252`                | Table headings and secondary icons.                                                  |
+| `gscf/neutral/90`  | `#464646`                | Row counter.                                                                         |
+| `gscf/neutral/70`  | `#656565`                | Placeholders.                                                                        |
+| `gscf/neutral/60`  | `#7C7C7C`                | Default input and radio borders.                                                     |
+| `gscf/neutral/30`  | `#DCDCDC`                | Table dividers and cell borders.                                                     |
+| `gscf/neutral/20`  | `#EDEDED`                | Disabled input background if needed.                                                 |
+| `gscf/neutral/40`  | `#BDBDBD`                | Disabled placeholder if needed.                                                      |
+| `gscf/neutral/0`   | `#FFFFFF`                | Page/modal surfaces and filled-button text.                                          |
+| `gscf/blue/90`     | `#13375A`                | Navigation and headings.                                                             |
+| `gscf/blue/100`    | `#0E2743`                | Input hover border.                                                                  |
+| `gscf/blue/A70`    | `#0055A4`                | Primary actions, secondary borders/text, focus, selected radios, and New badge text. |
+| `gscf/blue/10`     | `#E5EEF9`                | New badge background.                                                                |
+| `gscf/yellow/10`   | `#FEF9C3`                | Acknowledged badge background.                                                       |
+| `gscf/yellow/80`   | `#854D0E`                | Acknowledged badge text.                                                             |
+| `gscf/red/70`      | `#B91C1C`                | Errors, required markers, removal actions, and danger button.                        |
+| `gscf/green/60`    | `#3A8B25`                | Toast check icon and 3 px outline.                                                   |
+| Backdrop           | `#0D1A33` at 50% opacity | Modal dimming layer.                                                                 |
 
 Keep toast body text dark on white; the green token is for the icon and outline. Disabled-state colors should not be used for ordinary readable content. If a supplied combination fails the required text contrast, document the smallest necessary adjustment instead of silently claiming compliance.
 
@@ -679,30 +679,30 @@ Use [axe through Playwright](https://playwright.dev/docs/accessibility-testing) 
 
 Complete the stages in order. Add one tool or architectural concern per reviewable change, run the checks relevant to that change, and record actual results before proceeding to dependent work. Scaffolding stages must leave a usable build, even before domain functionality exists. Do not install all tools together and postpone integration failures until the application is finished.
 
-| Stage | Work introduced in this step | Exit criteria |
-| --- | --- | --- |
-| 0. Compatibility baseline | Verify stable Angular/CLI, local Node/npm, compatible exact TypeScript, and tool peer ranges; resolve the minimal workspace dependencies and record checks required at later integration stages. | The workspace baseline resolves without forced/legacy peer options or a hidden downgrade. Each later integration validates its own dependency graph and runtime behavior before dependent work proceeds. |
-| 1. CLI workspace | Generate the empty root workspace, `apps/disputes` shell, and only a minimal `ui/common` public-API integration fixture. Add strict/zoneless defaults, exact-save policy, runtime version files, root ignore rules, build output paths, and dependency-order build/watch scripts. Preserve the existing Git repository and documents. | Clean library-then-app build works from no output artifacts; the shell imports the built library public API; no Zone.js runtime or unintended attribution. Repository ignore rules exclude `TMP`, generated output, reports, and dependency folders on every machine. |
-| 2. Prettier | Add formatting config, ignore rules, and format/check scripts only. | Formatting covers owned source/config/docs; generated output and `TMP` are excluded. |
-| 3. ESLint and boundaries | Add Angular ESLint, template checks, and layer/import restrictions. Accommodate the agreed `$signal` fields with clean input/model aliases rather than forbidding those aliases. | Lint passes; a temporary invalid import is rejected and then removed. Update project-specific boundary mappings when later libraries are generated. |
-| 4. Tailwind and tokens | Add Tailwind/PostCSS, CSS-variable colors, locally served Montserrat plus its license, supplied logo assets, and app/library/story source detection. | Shell/fixture render token-backed utilities; a production build retains library-only classes and local fonts. No business feature is implemented yet. |
-| 5. Vitest unit/integration tests | Configure Angular CLI's Vitest test targets for app/library specs, zoneless TestBed, jsdom, isolated types, and unit/CI scripts. Keep pure Node contracts separate where needed. | Compatible dependency resolution and meaningful signal/DOM and pure-function tests pass without Zone.js; all intended library specs are discovered. |
-| 6. Browser component tests | Add the version-matched Vitest Playwright provider, browser binaries, isolated browser-spec selection, and component-test command. | The integration fixture passes a real-browser interaction test; Node/jsdom and browser targets do not run each other's specs. |
-| 7. Playwright E2E | Add `@playwright/test`, E2E fixtures, managed app startup/readiness/cleanup, axe, viewport/browser projects, and screenshot policy. | Shell/navigation and accessibility smoke checks pass; the acceptance matrix is prepared; Chromium/Firefox/WebKit checks do not discover component or story specs. |
-| 8. MSW infrastructure | Add exact MSW, generated worker, typed environments, build-time flags, awaited dynamic startup, and separate development/demo/production outputs. Use a minimal temporary HTTP fixture. | Browser first-request smoke and Vitest/Node interception work; development/demo include the worker; production excludes mock code/assets. No domain UI is added. |
-| 9. Storybook | Add the supported Angular renderer and its devkit dependencies, shared styles/assets/providers, and catalog configuration; check its dependency graph independently. | Resolution introduces no unexplained mismatch; the zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
-| 10. Compodoc | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs. | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits. |
-| 11. Story component tests | Add the renderer-compatible story test runner and isolated configuration. | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command. |
-| 12. Common UI kit | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when needed. Each component includes stories/tests before moving on. | Default, focus, invalid, disabled, busy, mobile, and long-content states are demonstrated; documented APIs have no business-store/mock dependencies. |
-| 13. Core and domain contracts | Add API configuration, date source, domain/DTO models, and pure money/date functions in core/data-access public APIs. | Vitest verifies exact validation precedence, raw decimal precision, safe cents, and local dates. Clean dependency-order library builds work. |
-| 14. MSW disputes backend | Add the separate mock library, exact fixtures, in-memory repository, and GET/POST/DELETE handlers; remove the temporary smoke endpoint. | Vitest repository/HTTP tests cover seeds/order, payload validation, status codes, prepend/removal, monotonic IDs, empty lists, and session reset; no browser globals in shared handlers. |
-| 15. HTTP and signal store | Add the Angular API adapter, resource read model, feature-scoped store, pending/error commands, and isolated test scenario setup. | Tests verify loading/error/empty separation, confirmed updates, failure recovery, one submission path, no stale-read overwrite, and mock-free client imports. |
-| 16. Disputes overview | Add the lazy feature, table, counter, empty/loading/error states, retry, and branded navigation using the completed kit. | Seed values/order match the PDF through MSW; Playwright verifies populated/empty/error rendering; the route is a real lazy boundary. |
-| 17. Creation flow | Add the Signal Forms draft/schema, narrow amount control, awaited `FormRoot` submission, validation, cancellation, pending lock, and success notification. | Vitest/component checks and Playwright E2E cover required errors, USD/EUR creation, insertion/defaults, cancellation, clean reopening, delayed/failed requests, preserved draft, and toast behavior. |
-| 18. Removal flow | Add record-specific confirmation, dismissals, awaited mutation, pending lock, and focus fallback. | Playwright covers cancellation, failure without local deletion, confirmed/last-row removal, recreation, ID continuity, and focus/busy behavior across engines. |
-| 19. Built previews and optimization | Add pinned local server and demo/production preview scripts; review side effects, chunks, images, budgets, and justified deferred content. | Optimized demo works at `/disputes` with MSW; production has no worker/seeds/mock or test code; assets survive optimization; output checks use clean separate paths. |
-| 20. Final integration | Complete acceptance matrix, desktop/mobile visual review, axe scans, manual keyboard/focus checks, and configured suites. | Every assignment behavior has E2E coverage; mobile workflows and async states are accessible; clean builds/checks pass with recorded results. |
-| 21. Handover | Document root commands, build order, tool responsibilities, profiles, reset behavior, choices, limitations, and demo steps. | Another developer can install/build, run suites/catalog, preview the working demo, inspect mock-free production, and explain its real-API requirement. |
+| Stage                               | Work introduced in this step                                                                                                                                                                                                                                                                                                          | Exit criteria                                                                                                                                                                                                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0. Compatibility baseline           | Verify stable Angular/CLI, local Node/npm, compatible exact TypeScript, and tool peer ranges; resolve the minimal workspace dependencies and record checks required at later integration stages.                                                                                                                                      | The workspace baseline resolves without forced/legacy peer options or a hidden downgrade. Each later integration validates its own dependency graph and runtime behavior before dependent work proceeds.                                                              |
+| 1. CLI workspace                    | Generate the empty root workspace, `apps/disputes` shell, and only a minimal `ui/common` public-API integration fixture. Add strict/zoneless defaults, exact-save policy, runtime version files, root ignore rules, build output paths, and dependency-order build/watch scripts. Preserve the existing Git repository and documents. | Clean library-then-app build works from no output artifacts; the shell imports the built library public API; no Zone.js runtime or unintended attribution. Repository ignore rules exclude `TMP`, generated output, reports, and dependency folders on every machine. |
+| 2. Prettier                         | Add formatting config, ignore rules, and format/check scripts only.                                                                                                                                                                                                                                                                   | Formatting covers owned source/config/docs; generated output and `TMP` are excluded.                                                                                                                                                                                  |
+| 3. ESLint and boundaries            | Add Angular ESLint, template checks, and layer/import restrictions. Accommodate the agreed `$signal` fields with clean input/model aliases rather than forbidding those aliases.                                                                                                                                                      | Lint passes; a temporary invalid import is rejected and then removed. Update project-specific boundary mappings when later libraries are generated.                                                                                                                   |
+| 4. Tailwind and tokens              | Add Tailwind/PostCSS, CSS-variable colors, locally served Montserrat plus its license, supplied logo assets, and app/library/story source detection.                                                                                                                                                                                  | Shell/fixture render token-backed utilities; a production build retains library-only classes and local fonts. No business feature is implemented yet.                                                                                                                 |
+| 5. Vitest unit/integration tests    | Configure Angular CLI's Vitest test targets for app/library specs, zoneless TestBed, jsdom, isolated types, and unit/CI scripts. Keep pure Node contracts separate where needed.                                                                                                                                                      | Compatible dependency resolution and meaningful signal/DOM and pure-function tests pass without Zone.js; all intended library specs are discovered.                                                                                                                   |
+| 6. Browser component tests          | Add the version-matched Vitest Playwright provider, browser binaries, isolated browser-spec selection, and component-test command.                                                                                                                                                                                                    | The integration fixture passes a real-browser interaction test; Node/jsdom and browser targets do not run each other's specs.                                                                                                                                         |
+| 7. Playwright E2E                   | Add `@playwright/test`, E2E fixtures, managed app startup/readiness/cleanup, axe, viewport/browser projects, and screenshot policy.                                                                                                                                                                                                   | Shell/navigation and accessibility smoke checks pass; the acceptance matrix is prepared; Chromium/Firefox/WebKit checks do not discover component or story specs.                                                                                                     |
+| 8. MSW infrastructure               | Add exact MSW, generated worker, typed environments, build-time flags, awaited dynamic startup, and separate development/demo/production outputs. Use a minimal temporary HTTP fixture.                                                                                                                                               | Browser first-request smoke and Vitest/Node interception work; development/demo include the worker; production excludes mock code/assets. No domain UI is added.                                                                                                      |
+| 9. Storybook                        | Add the supported Angular renderer and its devkit dependencies, shared styles/assets/providers, and catalog configuration; check its dependency graph independently.                                                                                                                                                                  | Resolution introduces no unexplained mismatch; the zoneless fixture renders and its required/aliased signal input, output, and model can be exercised.                                                                                                                |
+| 10. Compodoc                        | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs.                                                                                                                                                                                                                                                          | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits.                                                                                      |
+| 11. Story component tests           | Add the renderer-compatible story test runner and isolated configuration.                                                                                                                                                                                                                                                             | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command.                                                                                                                                                   |
+| 12. Common UI kit                   | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when needed. Each component includes stories/tests before moving on.                                                                                                        | Default, focus, invalid, disabled, busy, mobile, and long-content states are demonstrated; documented APIs have no business-store/mock dependencies.                                                                                                                  |
+| 13. Core and domain contracts       | Add API configuration, date source, domain/DTO models, and pure money/date functions in core/data-access public APIs.                                                                                                                                                                                                                 | Vitest verifies exact validation precedence, raw decimal precision, safe cents, and local dates. Clean dependency-order library builds work.                                                                                                                          |
+| 14. MSW disputes backend            | Add the separate mock library, exact fixtures, in-memory repository, and GET/POST/DELETE handlers; remove the temporary smoke endpoint.                                                                                                                                                                                               | Vitest repository/HTTP tests cover seeds/order, payload validation, status codes, prepend/removal, monotonic IDs, empty lists, and session reset; no browser globals in shared handlers.                                                                              |
+| 15. HTTP and signal store           | Add the Angular API adapter, resource read model, feature-scoped store, pending/error commands, and isolated test scenario setup.                                                                                                                                                                                                     | Tests verify loading/error/empty separation, confirmed updates, failure recovery, one submission path, no stale-read overwrite, and mock-free client imports.                                                                                                         |
+| 16. Disputes overview               | Add the lazy feature, table, counter, empty/loading/error states, retry, and branded navigation using the completed kit.                                                                                                                                                                                                              | Seed values/order match the PDF through MSW; Playwright verifies populated/empty/error rendering; the route is a real lazy boundary.                                                                                                                                  |
+| 17. Creation flow                   | Add the Signal Forms draft/schema, narrow amount control, awaited `FormRoot` submission, validation, cancellation, pending lock, and success notification.                                                                                                                                                                            | Vitest/component checks and Playwright E2E cover required errors, USD/EUR creation, insertion/defaults, cancellation, clean reopening, delayed/failed requests, preserved draft, and toast behavior.                                                                  |
+| 18. Removal flow                    | Add record-specific confirmation, dismissals, awaited mutation, pending lock, and focus fallback.                                                                                                                                                                                                                                     | Playwright covers cancellation, failure without local deletion, confirmed/last-row removal, recreation, ID continuity, and focus/busy behavior across engines.                                                                                                        |
+| 19. Built previews and optimization | Add pinned local server and demo/production preview scripts; review side effects, chunks, images, budgets, and justified deferred content.                                                                                                                                                                                            | Optimized demo works at `/disputes` with MSW; production has no worker/seeds/mock or test code; assets survive optimization; output checks use clean separate paths.                                                                                                  |
+| 20. Final integration               | Complete acceptance matrix, desktop/mobile visual review, axe scans, manual keyboard/focus checks, and configured suites.                                                                                                                                                                                                             | Every assignment behavior has E2E coverage; mobile workflows and async states are accessible; clean builds/checks pass with recorded results.                                                                                                                         |
+| 21. Handover                        | Document root commands, build order, tool responsibilities, profiles, reset behavior, choices, limitations, and demo steps.                                                                                                                                                                                                           | Another developer can install/build, run suites/catalog, preview the working demo, inspect mock-free production, and explain its real-API requirement.                                                                                                                |
 
 Accessibility and tests start when each component/feature is introduced. Stage 20 consolidates acceptance evidence; it is not the first test or accessibility pass. Within stage 12, finish one shared component and its stories before starting the next. Within stages 16-18, complete one user workflow and its tests at a time. MSW infrastructure, domain handlers, and Angular integration are separate concerns rather than one large backend change.
 
@@ -731,36 +731,36 @@ Use `sideEffects: false` for packages whose modules are safe to discard when unu
 
 ## 12. Assumptions and decisions to document
 
-| Topic | Planned decision | Basis |
-| --- | --- | --- |
-| Workspace | Root Angular CLI workspace, `apps/disputes`, and the four requested library groups. | Explicit user preference; CLI supports the layout without Nx. |
-| Delivery order | Integrate each tool separately, finish the shared kit with stories, then implement features. | Explicit user request for gradual integration and reviewable stages. |
-| Styling | Tailwind with semantic CSS custom properties. | Replaces the earlier SCSS-first choice. |
-| Test responsibilities | Vitest for units/integration, Vitest with the Playwright provider for browser components, Playwright Test for all E2E/browser workflows, and Storybook for catalog interactions. | Explicit user decision on 14 November; each suite has a distinct owner and isolated discovery. |
-| Component documentation | Mandatory shared-component stories and JSDoc/Compodoc API documentation. | Explicit user request. |
-| Form submission | `FormRoot` and Signal Forms `submit()`, shared by Enter and the submit button. | Explicitly confirmed after checking the current API. |
-| Naming/visibility | `$signal`, `observable$`, private implementation, protected template members, public contracts. | Latest user preference supersedes the review's original signal-naming recommendation. |
-| Exact dependencies | Pin owned declarations and lock resolved installs; recheck peers at each integration. | User-requested version policy. |
-| Persistence | Reset to fixtures on reload. | Mock data is required; persistence is unspecified. |
-| Mock backend | MSW 3 with normal Angular HTTP calls and an in-memory mock repository. | Later user request supersedes the direct-store/no-HTTP assumption. |
-| Profiles | Development and optimized demo use MSW; production excludes all mocks. | User explicitly confirmed a separate demo artifact because no real backend is supplied. |
-| Pending mutations | Temporarily lock duplicate actions and dialog dismissal, announce busy state, restore dismissal on failure. | User-approved extension for asynchronous requests; finite timeouts prevent indefinite locks. |
-| Optional features | Include success toasts and keyboard accessibility. | Confirmed during planning. |
-| Toast implementation | Use Material MatSnackBar and custom presentation. | Reuses package behavior as requested. |
-| Accessibility infrastructure | Use CDK Dialog and native semantics. | Matches the widgets present in this scope. |
-| Currency default | Start unselected. | Matches empty and invalid form figures. |
-| Creation date | Current local calendar date at save time. | The written requirement says today. |
-| Number allocation | Monotonic within the session, starting at 6229. | Preserves uniqueness after deletion and matches Figure 1.6b. |
-| Create-modal dismissal | Cancel, close icon, Escape, and backdrop discard the draft before submission/after failure; temporarily locked while pending. | Original consistency choice plus the confirmed asynchronous behavior. |
-| Button order | Cancel on the left, primary/danger action on the right. | Matches the figures. |
-| Touch validation | Blur reveals that field's error; submit reveals all invalid fields. | Interprets touched behavior without flagging untouched fields prematurely. |
-| Text values | Trim outer whitespace; reject whitespace-only required input. | Prevents empty business values. |
-| Amount entry | Native numeric field with ungrouped decimal input. | Resolves grouped-value artwork versus native number-input behavior. |
-| Extra decimals | Reject literal input with more than two fractional digits, including trailing zeroes. | Follows Figure 2.0's no-rounding rule. |
-| Removal toast duration | Five seconds. | Aligns with the specified creation duration. |
-| Focus after deletion | Next row, previous row, or New Dispute. | The original trigger is removed from the DOM. |
-| User/language indicators | Static prototype context. | No account or localization workflow is specified. |
-| Responsive layout | Preserve data through table scrolling and adaptive dialogs; verify phone workflows. | Explicitly requested by the user after the POC review. |
+| Topic                        | Planned decision                                                                                                                                                                 | Basis                                                                                          |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Workspace                    | Root Angular CLI workspace, `apps/disputes`, and the four requested library groups.                                                                                              | Explicit user preference; CLI supports the layout without Nx.                                  |
+| Delivery order               | Integrate each tool separately, finish the shared kit with stories, then implement features.                                                                                     | Explicit user request for gradual integration and reviewable stages.                           |
+| Styling                      | Tailwind with semantic CSS custom properties.                                                                                                                                    | Replaces the earlier SCSS-first choice.                                                        |
+| Test responsibilities        | Vitest for units/integration, Vitest with the Playwright provider for browser components, Playwright Test for all E2E/browser workflows, and Storybook for catalog interactions. | Explicit user decision on 14 November; each suite has a distinct owner and isolated discovery. |
+| Component documentation      | Mandatory shared-component stories and JSDoc/Compodoc API documentation.                                                                                                         | Explicit user request.                                                                         |
+| Form submission              | `FormRoot` and Signal Forms `submit()`, shared by Enter and the submit button.                                                                                                   | Explicitly confirmed after checking the current API.                                           |
+| Naming/visibility            | `$signal`, `observable$`, private implementation, protected template members, public contracts.                                                                                  | Latest user preference supersedes the review's original signal-naming recommendation.          |
+| Exact dependencies           | Pin owned declarations and lock resolved installs; recheck peers at each integration.                                                                                            | User-requested version policy.                                                                 |
+| Persistence                  | Reset to fixtures on reload.                                                                                                                                                     | Mock data is required; persistence is unspecified.                                             |
+| Mock backend                 | MSW 3 with normal Angular HTTP calls and an in-memory mock repository.                                                                                                           | Later user request supersedes the direct-store/no-HTTP assumption.                             |
+| Profiles                     | Development and optimized demo use MSW; production excludes all mocks.                                                                                                           | User explicitly confirmed a separate demo artifact because no real backend is supplied.        |
+| Pending mutations            | Temporarily lock duplicate actions and dialog dismissal, announce busy state, restore dismissal on failure.                                                                      | User-approved extension for asynchronous requests; finite timeouts prevent indefinite locks.   |
+| Optional features            | Include success toasts and keyboard accessibility.                                                                                                                               | Confirmed during planning.                                                                     |
+| Toast implementation         | Use Material MatSnackBar and custom presentation.                                                                                                                                | Reuses package behavior as requested.                                                          |
+| Accessibility infrastructure | Use CDK Dialog and native semantics.                                                                                                                                             | Matches the widgets present in this scope.                                                     |
+| Currency default             | Start unselected.                                                                                                                                                                | Matches empty and invalid form figures.                                                        |
+| Creation date                | Current local calendar date at save time.                                                                                                                                        | The written requirement says today.                                                            |
+| Number allocation            | Monotonic within the session, starting at 6229.                                                                                                                                  | Preserves uniqueness after deletion and matches Figure 1.6b.                                   |
+| Create-modal dismissal       | Cancel, close icon, Escape, and backdrop discard the draft before submission/after failure; temporarily locked while pending.                                                    | Original consistency choice plus the confirmed asynchronous behavior.                          |
+| Button order                 | Cancel on the left, primary/danger action on the right.                                                                                                                          | Matches the figures.                                                                           |
+| Touch validation             | Blur reveals that field's error; submit reveals all invalid fields.                                                                                                              | Interprets touched behavior without flagging untouched fields prematurely.                     |
+| Text values                  | Trim outer whitespace; reject whitespace-only required input.                                                                                                                    | Prevents empty business values.                                                                |
+| Amount entry                 | Native numeric field with ungrouped decimal input.                                                                                                                               | Resolves grouped-value artwork versus native number-input behavior.                            |
+| Extra decimals               | Reject literal input with more than two fractional digits, including trailing zeroes.                                                                                            | Follows Figure 2.0's no-rounding rule.                                                         |
+| Removal toast duration       | Five seconds.                                                                                                                                                                    | Aligns with the specified creation duration.                                                   |
+| Focus after deletion         | Next row, previous row, or New Dispute.                                                                                                                                          | The original trigger is removed from the DOM.                                                  |
+| User/language indicators     | Static prototype context.                                                                                                                                                        | No account or localization workflow is specified.                                              |
+| Responsive layout            | Preserve data through table scrolling and adaptive dialogs; verify phone workflows.                                                                                              | Explicitly requested by the user after the POC review.                                         |
 
 These decisions are sufficient to start implementation. Revisit a decision if further instructions change its assumptions; routine library configuration and visual refinement do not require separate approval.
 

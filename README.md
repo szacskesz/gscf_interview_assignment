@@ -18,3 +18,5 @@ Use `npm run watch:libs` in a second terminal when editing the library. If the d
 The application is in `apps/disputes`. Shared code is in `libs` and imported through its package public APIs. See the [implementation plan](Docs/1-Initial-Plan.md) for the work sequence.
 
 The workspace was verified with a clean `npm ci` and development and production builds in library-first order on Windows. npm reported optional native tooling install-script notices. The builds succeeded with npm's default install-script policy.
+
+Use `npm run format` to format workspace source, configuration, and Markdown. Use `npm run format:check` to check them without writing changes.
