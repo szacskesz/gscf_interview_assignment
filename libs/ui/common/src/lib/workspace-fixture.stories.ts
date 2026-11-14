@@ -10,6 +10,7 @@ interface FixtureArgs {
 const meta = {
   title: 'Foundation/Workspace fixture',
   component: WorkspaceFixture,
+  tags: ['autodocs'],
   decorators: [applicationConfig({ providers: [provideZonelessChangeDetection()] })],
   args: { label: 'Workspace check', count: 0 },
   render: (args) => ({
