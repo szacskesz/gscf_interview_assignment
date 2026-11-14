@@ -4,6 +4,8 @@ Date: 13 November 2026
 
 Status: Planning only
 
+Readiness review: See [development readiness](5-Development-Readiness.md) for the 14 November prerequisite checks, package-resolution findings, and stage-order clarifications. A planned exit criterion is not evidence that its integration has already passed.
+
 Revision: Updated after the POC review, the user's engineering decisions, and the MSW reference review. This revision supersedes the original single-application layout, SCSS-first styling, Vitest selection, optional Storybook recommendation, and direct in-memory store mutations without HTTP. Development/demo/production profiles and temporary pending-request dismissal locks were explicitly confirmed by the user.
 
 ## 1. Objective and source material
@@ -50,6 +52,8 @@ The prototype's language indicator and user name provide visual context; they do
 ### Angular version
 
 On 13 November 2026, the published `latest` version of `@angular/core` is **22.2.6**. Angular 22 is the appropriate stable major version for this assignment. Use the latest stable patch available when implementation begins, verify the release again, and record the installed versions in the lockfile. Avoid `next`, release-candidate, and experimental APIs in required functionality. Sources: [package release metadata](https://registry.npmjs.org/@angular/core/latest) and [Angular release policy](https://angular.dev/reference/releases).
+
+The readiness check selected **TypeScript 6.0.3**, not the registry's newer TypeScript 7.x release, because Angular 22 requires `>=6.0.0 <6.1.0`. Exact version selection must follow compatibility rather than applying `latest` to every package independently.
 
 Use a compatible Angular CLI and CDK release from the same major version; verify their own release numbers and peer dependencies instead of assuming every package has the same patch number.
 
@@ -245,7 +249,7 @@ Configure a polite announcement and keep keyboard focus in the workflow. Keep th
 
 Angular CLI supports multiple applications and libraries in one workspace. Create an empty workspace with `--no-create-application`, then generate projects at explicit roots. The library generator supports `--project-root`, so the requested layout does not require Nx. Keep one root `angular.json`, npm manifest, and lockfile. See [multi-project workspaces](https://angular.dev/reference/configs/file-structure) and [library generator options](https://angular.dev/cli/generate/library).
 
-The intended layout is below. Generate libraries when their implementation stage begins; do not create empty projects for every conceivable future feature.
+The intended layout is below. Generate libraries when their implementation stage begins; do not create empty projects for every conceivable future feature. Establish `ui/common` with a minimal temporary integration fixture in stage 1 so packaging, aliases, Tailwind, and later catalog tooling can be verified against a real library. Its actual reusable component kit is still implemented in stage 12, after Storybook and story tests are ready.
 
 ```text
 apps/
@@ -675,16 +679,16 @@ Complete the stages in order. Add one tool or architectural concern per reviewab
 
 | Stage | Work introduced in this step | Exit criteria |
 | --- | --- | --- |
-| 0. Compatibility baseline | Verify current stable Angular/CLI, Node/TypeScript, and the requested toolchain's peer ranges; record intended exact versions and any constraint. | A compatible plan exists without forced peer resolution, a hidden Angular downgrade, or an unapproved tool substitution. |
-| 1. CLI workspace | Generate the empty root workspace and `apps/disputes` shell; establish strict TypeScript/templates, standalone/zoneless defaults, npm exact-save policy, project roots, and the build output path. Prepare public-library conventions without generating the entire kit. | Clean installation and production shell build work; no Zone.js runtime, no unintended generated attribution, and existing documents/reference files remain intact. |
+| 0. Compatibility baseline | Verify stable Angular/CLI, local Node/npm, compatible exact TypeScript, and tool peer ranges; resolve the minimal workspace dependencies and record later-tool transitive conflicts with explicit integration gates. | The workspace baseline resolves without forced/legacy peer options or a hidden downgrade. Known later-tool issues remain visible and block their own integration, not unrelated foundation work; do not claim the complete stack is verified. |
+| 1. CLI workspace | Generate the empty root workspace, `apps/disputes` shell, and only a minimal `ui/common` public-API integration fixture. Add strict/zoneless defaults, exact-save policy, runtime version files, root ignore rules, build output paths, and dependency-order build/watch scripts. Preserve the existing Git repository and documents. | Clean library-then-app build works from no output artifacts; the shell imports the built library public API; no Zone.js runtime or unintended attribution. Repository ignore rules exclude `TMP`, generated output, reports, and dependency folders on every machine. |
 | 2. Prettier | Add formatting config, ignore rules, and format/check scripts only. | Formatting covers owned source/config/docs; generated output and `TMP` are excluded. |
-| 3. ESLint and boundaries | Add Angular ESLint, template checks, and explicit layer/import restrictions. | Lint passes; a small verification confirms forbidden layer imports are rejected. Remove any temporary invalid fixture after that check. |
-| 4. Tailwind and tokens | Add Tailwind/PostCSS, CSS-variable colors, global typography, and app/library/story source detection. | The shell renders token-backed utilities; a production build retains classes from library sources. No business feature is implemented yet. |
-| 5. Jest | Integrate the chosen Jest preset, zoneless TestBed setup, isolated TypeScript configuration, and scripts; replace generated unit-runner targets. | A meaningful signal/DOM integration fixture and a pure-function test pass without Zone.js; no duplicate application Vitest runner. |
-| 6. Cypress | Add E2E config, support code, isolated types, app startup/readiness, and browser installation instructions. | One shell/navigation smoke test runs reproducibly; the requirement-to-E2E matrix is prepared for later feature tests. |
-| 7. Playwright | Add an independent browser-test project, axe integration, viewport/browser settings, and screenshot policy. | Shell accessibility and cross-browser smoke checks run without discovering Cypress/Jest tests. |
+| 3. ESLint and boundaries | Add Angular ESLint, template checks, and layer/import restrictions. Accommodate the agreed `$signal` fields with clean input/model aliases rather than forbidding those aliases. | Lint passes; a temporary invalid import is rejected and then removed. Update project-specific boundary mappings when later libraries are generated. |
+| 4. Tailwind and tokens | Add Tailwind/PostCSS, CSS-variable colors, locally served Montserrat plus its license, supplied logo assets, and app/library/story source detection. | Shell/fixture render token-backed utilities; a production build retains library-only classes and local fonts. No business feature is implemented yet. |
+| 5. Jest | Isolate and resolve the readiness review's Babel peer finding for the Angular/Jest graph, then integrate the preset, zoneless TestBed, isolated types, and scripts; replace generated unit-runner targets. | Dependency resolution has no unexplained peer mismatches; meaningful signal/DOM and pure-function tests pass without Zone.js; no duplicate application Vitest runner. |
+| 6. Cypress | Add E2E config, support code, isolated types, managed dev-server startup/readiness/cleanup, and browser installation instructions. | Shell/navigation smoke runs reproducibly with condition-based waits; the requirement-to-E2E matrix is prepared for later feature tests. |
+| 7. Playwright | Add an independent browser-test project, axe, managed server startup, viewport/browser settings, and screenshot policy. | Installed Chromium/Firefox/WebKit smoke checks and shell accessibility run without discovering Cypress/Jest tests. Capture visual baselines on a documented, consistent browser/OS environment. |
 | 8. MSW infrastructure | Add exact MSW, generated worker, typed environments, build-time flags, awaited dynamic startup, and separate development/demo/production outputs. Use a minimal temporary HTTP fixture. | Browser first-request smoke and Jest/Node interception work; development/demo include the worker; production excludes mock code/assets. No domain UI is added. |
-| 9. Storybook | Add the supported Angular renderer, shared styles/assets/providers, and catalog configuration. | A small zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
+| 9. Storybook | Add the supported Angular renderer and its devkit dependencies, shared styles/assets/providers, and catalog configuration; recheck the combined Babel/peer graph. | Resolution introduces no unexplained mismatch; the zoneless fixture renders and its required/aliased signal input, output, and model can be exercised. |
 | 10. Compodoc | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs. | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits. |
 | 11. Story component tests | Add the renderer-compatible story test runner and isolated configuration. | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command. |
 | 12. Common UI kit | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when needed. Each component includes stories/tests before moving on. | Default, focus, invalid, disabled, busy, mobile, and long-content states are demonstrated; documented APIs have no business-store/mock dependencies. |
@@ -699,6 +703,8 @@ Complete the stages in order. Add one tool or architectural concern per reviewab
 | 21. Handover | Document root commands, build order, tool responsibilities, profiles, reset behavior, choices, limitations, and demo steps. | Another developer can install/build, run suites/catalog, preview the working demo, inspect mock-free production, and explain its real-API requirement. |
 
 Accessibility and tests start when each component/feature is introduced. Stage 20 consolidates acceptance evidence; it is not the first test or accessibility pass. Within stage 12, finish one shared component and its stories before starting the next. Within stages 16-18, complete one user workflow and its tests at a time. MSW infrastructure, domain handlers, and Angular integration are separate concerns rather than one large backend change.
+
+Early tooling uses the minimal integration fixture, not a prematurely implemented business component. Stage 9 adds its catalog example; stage 12 replaces temporary fixture behavior with the real shared kit. Add scripts and README setup notes in the stage that introduces them; stage 21 consolidates documentation rather than creating it for the first time. Stage 8 may use the configured Angular dev server for browser smoke checks and inspect emitted demo/production files; the dedicated built-artifact preview server arrives in stage 19. Core API/date infrastructure in stage 13 is not a prerequisite for presentational UI; keep stage 8's generic startup settings app-local until then.
 
 If a version combination fails its compatibility fixture, resolve that integration before layering dependent features on it. Record an evidence-based alternative for the user if the selected tools cannot coexist; do not silently substitute another unit runner, add Zone.js, or disable required checks.
 

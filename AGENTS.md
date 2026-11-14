@@ -27,6 +27,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use explicit library public APIs and enforce dependency direction with lint rules. Do not import another library's private implementation or create circular dependencies.
 - Integrate one concern at a time: workspace baseline, Prettier, ESLint/boundaries, Tailwind/tokens, Jest, Cypress, Playwright, MSW infrastructure, Storybook, Compodoc, story tests, shared components, domain contracts, mock handlers/repository, HTTP/store integration, then business features and final verification.
 - Each step must have its own usable result and appropriate verification before the next dependent step. Do not install the entire toolchain or implement the whole application in one change.
+- Establish only a minimal `ui/common` integration fixture with the initial workspace so early library/Tailwind/tool checks have a real target. Build the actual shared component kit after Storybook and story tests are ready. Maintain build/watch commands and setup notes as each stage lands.
 - Build the assignment-sized shared component set and its stories before the disputes features. Do not port the entire earlier POC toolkit or add unrelated controls.
 - This order describes future implementation. A documentation request still does not authorize scaffolding or installing application dependencies.
 
@@ -65,6 +66,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use `Instructions/SeniorFrontendEngineer-Interview-Task.pdf` as the assignment's source of requirements, including its figures and input-state specification.
 - Consult `Docs/1-Initial-Plan.md` for the detailed implementation approach and documented assumptions.
 - Consult `Docs/4-MSW-Integration-Plan.md` for the reviewed mock-backend design, API contract, profile decisions, and staged verification.
+- Consult `Docs/5-Development-Readiness.md` for the checked prerequisites, compatible package candidates, dependency-resolution findings, and stage-order clarifications. Recheck time-sensitive package choices before installing them.
 - Keep user requirements distinct from proposed implementation choices. Later user instructions take precedence over earlier planning assumptions.
 - Respect the requested stage of work: a planning or documentation request does not by itself authorize starting application implementation.
 

@@ -234,6 +234,8 @@ The detailed stage table and exit criteria live in section 11 of the plan. The o
 
 This sequence does not authorize implementing or installing these tools during the documentation update. It makes later changes independently reviewable and locates compatibility failures before they become entangled with the business application.
 
+The [development-readiness review](5-Development-Readiness.md) clarifies that the initial workspace includes one minimal `ui/common` integration fixture and its build/watch wiring. This makes early packaging and Tailwind checks possible; the real shared component kit still follows Storybook, Compodoc, and story tests. It also records the current package compatibility findings and remaining runtime checks.
+
 ### Still excluded
 
 - Copying the POC's custom Nx builders, global built-in patches, private Angular API access, lifecycle monkey-patching, or numeric parser.
