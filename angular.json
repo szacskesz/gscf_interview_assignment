@@ -18,7 +18,12 @@
           "options": {
             "browser": "apps/disputes/src/main.ts",
             "tsConfig": "apps/disputes/tsconfig.app.json",
-            "assets": [{ "glob": "**/*", "input": "apps/disputes/public" }],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "apps/disputes/public"
+              }
+            ],
             "styles": ["apps/disputes/src/styles.css"]
           },
           "configurations": {
@@ -58,6 +63,14 @@
             }
           },
           "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "apps/disputes/tsconfig.spec.json",
+            "exclude": ["**/*.browser.spec.ts"],
+            "isolate": true
+          }
         }
       }
     },
@@ -78,6 +91,14 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/ui/common/tsconfig.spec.json",
+            "exclude": ["**/*.browser.spec.ts"],
+            "isolate": true
+          }
         }
       }
     }

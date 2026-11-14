@@ -30,7 +30,13 @@
       "path": "./apps/disputes/tsconfig.app.json"
     },
     {
+      "path": "./apps/disputes/tsconfig.spec.json"
+    },
+    {
       "path": "./libs/ui/common/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/ui/common/tsconfig.spec.json"
     }
   ]
 }
