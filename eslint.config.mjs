@@ -73,14 +73,37 @@ export default defineConfig(
     },
   },
   {
-    files: ['libs/core/**/*.ts', 'libs/data-access/**/*.ts', 'libs/ui/**/*.ts'],
+    files: [
+      'libs/core/**/*.ts',
+      'libs/data-access/disputes/**/*.ts',
+      'libs/ui/**/*.ts',
+      'libs/feature/**/*.ts',
+    ],
     rules: {
       'no-restricted-syntax': [
         'error',
         {
-          selector: 'ImportDeclaration[source.value="@gscf/disputes-data-access"]',
-          message:
-            'Core, UI and data-access internals cannot depend on the disputes package entry.',
+          selector:
+            ':matches(ImportDeclaration, ImportExpression)[source.value="@gscf/disputes-mock"]',
+          message: 'Only the guarded app bootstrap may use the mock library.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['libs/core/**/*.ts', 'libs/data-access/disputes/**/*.ts', 'libs/ui/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            ':matches(ImportDeclaration, ImportExpression)[source.value="@gscf/disputes-mock"]',
+          message: 'Only the guarded app bootstrap may use the mock library.',
+        },
+        {
+          selector:
+            ':matches(ImportDeclaration, ImportExpression)[source.value="@gscf/disputes-data-access"]',
+          message: 'Use the domain API only from the feature and mock backend.',
         },
       ],
     },

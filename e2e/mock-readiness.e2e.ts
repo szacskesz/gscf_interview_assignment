@@ -1,18 +1,20 @@
 import { expect, test } from '@playwright/test';
 
-test('intercepts the first API request before the application renders', async ({
-  page,
-  request,
-}) => {
-  const readinessResponse = page.waitForResponse('**/api/__mock-readiness');
-
+test('serves the disputes API through its registered worker', async ({ page, request }) => {
   await page.goto('/');
-
-  const readiness = await readinessResponse;
-  expect(readiness.fromServiceWorker()).toBe(true);
-  expect(readiness.ok()).toBe(true);
-  await expect(readiness.json()).resolves.toEqual({ ready: true });
   await expect(page.getByRole('heading', { name: 'Disputes' })).toBeVisible();
+
+  const [disputes] = await Promise.all([
+    page.waitForResponse('**/api/disputes'),
+    page.evaluate(() => fetch('/api/disputes').then((response) => response.ok)),
+  ]);
+  expect(disputes.fromServiceWorker()).toBe(true);
+  expect(disputes.ok()).toBe(true);
+  await expect(disputes.json()).resolves.toMatchObject([
+    { number: 6228 },
+    { number: 6227 },
+    { number: 6224 },
+  ]);
 
   const worker = await request.get('/mockServiceWorker.js');
   expect(worker.ok()).toBe(true);
