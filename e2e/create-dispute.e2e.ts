@@ -78,6 +78,40 @@ test('has no axe violations in the invalid create dialog', { tag: '@mobile' }, a
   expect(results.violations).toEqual([]);
 });
 
+test.describe('Decimal entry with a comma-decimal browser locale', () => {
+  test.use({ locale: 'hu-HU' });
+
+  test(
+    'keeps a trailing period while typing and saves the completed U.S. decimal',
+    { tag: ['@cross-browser', '@mobile'] },
+    async ({ page }) => {
+      await page.goto('/disputes');
+      const dialog = await openCreate(page);
+      await dialog.getByRole('textbox', { name: 'Buyer' }).fill('Decimal Buyer');
+      await dialog.getByRole('textbox', { name: 'Dispute Reason' }).fill('Decimal reason');
+      await dialog.getByRole('radio', { name: 'USD' }).check();
+      const amount = dialog.getByRole('spinbutton', { name: 'Dispute Amount' });
+
+      await amount.pressSequentially('22.');
+      await amount.pressSequentially('45');
+      await expect(amount).toHaveValue('22.45');
+
+      await amount.fill('');
+      await amount.pressSequentially('22,45');
+      await dialog.getByRole('button', { name: 'Create Dispute' }).click();
+      await expect(amount).toHaveAccessibleDescription('Enter a valid dispute amount.');
+      await expect(page.getByText('Showing 3/3 rows')).toBeVisible();
+
+      await amount.press('ControlOrMeta+a');
+      await amount.press('Backspace');
+      await amount.pressSequentially('22.45');
+      await amount.press('Enter');
+      await expect(dialog).toHaveCount(0);
+      await expect(page.getByRole('row').nth(1).getByRole('cell').nth(4)).toHaveText('22.45');
+    },
+  );
+});
+
 test(
   'aligns the amount warning icon with the other fields and leaves the stepper usable',
   { tag: ['@cross-browser', '@mobile'] },

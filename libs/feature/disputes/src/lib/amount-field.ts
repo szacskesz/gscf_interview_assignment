@@ -17,14 +17,16 @@ export interface AmountDraft {
       type="number"
       step="0.01"
       inputmode="decimal"
+      lang="en-US"
       [id]="$controlId()"
-      [value]="$value().raw"
       [readOnly]="$locked()"
       [attr.aria-describedby]="$showError() ? $controlId() + '-error' : null"
       [attr.aria-invalid]="$showError() || null"
       placeholder="Enter dispute amount"
       required
-      (input)="update(control)"
+      (beforeinput)="checkSeparator($event)"
+      (paste)="checkPastedSeparator($event)"
+      (input)="update(control, $event)"
       (blur)="touch.emit()"
     />
   `,
@@ -39,12 +41,42 @@ export class AmountField implements FormValueControl<AmountDraft> {
   readonly $locked = input(false, { alias: 'locked' });
   readonly touch = output<void>();
   private readonly $control = viewChild.required<ElementRef<HTMLInputElement>>('control');
+  private rejectedSeparator = false;
 
   focus(options?: FocusOptions): void {
     this.$control().nativeElement.focus(options);
   }
 
-  protected update(control: HTMLInputElement): void {
-    this.$value.set({ raw: control.value, badInput: control.validity.badInput });
+  protected checkSeparator(event: InputEvent): void {
+    this.rejectComma(event, event.data);
+  }
+
+  protected checkPastedSeparator(event: ClipboardEvent): void {
+    this.rejectComma(event, event.clipboardData?.getData('text/plain'));
+  }
+
+  protected update(control: HTMLInputElement, event: Event): void {
+    if (
+      event instanceof InputEvent &&
+      (event.data?.includes('.') ||
+        event.inputType.startsWith('delete') ||
+        event.inputType === 'insertFromPaste')
+    ) {
+      this.rejectedSeparator = false;
+    }
+
+    // Keep the native editing buffer intact when a partial decimal has no serialized value.
+    this.$value.set({
+      raw: control.value,
+      badInput: control.validity.badInput || this.rejectedSeparator,
+    });
+  }
+
+  private rejectComma(event: Event, text: string | null | undefined): void {
+    if (!text?.includes(',')) return;
+
+    event.preventDefault();
+    this.rejectedSeparator = true;
+    this.$value.update((value) => ({ ...value, badInput: true }));
   }
 }
