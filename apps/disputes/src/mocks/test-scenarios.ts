@@ -13,6 +13,18 @@ export function testScenarioHandlers(url: string) {
       ];
     case 'read-error':
       return [http.get(url, () => new HttpResponse(null, { status: 503 }), { once: true })];
+    case 'read-retry-error':
+      return [
+        http.get(url, () => new HttpResponse(null, { status: 503 }), { once: true }),
+        http.get(
+          url,
+          async () => {
+            await delay(600);
+            return new HttpResponse(null, { status: 503 });
+          },
+          { once: true },
+        ),
+      ];
     case 'create-error':
       return [
         http.post(

@@ -18,7 +18,9 @@
     }
     @case ('error') {
       <p role="alert" class="mb-3 text-danger">Disputes could not be loaded.</p>
-      <button type="button" gscfButton="secondary" (click)="store.retry()">Try again</button>
+      <button #retryButton type="button" gscfButton="secondary" (click)="retry(retryButton)">
+        Try again
+      </button>
     }
     @case ('ready') {
       @if (store.$rows().length) {

@@ -22,8 +22,8 @@ export class DisputesStore {
     this.$list.hasValue() ? this.$list.value() : [],
   );
 
-  retry(): void {
-    if (!this.$pending() && this.$readState() === 'error') this.$list.reload();
+  retry(): boolean {
+    return !this.$pending() && this.$readState() === 'error' && this.$list.reload();
   }
 
   async create(draft: CreateDisputeRequest): Promise<MutationResult<Dispute>> {

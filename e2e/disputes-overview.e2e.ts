@@ -58,8 +58,42 @@ test('renders empty and read-error states and retries a failed request', async (
 
   await page.goto('/disputes?scenario=read-error');
   await expect(page.getByRole('alert')).toHaveText('Disputes could not be loaded.');
-  await page.getByRole('button', { name: 'Try again' }).click();
+  const retry = page.getByRole('button', { name: 'Try again' });
+  await retry.focus();
+  await page.keyboard.press('Enter');
   await expect(page.getByText('Showing 3/3 rows')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'New Dispute' })).toBeFocused();
+});
+
+test(
+  'returns focus to Try again after a failed retry',
+  { tag: ['@cross-browser', '@mobile'] },
+  async ({ page }) => {
+    await page.goto('/disputes?scenario=read-retry-error');
+    const retry = page.getByRole('button', { name: 'Try again' });
+    await retry.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('status')).toHaveText('Loading disputes…');
+    await expect(page.getByRole('alert')).toHaveText('Disputes could not be loaded.');
+    await expect(retry).toBeFocused();
+
+    await page.keyboard.press('Enter');
+    await expect(page.getByText('Showing 3/3 rows')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'New Dispute' })).toBeFocused();
+  },
+);
+
+test('keeps focus where the user moved it while retrying', async ({ page }) => {
+  await page.goto('/disputes?scenario=read-retry-error');
+  const retry = page.getByRole('button', { name: 'Try again' });
+  await retry.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('status')).toHaveText('Loading disputes…');
+
+  const navLink = page.getByRole('link', { name: 'Disputes' });
+  await navLink.focus();
+  await expect(page.getByRole('alert')).toHaveText('Disputes could not be loaded.');
+  await expect(navLink).toBeFocused();
 });
 
 test(

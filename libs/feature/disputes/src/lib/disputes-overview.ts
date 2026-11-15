@@ -5,7 +5,9 @@ import {
   Injector,
   ViewContainerRef,
   afterNextRender,
+  afterRenderEffect,
   inject,
+  signal,
   viewChild,
 } from '@angular/core';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
@@ -28,8 +30,37 @@ export class DisputesOverview {
   private readonly injector = inject(Injector);
   private readonly $createButton =
     viewChild.required<ElementRef<HTMLButtonElement>>('createButton');
+  private readonly $retryButton = viewChild<ElementRef<HTMLButtonElement>>('retryButton');
+  private readonly $restoreRetryFocus = signal(false);
   private readonly $table = viewChild(DisputesTable);
   protected readonly store = inject(DisputesStore);
+
+  constructor() {
+    afterRenderEffect({
+      earlyRead: () => {
+        if (!this.$restoreRetryFocus()) return;
+        const state = this.store.$readState();
+        if (state === 'loading') return;
+
+        const createButton = this.$createButton().nativeElement;
+        const { activeElement, body } = createButton.ownerDocument;
+        // Leave focus alone if the user moved to another control while waiting.
+        const destination = state === 'ready' ? createButton : this.$retryButton()?.nativeElement;
+        return { destination: activeElement === body ? destination : undefined };
+      },
+      write: (retryFocus) => {
+        const result = retryFocus();
+        if (!result) return;
+        this.$restoreRetryFocus.set(false);
+        result.destination?.focus();
+      },
+    });
+  }
+
+  protected retry(retryButton: HTMLButtonElement): void {
+    const wasFocused = retryButton.ownerDocument.activeElement === retryButton;
+    if (this.store.retry() && wasFocused) this.$restoreRetryFocus.set(true);
+  }
 
   protected createDispute(): void {
     if (this.store.$pending() || this.store.$readState() !== 'ready') return;
