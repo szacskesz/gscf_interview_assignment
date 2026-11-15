@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { expect, test } from 'vitest';
 import workspace from '../../angular.json' with { type: 'json' };
+import packageJson from '../../package.json' with { type: 'json' };
 import rootConfig from '../../tsconfig.json' with { type: 'json' };
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -38,5 +39,15 @@ test.each(['development', 'e2e'] as const)(
       });
       expect(resolvedModule?.resolvedFileName, name).toMatch(/\/libs\/.+\/src\/public-api\.ts$/);
     }
+  },
+);
+
+test.each(['serve:dist:dev', 'serve:dist:demo'] as const)(
+  '%s uses loopback HTTP so MSW can register without a local certificate',
+  (script) => {
+    const args = packageJson.scripts[script].split(/\s+/);
+    expect(args).toContain('--hostname');
+    expect(args[args.indexOf('--hostname') + 1]).toBe('127.0.0.1');
+    expect(args.filter((arg) => /^--(?:http2|https|key|cert|pfx)(?:=|$)/.test(arg))).toEqual([]);
   },
 );

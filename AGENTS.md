@@ -38,7 +38,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use npm, commit the lockfile, and configure `save-exact=true`. Use exact versions without `^` or `~` in repository-owned package manifests, including private library peer dependencies where declared. Do not edit third-party manifests or transitive lockfile ranges to enforce this rule.
 - Verify installed package peer compatibility with the selected Angular, TypeScript, Node, and test-tool versions. Do not hide incompatibilities with forced installs or silently downgrade Angular or replace requested tools.
 - Configure Prettier for the workspace and Angular ESLint for code quality and library boundaries. Exclude generated output and temporary/reference material from application tooling.
-- Provide `serve:dist` using a pinned local `local-web-server` dependency, HTTP/2, SPA fallback, and the actual application build directory. Prefer its `ws --directory ...` CLI over changing directories or downloading a package at run time.
+- Provide `serve:dist` using a pinned local `local-web-server` dependency, HTTP/2, SPA fallback, and the actual production build directory. Use loopback HTTP by default for `serve:dist:demo` and `serve:dist:dev` so MSW can register without a local TLS certificate. Prefer its `ws --directory ...` CLI over changing directories or downloading a package at run time.
 - Declare `sideEffects: false` for libraries that have no required import-time side effects. Preserve CSS or required initialization with explicit side-effect entries where needed. Verify production output; this declaration is not a universal tree-shaking fix.
 
 ## Angular development skill

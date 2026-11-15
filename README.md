@@ -43,11 +43,11 @@ Use `npm run test:stories` to start the catalog on port 6007 and run its renderi
 
 ## Build and preview
 
-- `npm run build:demo` and `npm run serve:dist:demo` open the self-contained optimized demo at `https://127.0.0.1:4300/disputes`.
-- `npm run build:dev` and `npm run serve:dist:dev` open the development artifact at `https://127.0.0.1:4300/disputes`. Stop the first preview before switching between development and demo.
+- `npm run build:demo` and `npm run serve:dist:demo` open the self-contained optimized demo at `http://127.0.0.1:4300/disputes`.
+- `npm run build:dev` and `npm run serve:dist:dev` open the development artifact at `http://127.0.0.1:4300/disputes`. Stop the first preview before switching between development and demo.
 - `npm run build` and `npm run serve:dist` open the mock-free build at `https://127.0.0.1:4301/disputes`. These are aliases for `build:prod` and `serve:dist:prod`. Serve a real API under `/api` for the production data workflows.
 
-The previews bind to loopback and use the local server's self-signed TLS certificate for HTTP/2. Use the development server on localhost if your browser rejects the preview certificate or prevents service worker registration with it.
+The mock-enabled previews use loopback HTTP so browsers can register the MSW worker without a local TLS certificate. The production preview uses HTTP/2 with the local server's self-signed certificate. To opt into HTTP/2 for the demo, pass `--http2 --key path/to/key.pem --cert path/to/cert.pem` after `npm run serve:dist:demo --`, using a certificate trusted by your browser.
 
 ## Architecture and behavior
 
