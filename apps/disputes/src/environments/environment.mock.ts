@@ -1,4 +1,4 @@
-import type { Environment } from './environment-config';
+import type { Environment } from './environment.model';
 
 export const environment: Environment = {
   mockApi: true,
