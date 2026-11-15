@@ -144,6 +144,9 @@ test(
 
     for (const control of controls) {
       await expect(control).toHaveCSS('border-top-width', '2px');
+    }
+    await expect(buyer).toHaveCSS('border-top-color', 'rgb(0, 85, 164)');
+    for (const control of controls.slice(1)) {
       await expect(control).toHaveCSS('border-top-color', 'rgb(124, 124, 124)');
     }
 
@@ -154,7 +157,8 @@ test(
       await expect(control).toHaveCSS('border-top-width', '2px');
       await expect(control).toHaveCSS('border-top-color', 'rgb(185, 28, 28)');
     }
-    await expect(buyer).toHaveCSS('outline-color', 'rgb(0, 85, 164)');
+    await expect(buyer).toHaveCSS('box-shadow', /0px 0px 3px 1px/);
+    await expect(buyer).toHaveCSS('outline-color', 'rgba(0, 0, 0, 0)');
   },
 );
 

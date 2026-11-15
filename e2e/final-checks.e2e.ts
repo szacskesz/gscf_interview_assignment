@@ -33,11 +33,16 @@ test('uses the reference colors for active navigation, danger actions, and inval
   const reason = creation.getByRole('textbox', { name: 'Dispute Reason' });
   await reason.hover();
   await expect(reason).toHaveCSS('border-top-color', 'rgb(14, 39, 67)');
+  await reason.focus();
+  await expect(reason).toHaveCSS('border-top-color', 'rgb(0, 85, 164)');
+  await expect(reason).toHaveCSS('box-shadow', /0px 0px 3px 1px/);
   await creation.getByRole('button', { name: 'Create Dispute' }).click();
   await reason.hover();
   await expect(reason).toHaveCSS('border-top-color', 'rgb(185, 28, 28)');
   await reason.focus();
-  await expect(reason).toHaveCSS('outline-color', 'rgb(0, 85, 164)');
+  await expect(reason).toHaveCSS('border-top-color', 'rgb(185, 28, 28)');
+  await expect(reason).toHaveCSS('box-shadow', /0px 0px 3px 1px/);
+  await expect(reason).toHaveCSS('outline-color', 'rgba(0, 0, 0, 0)');
 });
 
 test('dismisses the current success toast after five seconds and replaces earlier notices', async ({

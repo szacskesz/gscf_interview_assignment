@@ -56,6 +56,30 @@
   --font-sans: Montserrat, ui-sans-serif, system-ui, sans-serif;
 }
 
+@utility input-hover {
+  &:is(input):read-write:not(:focus, .input-focus, [aria-invalid='true']) {
+    @apply border-control-hover;
+  }
+}
+
+@utility input-focus {
+  &:is(input) {
+    --input-focus-color: var(--gscf-blue-a70);
+    border-color: var(--input-focus-color);
+    box-shadow: 0 0 3px 1px color-mix(in srgb, var(--input-focus-color) 50%, transparent);
+    outline: 2px solid transparent;
+    outline-offset: 1px;
+
+    &[aria-invalid='true'] {
+      --input-focus-color: var(--gscf-red-70);
+    }
+
+    @media (forced-colors: active) {
+      outline-color: Highlight;
+    }
+  }
+}
+
 @layer base {
   body {
     @apply bg-surface font-sans text-ink;

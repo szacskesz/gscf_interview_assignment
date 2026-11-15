@@ -25,20 +25,20 @@ const reasonStates: readonly ReasonState[] = [
     id: 'hover',
     title: 'Hover',
     description: 'The border darkens when the pointer is over the input.',
-    previewClass: 'border-control-hover!',
+    previewClass: 'input-hover',
   },
   {
     id: 'focused',
     title: 'Focused',
     description: 'Focus is visible while the placeholder remains.',
-    previewClass: 'outline-2 outline-primary',
+    previewClass: 'input-focus',
   },
   {
     id: 'typing',
     title: 'Focused, typing',
-    description: 'The typed value is visible inside the focus outline.',
+    description: 'The field retains its blue border and soft shadow while typing.',
     value: 'Incorrect unit price',
-    previewClass: 'outline-2 outline-primary',
+    previewClass: 'input-focus',
   },
   {
     id: 'filled',
@@ -55,9 +55,9 @@ const reasonStates: readonly ReasonState[] = [
   {
     id: 'focused-error',
     title: 'Error, focused',
-    description: 'The error border and focus outline are visible together.',
+    description: 'A soft red shadow shows focus around the red error border.',
     error: requiredReason,
-    previewClass: 'outline-2 outline-primary',
+    previewClass: 'input-focus',
   },
 ];
 
@@ -65,6 +65,52 @@ const amountStates = [
   { id: 'zero', value: '0', error: 'Enter an amount greater than 0.' },
   { id: 'precision', value: '12.345', error: 'Enter an amount with up to 2 decimals.' },
 ];
+
+const defaultBorder = 'rgb(124, 124, 124)';
+const hoverBorder = 'rgb(14, 39, 67)';
+const focusBorder = 'rgb(0, 85, 164)';
+const errorColor = 'rgb(185, 28, 28)';
+const textColor = 'rgb(41, 41, 41)';
+
+async function expectFieldColors(input: HTMLInputElement, borderColor: string, focused = false) {
+  await expect(input).toHaveStyle({
+    borderColor,
+    color: textColor,
+    backgroundColor: 'rgb(255, 255, 255)',
+  });
+
+  const label = input.labels?.item(0);
+  await expect(label).toHaveStyle({ color: textColor });
+  await expect(label?.querySelector('[aria-hidden="true"]')).toHaveStyle({ color: errorColor });
+  if (input.placeholder) {
+    await expect(getComputedStyle(input, '::placeholder').color).toBe('rgb(101, 101, 101)');
+  }
+
+  const style = getComputedStyle(input);
+  if (focused) {
+    // Let the browser normalize the reference shadow to its computed CSS color format.
+    const reference = input.ownerDocument.createElement('span');
+    reference.style.boxShadow = `0 0 3px 1px color-mix(in srgb, ${borderColor} 50%, transparent)`;
+    input.ownerDocument.body.append(reference);
+    try {
+      await expect(style.boxShadow).toBe(getComputedStyle(reference).boxShadow);
+      await expect(style.outlineColor).toBe('rgba(0, 0, 0, 0)');
+    } finally {
+      reference.remove();
+    }
+  } else {
+    await expect(style.boxShadow).toBe('none');
+    await expect(style.outlineStyle).toBe('none');
+  }
+
+  if (input.getAttribute('aria-invalid') === 'true') {
+    const error = input.ownerDocument.getElementById(`${input.id}-error`);
+    const icon = input.closest('gscf-field-frame')?.querySelector('gscf-icon svg');
+    await expect(error).toHaveStyle({ color: errorColor });
+    await expect(icon).toBeVisible();
+    await expect(getComputedStyle(icon!).stroke).toBe(errorColor);
+  }
+}
 
 export const Figure20: StoryObj = {
   name: 'Figure 2.0',
@@ -117,40 +163,48 @@ export const Figure20: StoryObj = {
     const reason = (state: string) =>
       within(canvas.getByRole('region', { name: state })).getByRole('textbox', {
         name: 'Dispute Reason',
-      });
+      }) as HTMLInputElement;
+
+    const colorStates = [
+      { name: 'Default', border: defaultBorder },
+      { name: 'Hover', border: hoverBorder },
+      { name: 'Focused', border: focusBorder, focused: true },
+      { name: 'Focused, typing', border: focusBorder, focused: true },
+      { name: 'Filled', border: defaultBorder },
+      { name: 'Error, empty', border: errorColor },
+      { name: 'Error, focused', border: errorColor, focused: true },
+    ];
+    for (const { name, border, focused } of colorStates) {
+      await expectFieldColors(reason(name), border, focused);
+    }
 
     const initial = reason('Default');
     await expect(initial).toBeRequired();
     await expect(initial).toHaveAttribute('placeholder', 'Add a reason');
-    await expect(initial).toHaveStyle({ borderColor: 'rgb(124, 124, 124)' });
-    await expect(reason('Hover')).toHaveStyle({ borderColor: 'rgb(14, 39, 67)' });
-    await expect(reason('Focused')).toHaveStyle({
-      outlineColor: 'rgb(0, 85, 164)',
-      outlineWidth: '2px',
-    });
     await expect(reason('Focused, typing')).toHaveValue('Incorrect unit price');
     await expect(reason('Filled')).toHaveValue('Incorrect unit price on invoice INV-20431');
-    await expect(reason('Error, empty')).toHaveAccessibleDescription(requiredReason);
-    const focusedError = reason('Error, focused');
-    await expect(focusedError).toHaveAccessibleDescription(requiredReason);
-    await expect(focusedError).toHaveStyle({
-      borderColor: 'rgb(185, 28, 28)',
-      outlineColor: 'rgb(0, 85, 164)',
-    });
+    const emptyError = reason('Error, empty');
+    await expect(emptyError).toHaveAccessibleDescription(requiredReason);
+    await expect(reason('Error, focused')).toHaveAccessibleDescription(requiredReason);
 
     const amounts = within(canvas.getByRole('region', { name: 'Error, invalid value' }));
     for (const { value, error } of amountStates) {
       const amount = amounts.getByRole('spinbutton', {
         name: 'Dispute Amount',
         description: error,
-      });
+      }) as HTMLInputElement;
       await expect(amount).toHaveValue(Number(value));
       await expect(amount).toHaveAttribute('aria-invalid', 'true');
+      await expectFieldColors(amount, errorColor);
     }
 
     await userEvent.click(initial);
     await expect(initial).toHaveFocus();
+    await expectFieldColors(initial, focusBorder, true);
+    await userEvent.click(emptyError);
+    await expect(emptyError).toHaveFocus();
+    await expectFieldColors(emptyError, errorColor, true);
     await userEvent.click(canvas.getByRole('heading', { name: 'Required text and number input' }));
-    await expect(initial).not.toHaveFocus();
+    await expect(emptyError).not.toHaveFocus();
   },
 };

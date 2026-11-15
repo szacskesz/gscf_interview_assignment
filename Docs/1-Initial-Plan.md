@@ -175,16 +175,16 @@ Also reject malformed, non-finite, or unrepresentable numeric input. The PDF doe
 
 Replicate the field states in Figure 2.0:
 
-| State                | Planned treatment                                                              |
-| -------------------- | ------------------------------------------------------------------------------ |
-| Default              | Neutral border, gray placeholder, required marker, no error.                   |
-| Hover                | Darker border and text cursor without changing label or message.               |
-| Focused              | Visible blue focus treatment; placeholder remains until typing starts.         |
-| Focused while typing | Focus treatment and the current value.                                         |
-| Filled and blurred   | Normal border and retained valid value.                                        |
-| Empty with error     | Red border, warning icon, required marker, and red error text below.           |
-| Focused with error   | Error remains until corrected, with an independently visible focus indication. |
-| Invalid amount       | The relevant single error message and preserved input; no silent rounding.     |
+| State                | Planned treatment                                                                |
+| -------------------- | -------------------------------------------------------------------------------- |
+| Default              | Neutral border, gray placeholder, required marker, no error.                     |
+| Hover                | Darker border and text cursor without changing label or message.                 |
+| Focused              | Blue border and a soft blue shadow. The placeholder remains until typing starts. |
+| Focused while typing | Blue border and a soft blue shadow around the current value.                     |
+| Filled and blurred   | Normal border and retained valid value.                                          |
+| Empty with error     | Red border, warning icon, required marker, and red error text below.             |
+| Focused with error   | Red error border and a soft red shadow. The error remains until corrected.       |
+| Invalid amount       | The relevant single error message and preserved input; no silent rounding.       |
 
 For currency errors, show red radio outlines and the group-level message as in Figure 1.3a. Do not invent an input box around the radio group.
 
