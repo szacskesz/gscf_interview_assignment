@@ -90,7 +90,9 @@
   background: var(--gscf-backdrop);
 }
 
-.gscf-success-toast {
+.mat-mdc-snack-bar-container.gscf-success-toast {
+  --gscf-toast-outline-width: 3px;
+  margin: calc(20px + var(--gscf-toast-outline-width));
   --mat-snack-bar-container-color: var(--gscf-neutral-0);
   --mat-snack-bar-container-shape: 0.5rem;
   --mat-snack-bar-supporting-text-color: var(--gscf-neutral-110);
@@ -101,5 +103,5 @@
 }
 
 .gscf-success-toast .mat-mdc-snackbar-surface {
-  box-shadow: 0 0 0 3px var(--gscf-green-60);
+  box-shadow: 0 0 0 var(--gscf-toast-outline-width) var(--gscf-green-60);
 }

@@ -73,6 +73,34 @@ test('dismisses the current success toast after five seconds and replaces earlie
 });
 
 test(
+  'insets the visible success toast outline by 20 pixels',
+  { tag: ['@cross-browser', '@mobile'] },
+  async ({ page, isMobile }) => {
+    if (isMobile) await page.setViewportSize({ width: 320, height: 620 });
+    await page.goto('/disputes');
+    await page.getByRole('button', { name: 'Remove dispute 6228' }).click();
+    await page.getByRole('button', { name: 'Remove dispute', exact: true }).click();
+    await expect(page.getByText('Dispute 6228 has been removed.', { exact: true })).toBeVisible();
+
+    const surface = page.locator('.gscf-success-toast .mat-mdc-snackbar-surface');
+    await expect(surface).toHaveCSS('box-shadow', 'rgb(58, 139, 37) 0px 0px 0px 3px');
+    await expect
+      .poll(() =>
+        surface.evaluate((toast) => {
+          const bounds = toast.getBoundingClientRect();
+          const outlineWidth = 3;
+          return {
+            right: Math.round(window.innerWidth - bounds.right - outlineWidth),
+            bottom: Math.round(window.innerHeight - bounds.bottom - outlineWidth),
+            leftFits: Math.round(bounds.left - outlineWidth) >= 20,
+          };
+        }),
+      )
+      .toEqual({ right: 20, bottom: 20, leftFits: true });
+  },
+);
+
+test(
   'keeps dialog actions visible in a short 320px viewport',
   { tag: '@mobile' },
   async ({ page }) => {
