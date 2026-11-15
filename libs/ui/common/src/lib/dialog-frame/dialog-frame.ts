@@ -6,8 +6,7 @@ import { Icon } from '../icon/icon';
   imports: [Button, Icon],
   selector: 'gscf-dialog-frame',
   host: {
-    class:
-      'block max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-lg bg-surface p-5 shadow-xl sm:p-6',
+    class: 'block max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-lg bg-surface p-5 sm:p-6',
   },
   template: `
     <header class="mb-3 flex items-start justify-between gap-3">

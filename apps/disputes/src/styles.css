@@ -1,6 +1,5 @@
 @import 'tailwindcss' source(none);
 @import '@angular/cdk/overlay-prebuilt.css';
-@import '@angular/material/prebuilt-themes/azure-blue.css';
 @source '../../';
 @source '../../../libs';
 @source '../../../.storybook';
@@ -35,6 +34,7 @@
 }
 
 @theme inline {
+  --color-*: initial;
   --color-ink: var(--gscf-neutral-110);
   --color-counter: var(--gscf-neutral-90);
   --color-muted: var(--gscf-neutral-80);
@@ -68,13 +68,14 @@
 
 .gscf-success-toast {
   --mat-snack-bar-container-color: var(--gscf-neutral-0);
+  --mat-snack-bar-container-shape: 0.5rem;
   --mat-snack-bar-supporting-text-color: var(--gscf-neutral-110);
-  --mat-snack-bar-supporting-text-font: Montserrat, ui-sans-serif, system-ui, sans-serif;
+  --mat-snack-bar-supporting-text-font: var(--font-sans);
+  --mat-snack-bar-supporting-text-line-height: 1.25rem;
+  --mat-snack-bar-supporting-text-size: 0.875rem;
+  --mat-snack-bar-supporting-text-weight: 400;
 }
 
 .gscf-success-toast .mat-mdc-snackbar-surface {
-  border-radius: 0.5rem;
-  box-shadow:
-    0 0 0 3px var(--gscf-green-60),
-    0 4px 10px rgb(0 0 0 / 16%);
+  box-shadow: 0 0 0 3px var(--gscf-green-60);
 }

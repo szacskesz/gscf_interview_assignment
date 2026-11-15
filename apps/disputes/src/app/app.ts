@@ -13,7 +13,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           routerLink="/disputes"
           routerLinkActive=""
           ariaCurrentWhenActive="page"
-          class="inline-flex min-h-11 items-center border-b-2 border-transparent px-2 text-sm font-semibold text-surface aria-[current=page]:border-surface focus-visible:outline-2 focus-visible:outline-surface"
+          class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-surface aria-[current=page]:bg-surface aria-[current=page]:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
         >
           Disputes
         </a>

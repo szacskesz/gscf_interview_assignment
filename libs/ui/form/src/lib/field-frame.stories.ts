@@ -45,3 +45,19 @@ export const RequiredCurrency: StoryObj<FieldFrame> = {
     await expect(canvas.getByRole('radio', { name: 'EUR' })).toBeChecked();
   },
 };
+
+export const DisabledText: StoryObj<FieldFrame> = {
+  render: () => ({
+    template: `
+      <gscf-field-frame label="Buyer" controlId="disabled-buyer">
+        <input gscfTextInput id="disabled-buyer" placeholder="Enter buyer name" disabled />
+      </gscf-field-frame>
+    `,
+  }),
+  async play({ canvas }) {
+    const input = canvas.getByRole('textbox', { name: 'Buyer' });
+    await expect(input).toBeDisabled();
+    await expect(input).toHaveStyle({ backgroundColor: 'rgb(237, 237, 237)' });
+    await expect(getComputedStyle(input, '::placeholder').color).toBe('rgb(189, 189, 189)');
+  },
+};

@@ -1,5 +1,45 @@
 import { expect, test } from '@playwright/test';
 
+test('uses the reference colors for active navigation, danger actions, and invalid fields', async ({
+  page,
+}) => {
+  await page.goto('/disputes');
+  const activeLink = page.getByRole('link', { name: 'Disputes' });
+  await expect(activeLink).toHaveCSS('color', 'rgb(0, 85, 164)');
+  await expect(activeLink).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+
+  const remove = page.getByRole('button', { name: 'Remove dispute 6228' });
+  await remove.hover();
+  await expect(remove).toHaveCSS('color', 'rgb(185, 28, 28)');
+  await expect(remove).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await remove.click();
+
+  const removal = page.getByRole('dialog', { name: 'Remove dispute 6228' });
+  const confirm = removal.getByRole('button', { name: 'Remove dispute', exact: true });
+  await confirm.hover();
+  await expect(confirm).toHaveCSS('background-color', 'rgb(185, 28, 28)');
+  await expect(removal.locator('#remove-dispute-description')).toHaveCSS(
+    'color',
+    'rgb(41, 41, 41)',
+  );
+  await removal.getByRole('button', { name: 'Cancel' }).click();
+
+  await page.getByRole('button', { name: 'New Dispute' }).click();
+  const creation = page.getByRole('dialog', { name: 'Create a dispute' });
+  await expect(creation.locator('#create-dispute-description')).toHaveCSS(
+    'color',
+    'rgb(41, 41, 41)',
+  );
+  const reason = creation.getByRole('textbox', { name: 'Dispute Reason' });
+  await reason.hover();
+  await expect(reason).toHaveCSS('border-top-color', 'rgb(14, 39, 67)');
+  await creation.getByRole('button', { name: 'Create Dispute' }).click();
+  await reason.hover();
+  await expect(reason).toHaveCSS('border-top-color', 'rgb(185, 28, 28)');
+  await reason.focus();
+  await expect(reason).toHaveCSS('outline-color', 'rgb(0, 85, 164)');
+});
+
 test('dismisses the current success toast after five seconds and replaces earlier notices', async ({
   page,
 }) => {
@@ -13,6 +53,10 @@ test('dismisses the current success toast after five seconds and replaces earlie
   await create.getByRole('radio', { name: 'USD' }).check();
   await create.getByRole('button', { name: 'Create Dispute' }).click();
   await expect(page.getByText('Dispute 6229 has been created.', { exact: true })).toBeVisible();
+  const surface = page.locator('.gscf-success-toast .mat-mdc-snackbar-surface');
+  await expect(surface).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect(surface).toHaveCSS('color', 'rgb(41, 41, 41)');
+  await expect(surface).toHaveCSS('box-shadow', 'rgb(58, 139, 37) 0px 0px 0px 3px');
   const liveNotice = page.locator('[aria-live="polite"]').filter({ hasText: 'Dispute created.' });
   await expect(liveNotice).toHaveText('Dispute created. Dispute 6229 has been created.');
 

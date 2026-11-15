@@ -13,7 +13,7 @@ import { Button, DialogFrame } from '@gscf/ui-common';
       [busy]="$busy()"
       (closed)="dismiss()"
     >
-      <p id="remove-dispute-description" class="mb-6 wrap-anywhere text-sm text-muted">
+      <p id="remove-dispute-description" class="mb-6 wrap-anywhere text-sm">
         Dispute {{ dispute.number }} ({{ dispute.reason }}, {{ amount }} {{ dispute.currency }})
         will be removed from the Disputes list, together with its comments and linked invoices. This
         cannot be undone.
