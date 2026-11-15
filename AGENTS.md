@@ -11,6 +11,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Repository content and commits
 
+- Commit each fix separately once it is complete and verified. Include the tests and documentation for that fix in the same commit.
 - Keep commit messages short, relevant, and focused on the actual change.
 - Do not add generated-by notices or attribution to coding assistants or generation tools in project files or commit metadata, including co-author trailers.
 
