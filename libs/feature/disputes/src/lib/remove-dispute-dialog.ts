@@ -21,7 +21,7 @@ import { Button, DialogFrame } from '@gscf/ui-common';
       @if ($failure(); as error) {
         <p role="alert" class="mb-4 text-sm text-danger">{{ error }}</p>
       }
-      <footer class="flex flex-wrap items-center justify-end gap-3">
+      <footer dialogActions class="flex flex-wrap items-center justify-end gap-3">
         @if ($busy()) {
           <p role="status" class="mr-auto text-sm">Removing dispute…</p>
         }

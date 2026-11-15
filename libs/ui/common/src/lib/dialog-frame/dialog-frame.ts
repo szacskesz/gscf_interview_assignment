@@ -6,10 +6,10 @@ import { Icon } from '../icon/icon';
   imports: [Button, Icon],
   selector: 'gscf-dialog-frame',
   host: {
-    class: 'block max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-lg bg-surface p-5 sm:p-6',
+    class: 'flex max-h-[calc(100dvh-2rem)] flex-col rounded-lg bg-surface py-5 sm:py-6',
   },
   template: `
-    <header class="mb-3 flex items-start justify-between gap-3">
+    <header class="flex shrink-0 items-start justify-between gap-3 px-5 pb-2 sm:px-6">
       <h2 [id]="$headingId()" class="pt-2 text-xl font-semibold text-brand">{{ $heading() }}</h2>
       <button
         type="button"
@@ -21,9 +21,15 @@ import { Icon } from '../icon/icon';
         <gscf-icon name="close" />
       </button>
     </header>
-    <ng-content />
+    <div class="min-h-0 overflow-y-auto px-5 py-1 sm:px-6">
+      <ng-content />
+    </div>
+    <div class="shrink-0 px-5 sm:px-6">
+      <ng-content select="[dialogActions]" />
+    </div>
   `,
 })
+/** Keeps the title and any projected `[dialogActions]` visible while the body scrolls. */
 export class DialogFrame {
   /** Required visible title of the dialog. */
   readonly $heading = input.required<string>({ alias: 'heading' });

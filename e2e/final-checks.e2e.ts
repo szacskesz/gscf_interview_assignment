@@ -73,7 +73,7 @@ test('dismisses the current success toast after five seconds and replaces earlie
 });
 
 test(
-  'fits a short 320px viewport with scrollable dialog actions',
+  'keeps dialog actions visible in a short 320px viewport',
   { tag: '@mobile' },
   async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 420 });
@@ -81,13 +81,11 @@ test(
     await page.getByRole('button', { name: 'New Dispute' }).click();
     const dialog = page.getByRole('dialog', { name: 'Create a dispute' });
     const submit = dialog.getByRole('button', { name: 'Create Dispute' });
-    await submit.scrollIntoViewIfNeeded();
-    await expect(submit).toBeInViewport();
+    await expect(submit).toBeInViewport({ ratio: 1 });
     await submit.click();
     await expect(dialog.getByText('Select a currency.')).toBeVisible();
     const cancel = dialog.getByRole('button', { name: 'Cancel' });
-    await cancel.scrollIntoViewIfNeeded();
-    await expect(cancel).toBeInViewport();
+    await expect(cancel).toBeInViewport({ ratio: 1 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
     await cancel.click();
     await expect(dialog).toHaveCount(0);

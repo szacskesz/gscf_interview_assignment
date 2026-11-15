@@ -79,6 +79,55 @@ test('has no axe violations in the invalid create dialog', { tag: '@mobile' }, a
 });
 
 test(
+  'scrolls validation errors within the dialog while keeping the title and actions in place',
+  { tag: ['@cross-browser', '@mobile'] },
+  async ({ page, isMobile }) => {
+    // A 1,200 by 650 viewport at 125% browser zoom has 960 by 520 CSS pixels.
+    await page.setViewportSize({ width: isMobile ? 390 : 960, height: 520 });
+    await page.goto('/disputes');
+    const dialog = await openCreate(page);
+    const buyer = dialog.getByRole('textbox', { name: 'Buyer' });
+    const title = dialog.getByRole('heading', { name: 'Create a dispute' });
+    const cancel = dialog.getByRole('button', { name: 'Cancel' });
+    const submit = dialog.getByRole('button', { name: 'Create Dispute' });
+
+    await buyer.press('Enter');
+    await expect(buyer).toBeFocused();
+    for (const error of [
+      'Enter a buyer name.',
+      'Enter a dispute reason.',
+      'Enter a dispute amount.',
+      'Select a currency.',
+    ]) {
+      await expect(dialog.getByText(error)).toBeVisible();
+    }
+
+    const currencyError = dialog.getByText('Select a currency.');
+    await expect(currencyError).not.toBeInViewport({ ratio: 1 });
+    const fixedControls = [title, cancel, submit];
+    const controlPositions = [];
+    for (const control of fixedControls) {
+      await expect(control).toBeInViewport({ ratio: 1 });
+      controlPositions.push(await control.boundingBox());
+    }
+
+    if (isMobile) {
+      await currencyError.scrollIntoViewIfNeeded();
+    } else {
+      await buyer.hover();
+      await page.mouse.wheel(0, 500);
+    }
+    await expect(currencyError).toBeInViewport({ ratio: 1 });
+    for (const [index, control] of fixedControls.entries()) {
+      await expect(control).toBeInViewport({ ratio: 1 });
+      expect(await control.boundingBox()).toEqual(controlPositions[index]);
+    }
+    await cancel.click();
+    await expect(dialog).toHaveCount(0);
+  },
+);
+
+test(
   'keeps a two-pixel border on text, amount, and radio fields in default and error states',
   { tag: ['@cross-browser', '@mobile'] },
   async ({ page }) => {

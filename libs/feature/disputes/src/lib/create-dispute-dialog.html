@@ -1,94 +1,96 @@
-<gscf-dialog-frame
-  heading="Create a dispute"
-  headingId="create-dispute-title"
-  [busy]="$busy()"
-  (closed)="dismiss()"
->
-  <p id="create-dispute-description" class="mb-5 text-sm">
-    Raise a dispute when an invoice differs from the agreed terms and conditions. Fields marked with
-    * are mandatory.
-  </p>
-  <form [formRoot]="$form" novalidate class="space-y-4">
-    <gscf-field-frame
-      label="Buyer"
-      controlId="dispute-buyer"
-      [required]="true"
-      [error]="$buyerError()"
-    >
-      <input
-        gscfTextInput
-        id="dispute-buyer"
-        [formField]="$form.buyer"
-        placeholder="Enter buyer name"
-        [readOnly]="$busy()"
-        [attr.aria-invalid]="$buyerError() ? 'true' : null"
-        [attr.aria-describedby]="$buyerError() ? 'dispute-buyer-error' : null"
-      />
-    </gscf-field-frame>
-    <gscf-field-frame
-      label="Dispute Reason"
-      controlId="dispute-reason"
-      [required]="true"
-      [error]="$reasonError()"
-    >
-      <input
-        gscfTextInput
-        id="dispute-reason"
-        [formField]="$form.reason"
-        placeholder="Add a reason"
-        [readOnly]="$busy()"
-        [attr.aria-invalid]="$reasonError() ? 'true' : null"
-        [attr.aria-describedby]="$reasonError() ? 'dispute-reason-error' : null"
-      />
-    </gscf-field-frame>
-    <gscf-field-frame
-      label="Dispute Amount"
-      controlId="dispute-amount"
-      [required]="true"
-      [error]="$amountError()"
-    >
-      <gscf-amount-field
+<form [formRoot]="$form" novalidate>
+  <gscf-dialog-frame
+    heading="Create a dispute"
+    headingId="create-dispute-title"
+    [busy]="$busy()"
+    (closed)="dismiss()"
+  >
+    <p id="create-dispute-description" class="mb-5 text-sm">
+      Raise a dispute when an invoice differs from the agreed terms and conditions. Fields marked
+      with * are mandatory.
+    </p>
+    <div class="space-y-4">
+      <gscf-field-frame
+        label="Buyer"
+        controlId="dispute-buyer"
+        [required]="true"
+        [error]="$buyerError()"
+      >
+        <input
+          gscfTextInput
+          id="dispute-buyer"
+          [formField]="$form.buyer"
+          placeholder="Enter buyer name"
+          [readOnly]="$busy()"
+          [attr.aria-invalid]="$buyerError() ? 'true' : null"
+          [attr.aria-describedby]="$buyerError() ? 'dispute-buyer-error' : null"
+        />
+      </gscf-field-frame>
+      <gscf-field-frame
+        label="Dispute Reason"
+        controlId="dispute-reason"
+        [required]="true"
+        [error]="$reasonError()"
+      >
+        <input
+          gscfTextInput
+          id="dispute-reason"
+          [formField]="$form.reason"
+          placeholder="Add a reason"
+          [readOnly]="$busy()"
+          [attr.aria-invalid]="$reasonError() ? 'true' : null"
+          [attr.aria-describedby]="$reasonError() ? 'dispute-reason-error' : null"
+        />
+      </gscf-field-frame>
+      <gscf-field-frame
+        label="Dispute Amount"
         controlId="dispute-amount"
-        [formField]="$form.amount"
-        [locked]="$busy()"
-        [showError]="$amountError() !== null"
-      />
-    </gscf-field-frame>
-    <gscf-field-frame
-      label="Currency"
-      controlId="dispute-currency"
-      kind="group"
-      [disabled]="$busy()"
-      [required]="true"
-      [error]="$currencyError()"
-    >
-      <div class="flex flex-wrap gap-4">
-        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2">
-          <input
-            gscfRadioInput
-            type="radio"
-            value="USD"
-            [formField]="$form.currency"
-            [attr.aria-invalid]="$currencyError() ? 'true' : null"
-          />
-          USD
-        </label>
-        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2">
-          <input
-            gscfRadioInput
-            type="radio"
-            value="EUR"
-            [formField]="$form.currency"
-            [attr.aria-invalid]="$currencyError() ? 'true' : null"
-          />
-          EUR
-        </label>
-      </div>
-    </gscf-field-frame>
-    @if ($failure(); as error) {
-      <p role="alert" class="text-sm text-danger">{{ error }}</p>
-    }
-    <footer class="flex flex-wrap items-center justify-end gap-3">
+        [required]="true"
+        [error]="$amountError()"
+      >
+        <gscf-amount-field
+          controlId="dispute-amount"
+          [formField]="$form.amount"
+          [locked]="$busy()"
+          [showError]="$amountError() !== null"
+        />
+      </gscf-field-frame>
+      <gscf-field-frame
+        label="Currency"
+        controlId="dispute-currency"
+        kind="group"
+        [disabled]="$busy()"
+        [required]="true"
+        [error]="$currencyError()"
+      >
+        <div class="flex flex-wrap gap-4">
+          <label class="inline-flex min-h-11 cursor-pointer items-center gap-2">
+            <input
+              gscfRadioInput
+              type="radio"
+              value="USD"
+              [formField]="$form.currency"
+              [attr.aria-invalid]="$currencyError() ? 'true' : null"
+            />
+            USD
+          </label>
+          <label class="inline-flex min-h-11 cursor-pointer items-center gap-2">
+            <input
+              gscfRadioInput
+              type="radio"
+              value="EUR"
+              [formField]="$form.currency"
+              [attr.aria-invalid]="$currencyError() ? 'true' : null"
+            />
+            EUR
+          </label>
+        </div>
+      </gscf-field-frame>
+      @if ($failure(); as error) {
+        <p role="alert" class="text-sm text-danger">{{ error }}</p>
+      }
+    </div>
+    <footer dialogActions class="flex flex-wrap items-center justify-end gap-3 pt-3">
       @if ($busy()) {
         <p role="status" class="mr-auto text-sm">Creating dispute…</p>
       }
@@ -99,5 +101,5 @@
         Create Dispute
       </button>
     </footer>
-  </form>
-</gscf-dialog-frame>
+  </gscf-dialog-frame>
+</form>
