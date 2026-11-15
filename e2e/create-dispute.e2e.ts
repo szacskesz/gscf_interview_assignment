@@ -78,6 +78,37 @@ test('has no axe violations in the invalid create dialog', { tag: '@mobile' }, a
   expect(results.violations).toEqual([]);
 });
 
+test(
+  'keeps a two-pixel border on text, amount, and radio fields in default and error states',
+  { tag: ['@cross-browser', '@mobile'] },
+  async ({ page }) => {
+    await page.goto('/disputes');
+    const dialog = await openCreate(page);
+    const buyer = dialog.getByRole('textbox', { name: 'Buyer' });
+    const controls = [
+      buyer,
+      dialog.getByRole('textbox', { name: 'Dispute Reason' }),
+      dialog.getByRole('spinbutton', { name: 'Dispute Amount' }),
+      dialog.getByRole('radio', { name: 'USD' }),
+      dialog.getByRole('radio', { name: 'EUR' }),
+    ];
+
+    for (const control of controls) {
+      await expect(control).toHaveCSS('border-top-width', '2px');
+      await expect(control).toHaveCSS('border-top-color', 'rgb(124, 124, 124)');
+    }
+
+    await dialog.getByRole('button', { name: 'Create Dispute' }).click();
+    await expect(buyer).toBeFocused();
+
+    for (const control of controls) {
+      await expect(control).toHaveCSS('border-top-width', '2px');
+      await expect(control).toHaveCSS('border-top-color', 'rgb(185, 28, 28)');
+    }
+    await expect(buyer).toHaveCSS('outline-color', 'rgb(0, 85, 164)');
+  },
+);
+
 test.describe('Decimal entry with a comma-decimal browser locale', () => {
   test.use({ locale: 'hu-HU' });
 
