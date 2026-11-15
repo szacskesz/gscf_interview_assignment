@@ -77,7 +77,7 @@ Use a compatible Angular CLI and CDK release from the same major version; verify
 | E2E and browser verification | Playwright Test with axe                                                              | One suite owns complete business workflows and targeted cross-browser, accessibility, focus, responsive, and visual checks. |
 | Shared component catalog     | Storybook with Compodoc and executable stories                                        | Documents public APIs and verifies isolated UI behavior before feature assembly.                                            |
 | Static quality               | Angular ESLint and Prettier                                                           | Consistent TypeScript, templates, styles, and documentation.                                                                |
-| Built previews               | Pinned `local-web-server`; `serve:dist` for demo and `serve:dist:prod` for production | Separate artifacts/origins, SPA fallback, HTTP/2; demo includes MSW intentionally.                                          |
+| Built previews               | Pinned `local-web-server`; `serve:dist:demo` for demo and `serve:dist` for production | Separate artifacts, SPA fallback, and HTTP/2. The demo includes MSW.                                                        |
 
 Angular's [compatibility matrix](https://angular.dev/reference/versions) is the source for runtime and language versions. Use the CLI-compatible RxJS 7.x dependency where required; it does not need to become the application's state-management mechanism. Check the development machine's Node/npm versions before scaffolding and document the supported runtime in the README and version configuration.
 
@@ -714,14 +714,7 @@ If commits are requested during implementation, each should describe a completed
 
 ### Demo/production previews and tree-shaking verification
 
-Use separate profile outputs under `dist/apps/disputes/{development,demo,production}/browser`; library and Storybook outputs also remain separate. Keep `build` production-oriented and use explicit `build:demo` for the self-contained interview artifact. The planned server scripts are:
-
-```json
-{
-  "serve:dist": "ws --http2 --spa index.html --directory dist/apps/disputes/demo/browser --port 4300",
-  "serve:dist:prod": "ws --http2 --spa index.html --directory dist/apps/disputes/production/browser --port 4301"
-}
-```
+Use separate profile outputs under `dist/apps/disputes/{development,demo,production}/browser`. Keep `build` and `serve:dist` as production aliases. Use `build:demo` and `serve:dist:demo` for the self-contained interview artifact. See the [README preview commands](../README.md#build-and-preview) for the development, demo, and production ports.
 
 Install `local-web-server` as an exact development dependency so npm resolves its local `ws` executable. This preserves HTTP/2 and SPA fallback without the original shell directory changes or an on-demand `npx` download. Build first, document the local HTTPS behavior, and verify the installed version's options. A separate loopback HTTP server command may be used for automated suites if local certificate handling would otherwise obscure their purpose. [local-web-server documentation](https://github.com/lwsjs/local-web-server).
 
@@ -773,11 +766,11 @@ The application README should contain:
 - A short architecture explanation, including why signals and Signal Forms fit this scope.
 - The division between CDK/Material behavior and application-specific presentation.
 - Money/date handling, ID allocation, persistence behavior, and documented ambiguities.
-- MSW startup, API contracts, per-page reset, worker regeneration, test scenarios, and development/demo/production differences. Document `build:demo` plus `serve:dist` as the interview path and the production artifact's real-API requirement.
+- MSW startup, API contracts, per-page reset, worker regeneration during installation and startup, test scenarios, and development/demo/production differences. Document `build:demo` plus `serve:dist:demo` as the interview path and the production artifact's real-API requirement.
 - Actual verification results and any known limitations.
 - A concise demonstration script covering creation errors, successful creation, removal cancellation, confirmed removal, and recovery from an empty list.
 
-Introduce scripts as their stage is completed: `start`, `build:libs`, `build`, `build:dev`, `build:demo`, `build:prod`, `mock:worker`, `serve:dist`, `serve:dist:prod`, `lint`, `format`, `format:check`, `test` and `test:ci` (Vitest), `test:components` (Vitest Browser Mode), `test:e2e`, `test:e2e:ui`, and `test:e2e:cross-browser` (Playwright Test), `storybook`, `build-storybook`, `docs:components`, and `test:stories`. Document clean library builds and watch mode explicitly. The README must use the real scripts once they exist and explain browser installation and local HTTPS behavior.
+Introduce scripts as their stages are completed. Keep the supported build, preview, test, and catalog commands in the [README](../README.md), including the `test:all` entry point and browser installation instructions.
 
 For the assignment's 40-minute presentation slot, prepare approximately five minutes on requirements and assumptions, ten minutes of live workflows, ten minutes on architecture/forms/state, ten minutes on testing/accessibility, and five minutes on tradeoffs and possible next steps. The separate team introduction, questions, and wrap-up remain outside that slot.
 
