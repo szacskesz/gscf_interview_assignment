@@ -166,7 +166,7 @@ test.describe('Decimal entry with a comma-decimal browser locale', () => {
   test.use({ locale: 'hu-HU' });
 
   test(
-    'keeps a trailing period while typing and saves the completed U.S. decimal',
+    'keeps a trailing period, blocks stepping after a comma, and saves a corrected U.S. decimal',
     { tag: ['@cross-browser', '@mobile'] },
     async ({ page }) => {
       await page.goto('/disputes');
@@ -177,11 +177,14 @@ test.describe('Decimal entry with a comma-decimal browser locale', () => {
       const amount = dialog.getByRole('spinbutton', { name: 'Dispute Amount' });
 
       await amount.pressSequentially('22.');
+      await expect(amount).toHaveValue('22.');
       await amount.pressSequentially('45');
       await expect(amount).toHaveValue('22.45');
 
       await amount.fill('');
-      await amount.pressSequentially('22,45');
+      await amount.pressSequentially('22,22');
+      await amount.press('ArrowDown');
+      await expect(amount).toHaveValue('2222');
       await dialog.getByRole('button', { name: 'Create Dispute' }).click();
       await expect(amount).toHaveAccessibleDescription('Enter a valid dispute amount.');
       await expect(page.getByText('Showing 3/3 rows')).toBeVisible();
@@ -189,9 +192,11 @@ test.describe('Decimal entry with a comma-decimal browser locale', () => {
       await amount.press('ControlOrMeta+a');
       await amount.press('Backspace');
       await amount.pressSequentially('22.45');
+      await amount.press('ArrowDown');
+      await expect(amount).toHaveValue('22.44');
       await amount.press('Enter');
       await expect(dialog).toHaveCount(0);
-      await expect(page.getByRole('row').nth(1).getByRole('cell').nth(4)).toHaveText('22.45');
+      await expect(page.getByRole('row').nth(1).getByRole('cell').nth(4)).toHaveText('22.44');
     },
   );
 });
@@ -199,7 +204,7 @@ test.describe('Decimal entry with a comma-decimal browser locale', () => {
 test(
   'aligns the amount warning icon with the other fields and leaves the stepper usable',
   { tag: ['@cross-browser', '@mobile'] },
-  async ({ page, browserName, isMobile }) => {
+  async ({ page }) => {
     await page.goto('/disputes');
     const dialog = await openCreate(page);
     await dialog.getByRole('button', { name: 'Create Dispute' }).click();
@@ -222,23 +227,12 @@ test(
       .filter({ has: page.getByRole('spinbutton', { name: 'Dispute Amount' }) })
       .locator('gscf-icon[name="warning"]');
     await expect(warning).toBeVisible();
-    if (browserName === 'chromium' && !isMobile) {
-      await amount.hover();
-      // The native stepper occupies the end of Chromium's input content box.
-      const increment = await amount.evaluate((input) => {
-        const box = input.getBoundingClientRect();
-        const style = getComputedStyle(input);
-        return {
-          x: box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth) - 5,
-          y: box.top + box.height / 2 - 4,
-        };
-      });
-      const iconLeft = await warning.evaluate((icon) => icon.getBoundingClientRect().left);
-      expect(increment.x).toBeLessThan(iconLeft);
-      await page.mouse.click(increment.x, increment.y);
-    } else {
-      await amount.press('ArrowUp');
-    }
+    const increment = dialog.getByRole('button', { name: 'Increase dispute amount' });
+    const incrementBox = await increment.boundingBox();
+    const warningBox = await warning.boundingBox();
+    if (!incrementBox || !warningBox) throw new Error('Expected the stepper and warning icon.');
+    expect(incrementBox.x + incrementBox.width).toBeLessThanOrEqual(warningBox.x);
+    await increment.click();
 
     await expect(amount).toHaveValue('0.01');
     await expect(warning).toHaveCount(0);

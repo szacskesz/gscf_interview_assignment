@@ -39,6 +39,23 @@ describe('Amount field', () => {
     expect(field.value()).toEqual({ raw: '5', badInput: true });
   });
 
+  it('removes commas inserted without a cancelable beforeinput and skips stepping the invalid draft', async () => {
+    const { field, input } = await createAmountField();
+    input.value = '22,22';
+    input.dispatchEvent(new InputEvent('input', { data: '22,22', inputType: 'insertText' }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+
+    expect(input.value).toBe('2222');
+    expect(field.value()).toEqual({ raw: '2222', badInput: true });
+
+    input.select();
+    input.dispatchEvent(new InputEvent('beforeinput', { data: '1', inputType: 'insertText' }));
+    input.value = '1';
+    input.dispatchEvent(new InputEvent('input', { data: '1', inputType: 'insertText' }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+    expect(field.value()).toEqual({ raw: '0.99', badInput: false });
+  });
+
   it('forwards focus, emits touch on blur, and reflects error and lock inputs on the control', async () => {
     const { fixture, field, input } = await createAmountField();
     const touched = vi.fn();
