@@ -62,6 +62,9 @@
     },
     {
       "path": "./libs/feature/disputes/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/feature/disputes/tsconfig.spec.json"
     }
   ]
 }

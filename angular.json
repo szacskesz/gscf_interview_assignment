@@ -333,6 +333,14 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/feature/disputes/tsconfig.spec.json",
+            "exclude": ["**/*.browser.spec.ts", "**/*.node.spec.ts"],
+            "isolate": true
+          }
         }
       }
     }
