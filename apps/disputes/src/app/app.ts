@@ -6,14 +6,14 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   imports: [NgOptimizedImage, RouterLink, RouterLinkActive, RouterOutlet],
   selector: 'gscf-root',
   template: `
-    <header class="flex items-center gap-5 bg-brand px-4 py-2 sm:gap-10 sm:px-8">
+    <header class="flex items-center gap-3 bg-brand px-4 py-0.5 sm:gap-4 sm:px-5">
       <img ngSrc="gscf-logo.png" alt="GSCF" width="81" height="24" priority />
       <nav aria-label="Main navigation">
         <a
           routerLink="/disputes"
           routerLinkActive=""
           ariaCurrentWhenActive="page"
-          class="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-surface aria-[current=page]:bg-surface aria-[current=page]:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface"
+          class="inline-flex min-h-11 items-center rounded px-2 text-xs text-surface aria-[current=page]:font-semibold focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-surface"
         >
           Disputes
         </a>

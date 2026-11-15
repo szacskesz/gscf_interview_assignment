@@ -121,7 +121,7 @@ The criteria below preserve the PDF interpretation. One later user-approved exte
 
 ### 4.1 Overview and initial data
 
-The initial screen must show the dark blue navigation bar, GSCF logo, active Disputes item, page title `Disputes`, and a top-right primary `New Dispute` button with a plus icon.
+The initial screen must show the dark blue navigation bar, GSCF logo, active Disputes item, page title `Disputes`, and a top-right primary `New Dispute` button with a plus icon. Use semibold white text directly on the navy bar for the active navigation item, as shown in Figure 1.1. Keep a 44 px target and a visible keyboard focus indicator.
 
 Use these columns, in this order: `Dispute No.`, `Buyer`, `Status`, `Dispute Date`, `Amount`, `Currency`, `Dispute Reason`, and `Actions`.
 
@@ -571,7 +571,7 @@ Configure Tailwind source detection for `apps/`, every UI/feature library, and t
 | `gscf/neutral/30`  | `#DCDCDC`                | Table dividers and cell borders.                                                     |
 | `gscf/neutral/20`  | `#EDEDED`                | Disabled input background if needed.                                                 |
 | `gscf/neutral/40`  | `#BDBDBD`                | Disabled placeholder if needed.                                                      |
-| `gscf/neutral/0`   | `#FFFFFF`                | Page/modal surfaces and filled-button text.                                          |
+| `gscf/neutral/0`   | `#FFFFFF`                | Page/modal surfaces, navigation text, and filled-button text.                        |
 | `gscf/blue/90`     | `#13375A`                | Navigation and headings.                                                             |
 | `gscf/blue/100`    | `#0E2743`                | Input hover border.                                                                  |
 | `gscf/blue/A70`    | `#0055A4`                | Primary actions, secondary borders/text, focus, selected radios, and New badge text. |

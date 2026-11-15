@@ -1,12 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-test('uses the reference colors for active navigation, danger actions, and invalid fields', async ({
-  page,
-}) => {
+test('uses the reference colors for danger actions and invalid fields', async ({ page }) => {
   await page.goto('/disputes');
-  const activeLink = page.getByRole('link', { name: 'Disputes' });
-  await expect(activeLink).toHaveCSS('color', 'rgb(0, 85, 164)');
-  await expect(activeLink).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 
   const remove = page.getByRole('button', { name: 'Remove dispute 6228' });
   await remove.hover();
