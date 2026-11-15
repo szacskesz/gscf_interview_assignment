@@ -48,6 +48,7 @@
               "outputPath": "dist/apps/disputes/production"
             },
             "development": {
+              "tsConfig": "apps/disputes/tsconfig.dev.json",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
