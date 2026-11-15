@@ -78,6 +78,55 @@ test('has no axe violations in the invalid create dialog', { tag: '@mobile' }, a
   expect(results.violations).toEqual([]);
 });
 
+test(
+  'aligns the amount warning icon with the other fields and leaves the stepper usable',
+  { tag: ['@cross-browser', '@mobile'] },
+  async ({ page, browserName, isMobile }) => {
+    await page.goto('/disputes');
+    const dialog = await openCreate(page);
+    await dialog.getByRole('button', { name: 'Create Dispute' }).click();
+    const amount = dialog.getByRole('spinbutton', { name: 'Dispute Amount' });
+    await amount.fill('0');
+    await expect(amount).toHaveAccessibleDescription('Enter an amount greater than 0.');
+
+    const warnings = dialog.locator('gscf-field-frame gscf-icon[name="warning"]');
+    await expect(warnings).toHaveCount(3);
+    const rightEdges = [];
+    for (const icon of await warnings.all()) {
+      const box = await icon.boundingBox();
+      if (!box) throw new Error('Expected the field warning icon to be visible.');
+      rightEdges.push(box.x + box.width);
+    }
+    expect(Math.max(...rightEdges) - Math.min(...rightEdges)).toBeLessThan(1);
+
+    const warning = dialog
+      .locator('gscf-field-frame')
+      .filter({ has: page.getByRole('spinbutton', { name: 'Dispute Amount' }) })
+      .locator('gscf-icon[name="warning"]');
+    await expect(warning).toBeVisible();
+    if (browserName === 'chromium' && !isMobile) {
+      await amount.hover();
+      // The native stepper occupies the end of Chromium's input content box.
+      const increment = await amount.evaluate((input) => {
+        const box = input.getBoundingClientRect();
+        const style = getComputedStyle(input);
+        return {
+          x: box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth) - 5,
+          y: box.top + box.height / 2 - 4,
+        };
+      });
+      const iconLeft = await warning.evaluate((icon) => icon.getBoundingClientRect().left);
+      expect(increment.x).toBeLessThan(iconLeft);
+      await page.mouse.click(increment.x, increment.y);
+    } else {
+      await amount.press('ArrowUp');
+    }
+
+    await expect(amount).toHaveValue('0.01');
+    await expect(warning).toHaveCount(0);
+  },
+);
+
 test('creates a USD dispute with Enter and opens a clean draft next time', async ({ page }) => {
   await page.clock.setFixedTime(new Date(2026, 10, 14, 12));
   await page.goto('/disputes');

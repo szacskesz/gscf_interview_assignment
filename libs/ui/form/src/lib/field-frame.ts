@@ -36,9 +36,7 @@ import { Icon } from '@gscf/ui-common';
         @if ($error() && $kind() === 'field') {
           <gscf-icon
             name="warning"
-            class="pointer-events-none absolute top-3 text-danger"
-            [class.inset-e-3]="!$numberInput()"
-            [class.inset-e-8]="$numberInput()"
+            class="pointer-events-none absolute inset-e-3 top-3 text-danger"
           />
         }
       </div>
@@ -63,9 +61,6 @@ export class FieldFrame {
 
   /** Displays the current error message below the controls. */
   readonly $error = input<string | null>(null, { alias: 'error' });
-
-  /** Leaves space for the native number input's stepper next to its warning icon. */
-  readonly $numberInput = input(false, { alias: 'numberInput' });
 
   /** Disables the projected controls when the frame is a fieldset. */
   readonly $disabled = input(false, { alias: 'disabled' });

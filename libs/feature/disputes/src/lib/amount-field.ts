@@ -22,7 +22,6 @@ export interface AmountDraft {
       [readOnly]="$locked()"
       [attr.aria-describedby]="$showError() ? $controlId() + '-error' : null"
       [attr.aria-invalid]="$showError() || null"
-      [class.pe-14]="$showError()"
       placeholder="Enter dispute amount"
       required
       (input)="update(control)"
