@@ -471,7 +471,7 @@ Define validation in a small feature-specific schema and pure amount-validation 
 
 Preserve the entered amount text until validation succeeds. Converting too early can lose information about decimal precision. Angular's native Signal Forms number binding converts values to numbers, so evaluate the amount control separately from the ordinary text fields. See [numeric input binding](https://angular.dev/essentials/signal-forms).
 
-The amount-field component implements the Signal Forms [custom-control interface](https://angular.dev/guide/forms/signals/custom-controls). An editable spinbutton uses a text input with `inputmode="decimal"` to preserve the raw U.S. decimal string across browser locales. Arrow keys and the visible controls step in integer cents. A rejected comma keeps the draft invalid and blocks stepping until the user corrects the input. The component also exposes focus, touched, and lock behavior.
+The amount-field component implements the Signal Forms [custom-control interface](https://angular.dev/guide/forms/signals/custom-controls). It wraps a native `type="number"` input with `lang="en-US"`, retains the raw decimal string and native bad-input state, and exposes focus, touched, and lock behavior. Comma keystrokes and comma-containing pastes are ignored so they leave the existing draft and its validity intact. The browser supplies the stepper and renders the numeric value according to its locale behavior.
 
 Implementation details:
 
@@ -485,7 +485,7 @@ Implementation details:
 
 Examples: `1250`, `1250.5`, and `1250.50` are valid and display as `1,250.00`, `1,250.50`, and `1,250.50`. `12.345` remains visible and invalid. Under the chosen literal precision policy, `1.230` also fails rather than silently discarding the last zero.
 
-The populated prototype shows `1,250.00` inside the amount field. The editable spinbutton uses an ungrouped value such as `1250.00`. The table and confirmation text display `1,250.00`.
+The populated prototype shows `1,250.00` inside a number field. Native number controls do not reliably support grouped values, so the editable field will use an ungrouped value such as `1250.00`; the table and confirmation text will use `1,250.00`. Record this small, explicit interpretation in the README.
 
 ### Dates
 
@@ -748,7 +748,7 @@ Use `sideEffects: false` for packages whose modules are safe to discard when unu
 | Button order                 | Cancel on the left, primary/danger action on the right.                                                                                                                          | Matches the figures.                                                                           |
 | Touch validation             | Blur reveals that field's error; submit reveals all invalid fields.                                                                                                              | Interprets touched behavior without flagging untouched fields prematurely.                     |
 | Text values                  | Trim outer whitespace; reject whitespace-only required input.                                                                                                                    | Prevents empty business values.                                                                |
-| Amount entry                 | Editable spinbutton with ungrouped U.S. decimal input.                                                                                                                           | Preserves a period as the decimal separator across browser locales.                            |
+| Amount entry                 | Native numeric field with ungrouped decimal input.                                                                                                                               | Resolves grouped-value artwork versus native number-input behavior.                            |
 | Extra decimals               | Reject literal input with more than two fractional digits, including trailing zeroes.                                                                                            | Follows Figure 2.0's no-rounding rule.                                                         |
 | Removal toast duration       | Five seconds.                                                                                                                                                                    | Aligns with the specified creation duration.                                                   |
 | Focus after deletion         | Next row, previous row, or New Dispute.                                                                                                                                          | The original trigger is removed from the DOM.                                                  |

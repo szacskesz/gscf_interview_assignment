@@ -166,7 +166,7 @@ test.describe('Decimal entry with a comma-decimal browser locale', () => {
   test.use({ locale: 'hu-HU' });
 
   test(
-    'keeps a trailing period, blocks stepping after a comma, and saves a corrected U.S. decimal',
+    'ignores a comma without changing the native number input, validation, or saved amount',
     { tag: ['@cross-browser', '@mobile'] },
     async ({ page }) => {
       await page.goto('/disputes');
@@ -176,24 +176,38 @@ test.describe('Decimal entry with a comma-decimal browser locale', () => {
       await dialog.getByRole('radio', { name: 'USD' }).check();
       const amount = dialog.getByRole('spinbutton', { name: 'Dispute Amount' });
 
-      await amount.pressSequentially('22.');
-      await expect(amount).toHaveValue('22.');
+      await expect(amount).toHaveAttribute('type', 'number');
+      await dialog.getByRole('button', { name: 'Create Dispute' }).click();
+      await expect(amount).toHaveAccessibleDescription('Enter a dispute amount.');
+
+      await amount.pressSequentially('22');
+      await amount.press(',');
+      await expect(amount).toHaveValue('22');
+      await expect(amount).not.toHaveAttribute('aria-invalid');
+
+      await amount.pressSequentially('22');
+      await amount.press('Tab');
+      await expect(amount).not.toBeFocused();
+      await expect(amount).toHaveValue('2222');
+      await expect(amount).not.toHaveAttribute('aria-invalid');
+      await page.keyboard.press('Shift+Tab');
+      await expect(amount).toBeFocused();
+      await amount.press('End');
+      await amount.press('Backspace');
+      await expect(amount).toHaveValue('222');
+      await expect(amount).not.toHaveAttribute('aria-invalid');
+
+      await amount.fill('22');
+      await amount.press('End');
+      await amount.pressSequentially('.');
+      await amount.press(',');
       await amount.pressSequentially('45');
       await expect(amount).toHaveValue('22.45');
 
-      await amount.fill('');
-      await amount.pressSequentially('22,22');
-      await amount.press('ArrowDown');
-      await expect(amount).toHaveValue('2222');
-      await dialog.getByRole('button', { name: 'Create Dispute' }).click();
-      await expect(amount).toHaveAccessibleDescription('Enter a valid dispute amount.');
-      await expect(page.getByText('Showing 3/3 rows')).toBeVisible();
-
-      await amount.press('ControlOrMeta+a');
-      await amount.press('Backspace');
-      await amount.pressSequentially('22.45');
+      await amount.press(',');
       await amount.press('ArrowDown');
       await expect(amount).toHaveValue('22.44');
+      await expect(amount).not.toHaveAttribute('aria-invalid');
       await amount.press('Enter');
       await expect(dialog).toHaveCount(0);
       await expect(page.getByRole('row').nth(1).getByRole('cell').nth(4)).toHaveText('22.44');
@@ -204,7 +218,7 @@ test.describe('Decimal entry with a comma-decimal browser locale', () => {
 test(
   'aligns the amount warning icon with the other fields and leaves the stepper usable',
   { tag: ['@cross-browser', '@mobile'] },
-  async ({ page }) => {
+  async ({ page, browserName, isMobile }) => {
     await page.goto('/disputes');
     const dialog = await openCreate(page);
     await dialog.getByRole('button', { name: 'Create Dispute' }).click();
@@ -227,12 +241,23 @@ test(
       .filter({ has: page.getByRole('spinbutton', { name: 'Dispute Amount' }) })
       .locator('gscf-icon[name="warning"]');
     await expect(warning).toBeVisible();
-    const increment = dialog.getByRole('button', { name: 'Increase dispute amount' });
-    const incrementBox = await increment.boundingBox();
-    const warningBox = await warning.boundingBox();
-    if (!incrementBox || !warningBox) throw new Error('Expected the stepper and warning icon.');
-    expect(incrementBox.x + incrementBox.width).toBeLessThanOrEqual(warningBox.x);
-    await increment.click();
+    if (browserName === 'chromium' && !isMobile) {
+      await amount.hover();
+      // The native stepper occupies the end of Chromium's input content box.
+      const increment = await amount.evaluate((input) => {
+        const box = input.getBoundingClientRect();
+        const style = getComputedStyle(input);
+        return {
+          x: box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth) - 5,
+          y: box.top + box.height / 2 - 4,
+        };
+      });
+      const iconLeft = await warning.evaluate((icon) => icon.getBoundingClientRect().left);
+      expect(increment.x).toBeLessThan(iconLeft);
+      await page.mouse.click(increment.x, increment.y);
+    } else {
+      await amount.press('ArrowUp');
+    }
 
     await expect(amount).toHaveValue('0.01');
     await expect(warning).toHaveCount(0);

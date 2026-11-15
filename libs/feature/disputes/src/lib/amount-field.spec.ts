@@ -11,14 +11,17 @@ async function createAmountField() {
 }
 
 describe('Amount field', () => {
-  it('preserves the raw decimal and clears a rejected comma when the input is corrected', async () => {
+  it('ignores comma keystrokes and insertions without changing the current draft', async () => {
     const { field, input } = await createAmountField();
     input.value = '22';
     input.dispatchEvent(new InputEvent('input', { data: '22', inputType: 'insertText' }));
 
-    const comma = new InputEvent('beforeinput', { data: ',', cancelable: true });
-    expect(input.dispatchEvent(comma)).toBe(false);
-    expect(field.value()).toEqual({ raw: '22', badInput: true });
+    const commaKey = new KeyboardEvent('keydown', { key: ',', cancelable: true });
+    const commaInput = new InputEvent('beforeinput', { data: ',', cancelable: true });
+    expect(input.dispatchEvent(commaKey)).toBe(false);
+    expect(input.dispatchEvent(commaInput)).toBe(false);
+    expect(input.value).toBe('22');
+    expect(field.value()).toEqual({ raw: '22', badInput: false });
 
     input.value = '22.40';
     input.dispatchEvent(new InputEvent('input', { data: '.', inputType: 'insertText' }));
@@ -26,7 +29,7 @@ describe('Amount field', () => {
     expect(input.value).toBe('22.40');
   });
 
-  it('blocks comma-decimal paste and marks the existing draft invalid', async () => {
+  it('blocks comma-decimal paste without changing the existing draft', async () => {
     const { field, input } = await createAmountField();
     input.value = '5';
     input.dispatchEvent(new InputEvent('input', { data: '5', inputType: 'insertText' }));
@@ -36,24 +39,7 @@ describe('Amount field', () => {
 
     expect(input.dispatchEvent(paste)).toBe(false);
     expect(input.value).toBe('5');
-    expect(field.value()).toEqual({ raw: '5', badInput: true });
-  });
-
-  it('removes commas inserted without a cancelable beforeinput and skips stepping the invalid draft', async () => {
-    const { field, input } = await createAmountField();
-    input.value = '22,22';
-    input.dispatchEvent(new InputEvent('input', { data: '22,22', inputType: 'insertText' }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
-
-    expect(input.value).toBe('2222');
-    expect(field.value()).toEqual({ raw: '2222', badInput: true });
-
-    input.select();
-    input.dispatchEvent(new InputEvent('beforeinput', { data: '1', inputType: 'insertText' }));
-    input.value = '1';
-    input.dispatchEvent(new InputEvent('input', { data: '1', inputType: 'insertText' }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
-    expect(field.value()).toEqual({ raw: '0.99', badInput: false });
+    expect(field.value()).toEqual({ raw: '5', badInput: false });
   });
 
   it('forwards focus, emits touch on blur, and reflects error and lock inputs on the control', async () => {
