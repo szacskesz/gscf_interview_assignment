@@ -31,6 +31,7 @@ describe('CreateDisputeForm submission', () => {
     const fixture = TestBed.createComponent(InlineFormHost);
     await fixture.whenStable();
     const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector<HTMLInputElement>('input[type="number"]')?.step).toBe('0.01');
     const submit = element.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     expect(
       Array.from(element.querySelectorAll<HTMLInputElement>('input[type="radio"]')).every(

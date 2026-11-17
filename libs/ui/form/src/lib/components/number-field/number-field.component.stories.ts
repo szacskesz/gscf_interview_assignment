@@ -1,21 +1,21 @@
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
 import { expect } from 'storybook/test';
 import { FieldFrame } from '../field-frame/field-frame.component';
-import { AmountField } from './amount-field.component';
+import { NumberField } from './number-field.component';
 
 const meta = {
-  title: 'Form/Amount field',
-  component: AmountField,
+  title: 'Form/Number field',
+  component: NumberField,
   tags: ['autodocs'],
-  decorators: [moduleMetadata({ imports: [AmountField, FieldFrame] })],
-} satisfies Meta<AmountField>;
+  decorators: [moduleMetadata({ imports: [NumberField, FieldFrame] })],
+} satisfies Meta<NumberField>;
 export default meta;
 
-export const Editable: StoryObj<AmountField> = {
+export const Editable: StoryObj<NumberField> = {
   render: () => ({
     template: `
       <gscf-field-frame label="Amount" controlId="amount" [required]="true">
-        <gscf-amount-field controlId="amount" placeholder="Enter an amount" [inputRequired]="true" />
+        <gscf-number-field controlId="amount" placeholder="Enter an amount" [step]="0.01" [inputRequired]="true" />
       </gscf-field-frame>
     `,
   }),
@@ -30,11 +30,11 @@ export const Editable: StoryObj<AmountField> = {
   },
 };
 
-export const LockedWithError: StoryObj<AmountField> = {
+export const LockedWithError: StoryObj<NumberField> = {
   render: () => ({
     template: `
       <gscf-field-frame label="Amount" controlId="locked-amount" error="Enter an amount.">
-        <gscf-amount-field controlId="locked-amount" [locked]="true" [showError]="true" />
+        <gscf-number-field controlId="locked-amount" [locked]="true" [showError]="true" />
       </gscf-field-frame>
     `,
   }),
@@ -45,5 +45,24 @@ export const LockedWithError: StoryObj<AmountField> = {
     await expect(amount).toHaveAttribute('readonly');
     await userEvent.tab();
     await expect(amount).toHaveFocus();
+  },
+};
+
+export const IntegerStep: StoryObj<{ step: number | 'any' }> = {
+  args: { step: 1 },
+  render: (args) => ({
+    props: args,
+    template: `
+      <gscf-field-frame label="Quantity" controlId="quantity">
+        <gscf-number-field controlId="quantity" [step]="step" />
+      </gscf-field-frame>
+    `,
+  }),
+  async play({ canvas, userEvent }) {
+    const quantity = canvas.getByRole('spinbutton', { name: 'Quantity' });
+    await expect(quantity).toHaveAttribute('step', '1');
+    await userEvent.type(quantity, '2');
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(quantity).toHaveValue(3);
   },
 };

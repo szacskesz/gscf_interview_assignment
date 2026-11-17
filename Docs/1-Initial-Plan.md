@@ -367,10 +367,10 @@ libs/
       src/
         lib/
           components/
-            amount-field/
-              amount-field.component.spec.ts
-              amount-field.component.stories.ts
-              amount-field.component.ts
+            number-field/
+              number-field.component.spec.ts
+              number-field.component.stories.ts
+              number-field.component.ts
             field-frame/
               field-frame.component.stories.ts
               field-frame.component.ts

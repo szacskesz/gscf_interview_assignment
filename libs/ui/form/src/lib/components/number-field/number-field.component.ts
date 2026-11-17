@@ -3,14 +3,14 @@ import { transformedValue, type FormValueControl } from '@angular/forms/signals'
 import { TextInput } from '../../directives/text-input/text-input.directive';
 
 @Component({
-  selector: 'gscf-amount-field',
+  selector: 'gscf-number-field',
   imports: [TextInput],
   template: `
     <input
       #control
       gscfTextInput
       type="number"
-      step="0.01"
+      [step]="$step()"
       inputmode="decimal"
       [id]="$controlId()"
       [readOnly]="$locked()"
@@ -23,7 +23,7 @@ import { TextInput } from '../../directives/text-input/text-input.directive';
     />
   `,
 })
-export class AmountField implements FormValueControl<number | null> {
+export class NumberField implements FormValueControl<number | null> {
   /** Publishes the native input's numeric value, or null when empty, as `value`. */
   readonly $value = model<number | null>(null, { alias: 'value' });
 
@@ -34,6 +34,9 @@ export class AmountField implements FormValueControl<number | null> {
 
   /** Required ID of the native input, used by its associated label. */
   readonly $controlId = input.required<string>({ alias: 'controlId' });
+
+  /** Native numeric step, or `any` for unrestricted decimal increments. Defaults to `any`. */
+  readonly $step = input<number | 'any'>('any', { alias: 'step' });
 
   /** Placeholder text shown by the native input. */
   readonly $placeholder = input('', { alias: 'placeholder' });
@@ -50,7 +53,7 @@ export class AmountField implements FormValueControl<number | null> {
   /** Emits when the native input loses focus. */
   readonly touch = output<void>();
   private readonly $control = viewChild<ElementRef<HTMLInputElement>>('control');
-  private readonly $editedAmount = transformedValue<number | null, number | null>(this.$value, {
+  private readonly $editedValue = transformedValue<number | null, number | null>(this.$value, {
     parse: (value) => (Number.isNaN(value) ? { error: { kind: 'parse' } } : { value }),
     format: (value) => value,
   });
@@ -58,7 +61,7 @@ export class AmountField implements FormValueControl<number | null> {
   constructor() {
     effect(() => {
       const control = this.$control()?.nativeElement;
-      const value = this.$editedAmount();
+      const value = this.$editedValue();
       if (!control || Number.isNaN(value)) return;
 
       // Rewriting an equivalent number would move the caret and discard an unfinished decimal.
@@ -76,6 +79,6 @@ export class AmountField implements FormValueControl<number | null> {
 
   protected update(control: HTMLInputElement): void {
     const value = control.validity.badInput || control.value !== '' ? control.valueAsNumber : null;
-    this.$editedAmount.set(value);
+    this.$editedValue.set(value);
   }
 }

@@ -38,7 +38,8 @@
       [required]="true"
       [error]="$amountError()"
     >
-      <gscf-amount-field
+      <gscf-number-field
+        [step]="0.01"
         placeholder="Enter dispute amount"
         [controlId]="$formId() + '-amount'"
         [formField]="$form.amount"

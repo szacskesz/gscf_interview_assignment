@@ -10,7 +10,7 @@ import {
 } from '@angular/forms/signals';
 import { hasAtMostDecimalPlaces, requiredNonEmpty } from '@gscf/core';
 import type { Currency, Dispute } from '@gscf/disputes-data-access';
-import { AmountField, FieldFrame, RadioInput, TextInput } from '@gscf/ui-form';
+import { NumberField, FieldFrame, RadioInput, TextInput } from '@gscf/ui-form';
 
 const amountDecimalPlaces = 2;
 
@@ -54,7 +54,7 @@ export function visibleError(
 
 @Component({
   selector: 'gscf-create-dispute-form',
-  imports: [AmountField, FieldFrame, FormField, FormRoot, RadioInput, TextInput],
+  imports: [NumberField, FieldFrame, FormField, FormRoot, RadioInput, TextInput],
   templateUrl: './create-dispute-form.component.html',
 })
 export class CreateDisputeForm {
