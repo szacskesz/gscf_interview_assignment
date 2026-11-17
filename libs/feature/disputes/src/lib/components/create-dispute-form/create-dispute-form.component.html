@@ -39,8 +39,10 @@
       [error]="$amountError()"
     >
       <gscf-amount-field
+        placeholder="Enter dispute amount"
         [controlId]="$formId() + '-amount'"
         [formField]="$form.amountInput"
+        [inputRequired]="true"
         [locked]="$busy()"
         [showError]="$amountError() !== null"
       />

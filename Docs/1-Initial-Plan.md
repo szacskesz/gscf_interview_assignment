@@ -317,9 +317,6 @@ libs/
       src/
         lib/
           components/
-            amount-field/
-              amount-field.component.spec.ts
-              amount-field.component.ts
             create-dispute-dialog/
               create-dispute-dialog.component.html
               create-dispute-dialog.component.spec.ts
@@ -371,6 +368,10 @@ libs/
       src/
         lib/
           components/
+            amount-field/
+              amount-field.component.spec.ts
+              amount-field.component.stories.ts
+              amount-field.component.ts
             field-frame/
               field-frame.component.stories.ts
               field-frame.component.ts
@@ -526,7 +527,7 @@ Define validation in a small feature-specific schema and pure amount-validation 
 
 Preserve the entered amount text until validation succeeds. Converting too early can lose information about decimal precision. Angular's native Signal Forms number binding converts values to numbers, so evaluate the amount control separately from the ordinary text fields. See [numeric input binding](https://angular.dev/essentials/signal-forms).
 
-The amount-field component implements the Signal Forms [custom-control interface](https://angular.dev/guide/forms/signals/custom-controls). It wraps a native `type="number"` input with `lang="en-US"`, retains the raw decimal string and native bad-input state, and exposes focus, touched, and lock behavior. Comma keystrokes and comma-containing pastes are ignored so they leave the existing draft and its validity intact. The browser supplies the stepper and renders the numeric value according to its locale behavior.
+The amount-field component in `@gscf/ui-form` implements the Signal Forms [custom-control interface](https://angular.dev/guide/forms/signals/custom-controls). It wraps a native `type="number"` input with `lang="en-US"`, retains the raw decimal string and native bad-input state, and exposes focus, touched, and lock behavior. Comma keystrokes and comma-containing pastes leave the existing draft and its validity intact. The browser supplies the stepper and renders the numeric value according to its locale behavior. The dispute form supplies the placeholder and required state and owns amount validation and error messages.
 
 Implementation details:
 

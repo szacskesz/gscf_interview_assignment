@@ -11,6 +11,18 @@ async function createAmountField() {
 }
 
 describe('Amount field', () => {
+  it('lets the caller set the placeholder and required state', async () => {
+    const { fixture, input } = await createAmountField();
+    expect(input.required).toBe(false);
+
+    fixture.componentRef.setInput('placeholder', 'Enter an amount');
+    fixture.componentRef.setInput('inputRequired', true);
+    await fixture.whenStable();
+
+    expect(input.placeholder).toBe('Enter an amount');
+    expect(input.required).toBe(true);
+  });
+
   it('ignores comma keystrokes and insertions without changing the current draft', async () => {
     const { field, input } = await createAmountField();
     input.value = '22';

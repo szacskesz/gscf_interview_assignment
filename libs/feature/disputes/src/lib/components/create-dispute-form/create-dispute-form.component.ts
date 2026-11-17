@@ -10,8 +10,7 @@ import {
 } from '@angular/forms/signals';
 import { hasAtMostDecimalPlaces, requiredNonEmpty } from '@gscf/core';
 import type { Currency, Dispute } from '@gscf/disputes-data-access';
-import { FieldFrame, RadioInput, TextInput } from '@gscf/ui-form';
-import { AmountField, type AmountDraft } from '../amount-field/amount-field.component';
+import { AmountField, FieldFrame, RadioInput, TextInput, type AmountDraft } from '@gscf/ui-form';
 
 const amountDecimalPlaces = 2;
 
