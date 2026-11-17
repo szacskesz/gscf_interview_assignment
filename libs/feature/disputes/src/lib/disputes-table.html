@@ -18,8 +18,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (entry of $displayRows(); track entry.dispute.id) {
-        @let row = entry.dispute;
+      @for (row of $rows(); track row.id) {
         <tr class="border-b border-divider">
           <td>{{ row.id }}</td>
           <td class="max-w-52 wrap-anywhere">{{ row.buyer }}</td>
@@ -32,9 +31,7 @@
             {{ row.date + 'T00:00:00Z' | date: 'd MMM yyyy' : '+0000' : 'en-US' }}
           </td>
           <td class="text-right whitespace-nowrap tabular-nums">
-            {{ entry.amount.whole | number: '1.0-0' : 'en-US' }}.{{
-              entry.amount.fraction | number: '2.0-0' : 'en-US'
-            }}
+            {{ row.amount / 100 | number: '1.2-2' : 'en-US' }}
           </td>
           <td>{{ row.currency }}</td>
           <td class="max-w-80 wrap-anywhere">{{ row.reason }}</td>

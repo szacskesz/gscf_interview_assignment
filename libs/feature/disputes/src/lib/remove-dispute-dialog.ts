@@ -1,7 +1,6 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { splitMinorUnits } from '@gscf/core';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Button, DialogFrame } from '@gscf/ui-common';
 
@@ -17,9 +16,7 @@ import { Button, DialogFrame } from '@gscf/ui-common';
     >
       <p id="remove-dispute-description" class="mb-6 wrap-anywhere text-sm">
         Dispute {{ dispute.id }} ({{ dispute.reason }},
-        {{ amount.whole | number: '1.0-0' : 'en-US' }}.{{
-          amount.fraction | number: '2.0-0' : 'en-US'
-        }}
+        {{ dispute.amount / 100 | number: '1.2-2' : 'en-US' }}
         {{ dispute.currency }}) will be removed from the Disputes list, together with its comments
         and linked invoices. This cannot be undone.
       </p>
@@ -55,7 +52,6 @@ export class RemoveDisputeDialog {
   private readonly dialog = inject<DialogRef<boolean>>(DialogRef);
   private readonly store = inject(DisputesStore);
   protected readonly dispute = inject<Dispute>(DIALOG_DATA);
-  protected readonly amount = splitMinorUnits(this.dispute.amount);
   protected readonly $busy = this.store.$pending;
   protected readonly $failure = signal<string | null>(null);
 

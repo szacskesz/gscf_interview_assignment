@@ -1,6 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, ElementRef, computed, input, output, viewChildren } from '@angular/core';
-import { splitMinorUnits } from '@gscf/core';
+import { Component, ElementRef, input, output, viewChildren } from '@angular/core';
 import type { Dispute } from '@gscf/disputes-data-access';
 import { Badge, Button, Icon } from '@gscf/ui-common';
 
@@ -21,11 +20,4 @@ export class DisputesTable {
     button.nativeElement.focus();
     return true;
   }
-
-  protected readonly $displayRows = computed(() =>
-    this.$rows().map((dispute) => ({
-      dispute,
-      amount: splitMinorUnits(dispute.amount),
-    })),
-  );
 }
