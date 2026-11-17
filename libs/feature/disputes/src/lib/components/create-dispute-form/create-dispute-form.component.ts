@@ -1,4 +1,4 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, ElementRef, input, output, signal, viewChild } from '@angular/core';
 import {
   FormField,
   FormRoot,
@@ -10,7 +10,7 @@ import {
 } from '@angular/forms/signals';
 import { hasAtMostDecimalPlaces, requiredNonEmpty } from '@gscf/core';
 import type { Currency, Dispute } from '@gscf/disputes-data-access';
-import { AmountField, FieldFrame, RadioInput, TextInput, type AmountDraft } from '@gscf/ui-form';
+import { AmountField, FieldFrame, RadioInput, TextInput } from '@gscf/ui-form';
 
 const amountDecimalPlaces = 2;
 
@@ -22,43 +22,28 @@ const amountErrors = {
   range: 'Enter a smaller dispute amount.',
 } as const;
 
-type AmountResult =
-  | { readonly valid: true; readonly amount: number }
-  | { readonly valid: false; readonly error: keyof typeof amountErrors };
-
-const amountPattern = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
-
-export function validateAmount(value: string): AmountResult {
-  if (value === '') return { valid: false, error: 'required' };
-  if (!amountPattern.test(value)) return { valid: false, error: 'invalid' };
-
-  if (value.startsWith('-') || !/[1-9]/.test(value)) {
-    return { valid: false, error: 'nonpositive' };
-  }
-  if (!hasAtMostDecimalPlaces(value, amountDecimalPlaces)) {
-    return { valid: false, error: 'precision' };
-  }
-
-  const amount = Number(value);
-  return Number.isFinite(amount) ? { valid: true, amount } : { valid: false, error: 'range' };
+export interface DisputeFormValue {
+  buyer: string;
+  reason: string;
+  amount: number | null;
+  currency: Currency | null;
 }
 
-export interface DisputeFormControls {
-  amountInput: AmountDraft;
-  currencyInput: Currency | '';
-}
-
-export const disputeSchema = schema<Partial<Dispute> & DisputeFormControls>((path) => {
-  // The form initializes both text fields so Signal Forms can register them.
-  requiredNonEmpty(path.buyer!, 'Enter a buyer name.');
-  requiredNonEmpty(path.reason!, 'Enter a dispute reason.');
-  validate(path.amountInput, ({ value }) => {
-    const { raw, badInput } = value();
-    const result = validateAmount(raw);
-    if (badInput) return { kind: 'invalid', message: amountErrors.invalid };
-    return result.valid ? undefined : { kind: result.error, message: amountErrors[result.error] };
+export const disputeSchema = schema<DisputeFormValue>((path) => {
+  requiredNonEmpty(path.buyer, 'Enter a buyer name.');
+  requiredNonEmpty(path.reason, 'Enter a dispute reason.');
+  required(path.amount, { message: amountErrors.required });
+  validate(path.amount, ({ value }) => {
+    const amount = value();
+    if (amount === null || Number.isNaN(amount)) return undefined;
+    if (amount <= 0) return { kind: 'nonpositive', message: amountErrors.nonpositive };
+    if (!Number.isFinite(amount)) return { kind: 'range', message: amountErrors.range };
+    if (!hasAtMostDecimalPlaces(amount, amountDecimalPlaces)) {
+      return { kind: 'precision', message: amountErrors.precision };
+    }
+    return undefined;
   });
-  required(path.currencyInput, { message: 'Select a currency.' });
+  required(path.currency, { message: 'Select a currency.' });
 });
 
 export function visibleError(
@@ -80,41 +65,50 @@ export class CreateDisputeForm {
   /** Emits validated values with the amount as a decimal number. */
   readonly submitted = output<Partial<Dispute>>();
 
-  private readonly $formValue = signal<Partial<Dispute> & DisputeFormControls>({
+  private readonly $formValue = signal<DisputeFormValue>({
     buyer: '',
     reason: '',
-    amountInput: { raw: '', badInput: false },
-    currencyInput: '',
+    amount: null,
+    currency: null,
   });
+
+  private readonly $currencyControl =
+    viewChild.required<ElementRef<HTMLInputElement>>('currencyControl');
 
   protected readonly $form = form(this.$formValue, disputeSchema, {
     submission: {
       onInvalid: (field) => {
-        const fields = [field.buyer, field.reason, field.amountInput, field.currencyInput];
-        fields
-          .find((field) => field?.().invalid())?.()
-          .focusBoundControl();
+        const fields = [field.buyer, field.reason, field.amount, field.currency];
+        const invalidField = fields.find((field) => field().invalid());
+        if (invalidField === field.currency) {
+          this.$currencyControl().nativeElement.focus();
+        } else {
+          invalidField?.().focusBoundControl();
+        }
       },
       action: async () => {
         if (this.$busy()) return;
-        const { buyer, reason, amountInput, currencyInput } = this.$formValue();
-        if (!buyer || !reason || (currencyInput !== 'USD' && currencyInput !== 'EUR')) return;
-
-        const parsedAmount = validateAmount(amountInput.raw);
-        if (amountInput.badInput || !parsedAmount.valid) return;
+        const { buyer, reason, amount, currency } = this.$formValue();
+        if (amount === null || (currency !== 'USD' && currency !== 'EUR')) return;
 
         this.submitted.emit({
           buyer: buyer.trim(),
           reason: reason.trim(),
-          amount: parsedAmount.amount,
-          currency: currencyInput,
+          amount,
+          currency,
         });
       },
     },
   });
 
-  protected readonly $buyerError = computed(() => visibleError(this.$form.buyer!()));
-  protected readonly $reasonError = computed(() => visibleError(this.$form.reason!()));
-  protected readonly $amountError = computed(() => visibleError(this.$form.amountInput()));
-  protected readonly $currencyError = computed(() => visibleError(this.$form.currencyInput()));
+  protected readonly $buyerError = computed(() => visibleError(this.$form.buyer()));
+  protected readonly $reasonError = computed(() => visibleError(this.$form.reason()));
+  protected readonly $amountError = computed(() => {
+    const amount = this.$form.amount();
+    if (amount.touched() && amount.errors().some((error) => error.kind === 'parse')) {
+      return amountErrors.invalid;
+    }
+    return visibleError(amount);
+  });
+  protected readonly $currencyError = computed(() => visibleError(this.$form.currency()));
 }

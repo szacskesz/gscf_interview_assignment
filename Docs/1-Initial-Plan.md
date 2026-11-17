@@ -510,7 +510,7 @@ interface Dispute {
 
 This produces `6229` when creating after deleting all original rows, matching Figure 1.6b. If `6229` has already been created and removed, the next dispute is `6230`. Reloading starts a new mock session and resets both records and numbering.
 
-Use GET/POST `/api/disputes` and DELETE `/api/disputes/:id`. The Create Dispute feature validates the raw decimal string and sends a decimal number as `amount`. The mock stores the amount directly and returns the complete created record. Controlled scenarios exercise pending/error behavior. The HTTP contract, bootstrap, and build profiles are in [the MSW plan](4-MSW-Integration-Plan.md).
+Use GET/POST `/api/disputes` and DELETE `/api/disputes/:id`. The Create Dispute feature validates the numeric amount and sends a decimal number as `amount`. The mock stores the amount directly and returns the complete created record. Controlled scenarios exercise pending/error behavior. The HTTP contract, bootstrap, and build profiles are in [the MSW plan](4-MSW-Integration-Plan.md).
 
 ## 6. Form, money, and date implementation
 
@@ -520,26 +520,13 @@ Use a typed signal model with `form`, `FormField`, and schema-based validation f
 
 The user confirmed using `FormRoot` and the Signal Forms `submit()` lifecycle instead of requiring `ngSubmit`. Bind the native form through `FormRoot`, configure the submission action, and use a real submit button. Enter and clicking the button must invoke the same validation/submission path exactly once. Do not combine a second manual submit handler with `FormRoot`'s configured submission action. This preserves centralized submission without importing classic form directives solely for their event names. [Signal Forms submission](https://angular.dev/guide/forms/signals/form-submission).
 
-Define validation in a small feature-specific schema and pure amount-validation function. Render each error from its field state and the submitted/touched policy described above. Keep submission handling centralized so clicking Create Dispute and pressing Enter follow the same path. Use native text and radio inputs directly wherever possible. See the [Signal Forms overview](https://angular.dev/guide/forms/signals/overview) and [validation guidance](https://angular.dev/guide/forms/signals/validation).
+Define validation in a small feature-specific schema and use the shared numeric precision helper. Render each error from its field state and the submitted/touched policy described above. Keep submission handling centralized so clicking Create Dispute and pressing Enter follow the same path. Use native text and radio inputs directly wherever possible. See the [Signal Forms overview](https://angular.dev/guide/forms/signals/overview) and [validation guidance](https://angular.dev/guide/forms/signals/validation).
 
 ### Numeric input and precision
 
-Preserve the entered amount text until validation succeeds. Converting too early can lose information about decimal precision. Angular's native Signal Forms number binding converts values to numbers, so evaluate the amount control separately from the ordinary text fields. See [numeric input binding](https://angular.dev/essentials/signal-forms).
+The shared amount control wraps a native `type="number"` input and exposes a Signal Forms value of type `number | null`. It preserves the browser's editing buffer and reports incomplete numeric input through Signal Forms parse errors. The browser supplies the stepper and handles decimal separators and paste. The form owns the error messages and validates the resulting number. See [numeric input binding](https://angular.dev/essentials/signal-forms).
 
-The amount-field component in `@gscf/ui-form` implements the Signal Forms [custom-control interface](https://angular.dev/guide/forms/signals/custom-controls). It wraps a native `type="number"` input with `lang="en-US"`, retains the raw decimal string and native bad-input state, and exposes focus, touched, and lock behavior. Comma keystrokes and comma-containing pastes leave the existing draft and its validity intact. The browser supplies the stepper and renders the numeric value according to its locale behavior. The dispute form supplies the placeholder and required state and owns amount validation and error messages.
-
-Implementation details:
-
-- Use `step="0.01"` as an input affordance, with explicit application validation as the authority.
-- Accept ordinary decimal notation; document that grouped input and exponent notation are not supported in this first version.
-- Retain at most two fractional digits only after validation; do not truncate or round a failing value.
-- Convert the validated decimal string to a number in the specified currency.
-- Reject values that convert to a non-finite number.
-- Format display values with English thousands separators and exactly two fractional digits. Keep the separate currency column rather than adding a currency symbol to the Amount column.
-
-Examples: `1250`, `1250.5`, and `1250.50` are valid and display as `1,250.00`, `1,250.50`, and `1,250.50`. `12.345` remains visible and invalid. Under the chosen literal precision policy, `1.230` also fails rather than silently discarding the last zero.
-
-The populated prototype shows `1,250.00` inside a number field. Native number controls do not reliably support grouped values, so the editable field will use an ungrouped value such as `1250.00`; the table and confirmation text will use `1,250.00`. Record this small, explicit interpretation in the README.
+Use `step="0.01"` as an input affordance. The schema checks that the amount is present, positive, finite, and representable with at most two decimal places. Currency starts as null. Native radio bindings use an empty-string fallback for their checked comparison, write the selected currency to the field, and mark it touched on blur. The submit handler focuses the first radio when currency is the first invalid field. For example, `1.230` is accepted as `1.23` and `1.203` is invalid. Format saved values with English thousands separators and exactly two fractional digits. The table and confirmation use `1,250.00`, while the editable field follows the browser's native behavior.
 
 ### Dates
 
@@ -803,7 +790,7 @@ Use `sideEffects: false` for packages whose modules are safe to discard when unu
 | Touch validation             | Blur reveals that field's error; submit reveals all invalid fields.                                                                                                              | Interprets touched behavior without flagging untouched fields prematurely.                     |
 | Text values                  | Trim outer whitespace; reject whitespace-only required input.                                                                                                                    | Prevents empty business values.                                                                |
 | Amount entry                 | Native numeric field with ungrouped decimal input.                                                                                                                               | Resolves grouped-value artwork versus native number-input behavior.                            |
-| Extra decimals               | Reject literal input with more than two fractional digits, including trailing zeroes.                                                                                            | Follows Figure 2.0's no-rounding rule.                                                         |
+| Extra decimals               | Validate numeric precision after the browser parses the input. Trailing zeroes are insignificant.                                                                                | Accepts `1.230` as `1.23` and rejects `1.203`.                                                 |
 | Removal toast duration       | Five seconds.                                                                                                                                                                    | Aligns with the specified creation duration.                                                   |
 | Focus after deletion         | Next row, previous row, or New Dispute.                                                                                                                                          | The original trigger is removed from the DOM.                                                  |
 | User/language indicators     | Static prototype context.                                                                                                                                                        | No account or localization workflow is specified.                                              |

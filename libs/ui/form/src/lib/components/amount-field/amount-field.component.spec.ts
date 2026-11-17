@@ -23,35 +23,42 @@ describe('Amount field', () => {
     expect(input.required).toBe(true);
   });
 
-  it('ignores comma keystrokes and insertions without changing the current draft', async () => {
-    const { field, input } = await createAmountField();
-    input.value = '22';
-    input.dispatchEvent(new InputEvent('input', { data: '22', inputType: 'insertText' }));
-
-    const commaKey = new KeyboardEvent('keydown', { key: ',', cancelable: true });
-    const commaInput = new InputEvent('beforeinput', { data: ',', cancelable: true });
-    expect(input.dispatchEvent(commaKey)).toBe(false);
-    expect(input.dispatchEvent(commaInput)).toBe(false);
-    expect(input.value).toBe('22');
-    expect(field.value()).toEqual({ raw: '22', badInput: false });
-
+  it('emits a numeric value while retaining the browser input text', async () => {
+    const { fixture, field, input } = await createAmountField();
     input.value = '22.40';
-    input.dispatchEvent(new InputEvent('input', { data: '.', inputType: 'insertText' }));
-    expect(field.value()).toEqual({ raw: '22.40', badInput: false });
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    expect(field.value()).toBe(22.4);
     expect(input.value).toBe('22.40');
+
+    input.value = '';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    await fixture.whenStable();
+    expect(field.value()).toBeNull();
   });
 
-  it('blocks comma-decimal paste without changing the existing draft', async () => {
-    const { field, input } = await createAmountField();
-    input.value = '5';
-    input.dispatchEvent(new InputEvent('input', { data: '5', inputType: 'insertText' }));
-    const paste = Object.assign(new Event('paste', { cancelable: true }), {
-      clipboardData: { getData: () => '22,45' },
-    });
+  it('reflects a numeric value supplied by the parent and clears it on reset', async () => {
+    const { fixture, input } = await createAmountField();
+    fixture.componentRef.setInput('value', 12.34);
+    await fixture.whenStable();
+    expect(input.valueAsNumber).toBe(12.34);
 
-    expect(input.dispatchEvent(paste)).toBe(false);
-    expect(input.value).toBe('5');
-    expect(field.value()).toEqual({ raw: '5', badInput: false });
+    fixture.componentRef.setInput('value', null);
+    await fixture.whenStable();
+    expect(input.value).toBe('');
+  });
+
+  it('leaves comma key, input, and paste events to the browser', async () => {
+    const { input } = await createAmountField();
+    const events = [
+      new KeyboardEvent('keydown', { key: ',', cancelable: true }),
+      new InputEvent('beforeinput', { data: ',', cancelable: true }),
+      new Event('paste', { cancelable: true }),
+    ];
+    for (const event of events) {
+      expect(input.dispatchEvent(event)).toBe(true);
+    }
   });
 
   it('forwards focus, emits touch on blur, and reflects error and lock inputs on the control', async () => {

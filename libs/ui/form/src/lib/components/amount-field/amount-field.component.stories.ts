@@ -25,8 +25,6 @@ export const Editable: StoryObj<AmountField> = {
     await userEvent.click(amount);
     await expect(amount).toHaveFocus();
     await userEvent.type(amount, '22');
-    await userEvent.keyboard(',');
-    await expect(amount).toHaveValue(22);
     await userEvent.keyboard('.45');
     await expect(amount).toHaveValue(22.45);
   },

@@ -9,7 +9,7 @@
       <input
         gscfTextInput
         [id]="$formId() + '-buyer'"
-        [formField]="$form.buyer!"
+        [formField]="$form.buyer"
         placeholder="Enter buyer name"
         [readOnly]="$busy()"
         [attr.aria-invalid]="$buyerError() ? 'true' : null"
@@ -25,7 +25,7 @@
       <input
         gscfTextInput
         [id]="$formId() + '-reason'"
-        [formField]="$form.reason!"
+        [formField]="$form.reason"
         placeholder="Add a reason"
         [readOnly]="$busy()"
         [attr.aria-invalid]="$reasonError() ? 'true' : null"
@@ -41,7 +41,7 @@
       <gscf-amount-field
         placeholder="Enter dispute amount"
         [controlId]="$formId() + '-amount'"
-        [formField]="$form.amountInput"
+        [formField]="$form.amount"
         [inputRequired]="true"
         [locked]="$busy()"
         [showError]="$amountError() !== null"
@@ -60,8 +60,13 @@
           <input
             gscfRadioInput
             type="radio"
+            #currencyControl
             value="USD"
-            [formField]="$form.currencyInput"
+            [name]="$formId() + '-currency'"
+            [required]="$form.currency().required()"
+            [checked]="($form.currency().value() ?? '') === 'USD'"
+            (change)="$form.currency().value.set('USD')"
+            (blur)="$form.currency().markAsTouched()"
             [attr.aria-invalid]="$currencyError() ? 'true' : null"
           />
           USD
@@ -71,7 +76,11 @@
             gscfRadioInput
             type="radio"
             value="EUR"
-            [formField]="$form.currencyInput"
+            [name]="$formId() + '-currency'"
+            [required]="$form.currency().required()"
+            [checked]="($form.currency().value() ?? '') === 'EUR'"
+            (change)="$form.currency().value.set('EUR')"
+            (blur)="$form.currency().markAsTouched()"
             [attr.aria-invalid]="$currencyError() ? 'true' : null"
           />
           EUR

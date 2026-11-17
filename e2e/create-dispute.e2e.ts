@@ -27,7 +27,7 @@ test('discards cancelled drafts and restores focus for each dismissal method', a
 });
 
 test(
-  'reveals exact errors and validates raw decimals as the user edits',
+  'reveals exact errors and validates numeric amounts as the user edits',
   {
     tag: ['@cross-browser', '@mobile'],
   },
@@ -58,10 +58,9 @@ test(
     await expect(dialog.getByText('Enter a dispute reason.')).toBeVisible();
     await amount.fill('-12.345');
     await expect(amount).toHaveAccessibleDescription('Enter an amount greater than 0.');
-    await amount.fill('1.230');
-    await expect(amount).toHaveValue('1.230');
+    await amount.fill('1.203');
     await expect(amount).toHaveAccessibleDescription('Enter an amount with up to 2 decimals.');
-    await amount.fill('1.23');
+    await amount.fill('1.230');
     await expect(amount).not.toHaveAttribute('aria-describedby');
   },
 );
@@ -162,58 +161,35 @@ test(
   },
 );
 
-test.describe('Decimal entry with a comma-decimal browser locale', () => {
-  test.use({ locale: 'hu-HU' });
+test(
+  'blocks incomplete numeric input and saves after typing a valid decimal',
+  { tag: ['@cross-browser', '@mobile'] },
+  async ({ page }) => {
+    await page.goto('/disputes');
+    const dialog = await openCreate(page);
+    await dialog.getByRole('textbox', { name: 'Buyer' }).fill('Decimal Buyer');
+    await dialog.getByRole('textbox', { name: 'Dispute Reason' }).fill('Decimal reason');
+    await dialog.getByRole('radio', { name: 'USD' }).check();
+    const amount = dialog.getByRole('spinbutton', { name: 'Dispute Amount' });
 
-  test(
-    'ignores a comma without changing the native number input, validation, or saved amount',
-    { tag: ['@cross-browser', '@mobile'] },
-    async ({ page }) => {
-      await page.goto('/disputes');
-      const dialog = await openCreate(page);
-      await dialog.getByRole('textbox', { name: 'Buyer' }).fill('Decimal Buyer');
-      await dialog.getByRole('textbox', { name: 'Dispute Reason' }).fill('Decimal reason');
-      await dialog.getByRole('radio', { name: 'USD' }).check();
-      const amount = dialog.getByRole('spinbutton', { name: 'Dispute Amount' });
+    await amount.pressSequentially('1e');
+    await amount.press('Enter');
+    await expect(amount).toBeFocused();
+    await expect(amount).toHaveAccessibleDescription('Enter a valid dispute amount.');
 
-      await expect(amount).toHaveAttribute('type', 'number');
-      await dialog.getByRole('button', { name: 'Create Dispute' }).click();
-      await expect(amount).toHaveAccessibleDescription('Enter a dispute amount.');
-
-      await amount.pressSequentially('22');
-      await amount.press(',');
-      await expect(amount).toHaveValue('22');
-      await expect(amount).not.toHaveAttribute('aria-invalid');
-
-      await amount.pressSequentially('22');
-      await amount.press('Tab');
-      await expect(amount).not.toBeFocused();
-      await expect(amount).toHaveValue('2222');
-      await expect(amount).not.toHaveAttribute('aria-invalid');
-      await page.keyboard.press('Shift+Tab');
-      await expect(amount).toBeFocused();
-      await amount.press('End');
-      await amount.press('Backspace');
-      await expect(amount).toHaveValue('222');
-      await expect(amount).not.toHaveAttribute('aria-invalid');
-
-      await amount.fill('22');
-      await amount.press('End');
-      await amount.pressSequentially('.');
-      await amount.press(',');
-      await amount.pressSequentially('45');
-      await expect(amount).toHaveValue('22.45');
-
-      await amount.press(',');
-      await amount.press('ArrowDown');
-      await expect(amount).toHaveValue('22.44');
-      await expect(amount).not.toHaveAttribute('aria-invalid');
-      await amount.press('Enter');
-      await expect(dialog).toHaveCount(0);
-      await expect(page.getByRole('row').nth(1).getByRole('cell').nth(4)).toHaveText('22.44');
-    },
-  );
-});
+    await amount.fill('');
+    await expect(amount).toHaveAccessibleDescription('Enter a dispute amount.');
+    await amount.pressSequentially('22.');
+    await amount.pressSequentially('45');
+    await expect(amount).toHaveValue('22.45');
+    await expect(amount).not.toHaveAttribute('aria-invalid');
+    await amount.press('ArrowDown');
+    await expect(amount).toHaveValue('22.44');
+    await amount.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    await expect(page.getByRole('row').nth(1).getByRole('cell').nth(4)).toHaveText('22.44');
+  },
+);
 
 test(
   'aligns the amount warning icon with the other fields and leaves the stepper usable',
@@ -272,7 +248,7 @@ test('creates a USD dispute with Enter and opens a clean draft next time', async
   await dialog.getByRole('textbox', { name: 'Dispute Reason' }).fill(' Invoice issue ');
   await dialog.getByRole('radio', { name: 'USD' }).check();
   const amount = dialog.getByRole('spinbutton');
-  await amount.fill('1250.50');
+  await amount.fill('1250.500');
   await amount.press('Enter');
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole('row').nth(1).getByRole('cell')).toHaveText([

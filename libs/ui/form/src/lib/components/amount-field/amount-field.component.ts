@@ -1,11 +1,6 @@
-import { Component, ElementRef, input, model, output, viewChild } from '@angular/core';
-import type { FormValueControl } from '@angular/forms/signals';
+import { Component, effect, ElementRef, input, model, output, viewChild } from '@angular/core';
+import { transformedValue, type FormValueControl } from '@angular/forms/signals';
 import { TextInput } from '../../directives/text-input/text-input.directive';
-
-export interface AmountDraft {
-  raw: string;
-  badInput: boolean;
-}
 
 @Component({
   selector: 'gscf-amount-field',
@@ -17,24 +12,20 @@ export interface AmountDraft {
       type="number"
       step="0.01"
       inputmode="decimal"
-      lang="en-US"
       [id]="$controlId()"
       [readOnly]="$locked()"
       [attr.aria-describedby]="$showError() ? $controlId() + '-error' : null"
       [attr.aria-invalid]="$showError() || null"
       [placeholder]="$placeholder()"
       [required]="$inputRequired()"
-      (keydown)="ignoreComma($event, $event.key)"
-      (beforeinput)="ignoreComma($event, $event.data)"
-      (paste)="ignoreComma($event, $event.clipboardData?.getData('text/plain'))"
       (input)="update(control)"
       (blur)="touch.emit()"
     />
   `,
 })
-export class AmountField implements FormValueControl<AmountDraft> {
-  /** Publishes the native input's serialized text and bad-input state as `value`. */
-  readonly $value = model<AmountDraft>({ raw: '', badInput: false }, { alias: 'value' });
+export class AmountField implements FormValueControl<number | null> {
+  /** Publishes the native input's numeric value, or null when empty, as `value`. */
+  readonly $value = model<number | null>(null, { alias: 'value' });
 
   /** Exposes the value model under the name required by Signal Forms. */
   get value() {
@@ -58,21 +49,33 @@ export class AmountField implements FormValueControl<AmountDraft> {
 
   /** Emits when the native input loses focus. */
   readonly touch = output<void>();
-  private readonly $control = viewChild.required<ElementRef<HTMLInputElement>>('control');
+  private readonly $control = viewChild<ElementRef<HTMLInputElement>>('control');
+  private readonly $editedAmount = transformedValue<number | null, number | null>(this.$value, {
+    parse: (value) => (Number.isNaN(value) ? { error: { kind: 'parse' } } : { value }),
+    format: (value) => value,
+  });
 
-  focus(options?: FocusOptions): void {
-    this.$control().nativeElement.focus(options);
+  constructor() {
+    effect(() => {
+      const control = this.$control()?.nativeElement;
+      const value = this.$editedAmount();
+      if (!control || Number.isNaN(value)) return;
+
+      // Rewriting an equivalent number would move the caret and discard an unfinished decimal.
+      if (value === null) {
+        if (control.value !== '' || control.validity.badInput) control.value = '';
+      } else if (control.valueAsNumber !== value) {
+        control.value = String(value);
+      }
+    });
   }
 
-  protected ignoreComma(event: Event, text: string | null | undefined): void {
-    if (text?.includes(',')) event.preventDefault();
+  focus(options?: FocusOptions): void {
+    this.$control()?.nativeElement.focus(options);
   }
 
   protected update(control: HTMLInputElement): void {
-    // Keep the native editing buffer intact when a partial decimal has no serialized value.
-    this.$value.set({
-      raw: control.value,
-      badInput: control.validity.badInput,
-    });
+    const value = control.validity.badInput || control.value !== '' ? control.valueAsNumber : null;
+    this.$editedAmount.set(value);
   }
 }
