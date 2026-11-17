@@ -9,6 +9,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@gscf/core/validators': fileURLToPath(
+        new URL('./libs/core/validators/src/public-api.ts', import.meta.url),
+      ),
       '@gscf/core': fileURLToPath(new URL('./libs/core/src/public-api.ts', import.meta.url)),
       '@gscf/disputes-data-access': fileURLToPath(
         new URL('./libs/data-access/disputes/src/public-api.ts', import.meta.url),

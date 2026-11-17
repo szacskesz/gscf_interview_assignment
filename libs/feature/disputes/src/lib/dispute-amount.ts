@@ -1,8 +1,12 @@
+import { hasAtMostDecimalPlaces } from '@gscf/core/validators';
+
+const amountDecimalPlaces = 2;
+
 export const amountErrors = {
   required: 'Enter a dispute amount.',
   invalid: 'Enter a valid dispute amount.',
   nonpositive: 'Enter an amount greater than 0.',
-  precision: 'Enter an amount with up to 2 decimals.',
+  precision: `Enter an amount with up to ${amountDecimalPlaces} decimals.`,
   range: 'Enter a smaller dispute amount.',
 } as const;
 
@@ -11,10 +15,6 @@ type AmountResult =
   | { readonly valid: false; readonly error: keyof typeof amountErrors };
 
 const amountPattern = /^(-?)(?:(\d+)(?:\.(\d*))?|\.(\d+))$/;
-
-function validateAmountPrecision(fraction: string): 'precision' | undefined {
-  return fraction.length > 2 ? 'precision' : undefined;
-}
 
 export function validateAmount(value: string): AmountResult {
   if (value === '') return { valid: false, error: 'required' };
@@ -26,10 +26,11 @@ export function validateAmount(value: string): AmountResult {
   if (sign === '-' || !/[1-9]/.test(whole + fraction)) {
     return { valid: false, error: 'nonpositive' };
   }
-  const precisionError = validateAmountPrecision(fraction);
-  if (precisionError) return { valid: false, error: precisionError };
+  if (!hasAtMostDecimalPlaces(value, amountDecimalPlaces)) {
+    return { valid: false, error: 'precision' };
+  }
 
-  const minorUnits = Number(whole + fraction.padEnd(2, '0'));
+  const minorUnits = Number(whole + fraction.padEnd(amountDecimalPlaces, '0'));
   return Number.isSafeInteger(minorUnits)
     ? { valid: true, minorUnits }
     : { valid: false, error: 'range' };

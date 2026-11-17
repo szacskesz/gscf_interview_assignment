@@ -272,6 +272,12 @@ apps/
       mocks/browser.ts
 libs/
   core/
+    validators/
+      src/
+        lib/
+          decimal-places.ts
+          required-non-empty.ts
+        public-api.ts
     src/
       lib/api-config/
       public-api.ts

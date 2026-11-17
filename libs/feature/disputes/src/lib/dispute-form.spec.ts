@@ -1,9 +1,9 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
+import { requiredNonEmpty } from '@gscf/core/validators';
 import { describe, expect, it } from 'vitest';
 import { disputeSchema, visibleError, type DisputeDraft } from './dispute-form';
-import { requiredNonEmpty } from './validators/required-non-empty';
 
 function createForm(overrides: Partial<DisputeDraft> = {}) {
   const $draft = signal<DisputeDraft>({
