@@ -1,5 +1,5 @@
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
-import { expect, within } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 import { FieldFrame } from './field-frame';
 import { TextInput } from './text-input';
 
@@ -105,10 +105,12 @@ async function expectFieldColors(input: HTMLInputElement, borderColor: string, f
 
   if (input.getAttribute('aria-invalid') === 'true') {
     const error = input.ownerDocument.getElementById(`${input.id}-error`);
-    const icon = input.closest('gscf-field-frame')?.querySelector('gscf-icon svg');
     await expect(error).toHaveStyle({ color: errorColor });
-    await expect(icon).toBeVisible();
-    await expect(getComputedStyle(icon!).stroke).toBe(errorColor);
+    await waitFor(async () => {
+      const icon = input.closest('gscf-field-frame')?.querySelector('gscf-icon mat-icon svg');
+      await expect(icon).toBeVisible();
+      await expect(getComputedStyle(icon!).stroke).toBe(errorColor);
+    });
   }
 }
 

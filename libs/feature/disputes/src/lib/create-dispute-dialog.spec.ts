@@ -1,6 +1,8 @@
 import { DialogRef } from '@angular/cdk/dialog';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatIconRegistry } from '@angular/material/icon';
+import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { describe, expect, it, vi } from 'vitest';
 import { CreateDisputeDialog } from './create-dispute-dialog';
@@ -20,6 +22,7 @@ async function createDialog() {
   const dialog = { close: vi.fn(), disableClose: false };
   TestBed.configureTestingModule({
     providers: [
+      { provide: MatIconRegistry, useClass: FakeMatIconRegistry },
       { provide: DisputesStore, useValue: { $pending: signal(false), create } },
       { provide: DialogRef, useValue: dialog },
     ],

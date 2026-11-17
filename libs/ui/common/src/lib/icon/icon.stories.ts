@@ -1,5 +1,5 @@
 import { type Meta, type StoryObj } from '@storybook/angular';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
 import { Icon, type IconName } from './icon';
 
 const meta = {
@@ -16,6 +16,8 @@ export const Decorative: StoryObj<typeof meta> = {
   async play({ canvasElement }) {
     const icon = canvasElement.querySelector('gscf-icon');
     await expect(icon).toHaveAttribute('aria-hidden', 'true');
-    await expect(icon?.querySelector('path')).toBeVisible();
+    await waitFor(async () => {
+      await expect(icon?.querySelector('mat-icon svg path')).toBeVisible();
+    });
   },
 };

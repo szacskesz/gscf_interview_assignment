@@ -1,6 +1,8 @@
 import { Dialog, type DialogConfig } from '@angular/cdk/dialog';
 import { signal, type Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatIconRegistry } from '@angular/material/icon';
+import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Notifications } from '@gscf/ui-notifications';
 import { Subject, type Observable } from 'rxjs';
@@ -35,6 +37,7 @@ async function createOverview(state: ReturnType<DisputesStore['$readState']> = '
   const success = vi.fn();
   TestBed.configureTestingModule({
     providers: [
+      { provide: MatIconRegistry, useClass: FakeMatIconRegistry },
       { provide: Dialog, useValue: { open } },
       { provide: Notifications, useValue: { success } },
     ],

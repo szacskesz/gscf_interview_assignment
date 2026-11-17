@@ -1,4 +1,5 @@
-import type { Preview } from '@storybook/angular';
+import { provideUiIcons } from '@gscf/ui-common';
+import { applicationConfig, type Preview } from '@storybook/angular';
 import { setCompodocJson } from '@storybook/addon-docs/angular';
 import { STORY_FINISHED, type StoryFinishedPayload } from 'storybook/internal/core-events';
 import { addons } from 'storybook/preview-api';
@@ -16,5 +17,6 @@ if (new URLSearchParams(location.search).has('catalogTest')) {
 }
 
 export default {
+  decorators: [applicationConfig({ providers: [provideUiIcons()] })],
   parameters: { controls: { expanded: true } },
 } satisfies Preview;

@@ -26,6 +26,14 @@ test(
       'page',
     );
     await expect(page.getByRole('table').getByRole('row')).toHaveCount(4);
+    const addIcon = page.getByRole('button', { name: 'New Dispute' }).locator('mat-icon');
+    const removeIcon = page
+      .getByRole('button', { name: 'Remove dispute 6228' })
+      .locator('mat-icon');
+    await expect(addIcon.locator('svg path')).toBeVisible();
+    await expect(removeIcon.locator('svg path')).toBeVisible();
+    await expect(addIcon).toHaveAttribute('aria-hidden', 'true');
+    await expect(addIcon).toHaveCSS('width', '20px');
     await page.evaluate(() => document.fonts.ready);
     expect(
       await page
