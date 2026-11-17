@@ -553,7 +553,7 @@ Match the desktop prototype first: a compact dark header, white page, generous o
 
 Use Montserrat with locally served font files and appropriate license attribution. Load only the weights actually needed, with a fallback sans-serif stack and `font-display: swap`. This avoids depending on a third-party font request during the live demonstration. Copy the provided logo into the application's public assets and render it with `NgOptimizedImage`, meaningful alternative text, and intrinsic dimensions. Use the directive for eligible static image elements; inline SVG icons and unsupported inline base64 sources are different cases. [Image optimization](https://angular.dev/guide/image-optimization).
 
-Measure proportions from the embedded figures rather than interpreting their scaled-down PDF text as actual browser font sizes. Keep body and form text readable. Use Angular Material `MatIcon` to render the local `icons.svg` set for plus, bin, close, warning, and check. The app and Storybook share the icon registration. The decorative SVGs inherit the surrounding text color.
+Measure proportions from the embedded figures rather than interpreting their scaled-down PDF text as actual browser font sizes. Keep body and form text readable. Use Angular Material `MatIcon` to render the local `icons.svg` set for plus, bin, close, warning, and check. The first `Icon` instance registers the set through a root service in both the app and Storybook. The decorative SVGs inherit the surrounding text color.
 
 ### Design tokens
 

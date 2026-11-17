@@ -1,5 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
+import { UiIconSet } from './ui-icon-set';
 
 export type IconName = 'add' | 'remove' | 'close' | 'warning' | 'check';
 
@@ -12,4 +13,8 @@ export type IconName = 'add' | 'remove' | 'close' | 'warning' | 'check';
 export class Icon {
   /** Required name of the decorative icon. The surrounding control supplies its accessible name. */
   readonly $name = input.required<IconName>({ alias: 'name' });
+
+  constructor() {
+    inject(UiIconSet);
+  }
 }
