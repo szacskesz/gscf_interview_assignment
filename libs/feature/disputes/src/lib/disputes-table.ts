@@ -1,11 +1,12 @@
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, ElementRef, computed, input, output, viewChildren } from '@angular/core';
-import { formatAmount, formatCalendarDate } from '@gscf/core';
+import { splitMinorUnits } from '@gscf/core';
 import type { Dispute } from '@gscf/disputes-data-access';
 import { Badge, Button, Icon } from '@gscf/ui-common';
 
 @Component({
   selector: 'gscf-disputes-table',
-  imports: [Badge, Button, Icon],
+  imports: [Badge, Button, DatePipe, DecimalPipe, Icon],
   templateUrl: './disputes-table.html',
 })
 export class DisputesTable {
@@ -22,10 +23,9 @@ export class DisputesTable {
   }
 
   protected readonly $displayRows = computed(() =>
-    this.$rows().map((row) => ({
-      ...row,
-      dateLabel: formatCalendarDate(row.date),
-      amountLabel: formatAmount(row.amount),
+    this.$rows().map((dispute) => ({
+      dispute,
+      amount: splitMinorUnits(dispute.amount),
     })),
   );
 }

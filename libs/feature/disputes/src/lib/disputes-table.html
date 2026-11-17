@@ -18,7 +18,8 @@
       </tr>
     </thead>
     <tbody>
-      @for (row of $displayRows(); track row.id) {
+      @for (entry of $displayRows(); track entry.dispute.id) {
+        @let row = entry.dispute;
         <tr class="border-b border-divider">
           <td>{{ row.id }}</td>
           <td class="max-w-52 wrap-anywhere">{{ row.buyer }}</td>
@@ -27,8 +28,14 @@
               row.status
             }}</gscf-badge>
           </td>
-          <td class="whitespace-nowrap">{{ row.dateLabel }}</td>
-          <td class="text-right whitespace-nowrap tabular-nums">{{ row.amountLabel }}</td>
+          <td class="whitespace-nowrap">
+            {{ row.date + 'T00:00:00Z' | date: 'd MMM yyyy' : '+0000' : 'en-US' }}
+          </td>
+          <td class="text-right whitespace-nowrap tabular-nums">
+            {{ entry.amount.whole | number: '1.0-0' : 'en-US' }}.{{
+              entry.amount.fraction | number: '2.0-0' : 'en-US'
+            }}
+          </td>
           <td>{{ row.currency }}</td>
           <td class="max-w-80 wrap-anywhere">{{ row.reason }}</td>
           <td>

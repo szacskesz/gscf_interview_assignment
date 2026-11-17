@@ -1,4 +1,5 @@
-import { apiPath, formatLocalDate } from '@gscf/core';
+import { formatDate } from '@angular/common';
+import { apiPath } from '@gscf/core';
 import { createDisputesHandlers, DisputesRepository } from '@gscf/disputes-mock';
 import { setupWorker } from 'msw/browser';
 
@@ -12,7 +13,8 @@ export async function startMockApi(apiBasePath: string): Promise<void> {
   const apiBaseUrl = new URL(apiBasePath, window.location.origin);
   const workerUrl = new URL('mockServiceWorker.js', document.baseURI);
   const disputesUrl = apiPath(apiBaseUrl.href, 'disputes');
-  const handlers = createDisputesHandlers(disputesUrl, new DisputesRepository(formatLocalDate));
+  const repository = new DisputesRepository(() => formatDate(new Date(), 'yyyy-MM-dd', 'en-US'));
+  const handlers = createDisputesHandlers(disputesUrl, repository);
   if (COMPILE_TIME_ENABLE_TEST_SCENARIOS) {
     const { testScenarioHandlers } = await import('./test-scenarios');
     handlers.unshift(...testScenarioHandlers(disputesUrl));

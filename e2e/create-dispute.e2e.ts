@@ -297,6 +297,34 @@ test('creates a USD dispute with Enter and opens a clean draft next time', async
   await expect(page.getByText('Showing 4/4 rows')).toBeVisible();
 });
 
+test.describe('Formatting in a non-UTC time zone', () => {
+  test.use({ timezoneId: 'Asia/Tokyo' });
+
+  test('preserves the local creation date and the largest supported cent amount', async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date('2026-04-04T23:59:00Z'));
+    await page.goto('/disputes');
+    const dialog = await openCreate(page);
+    await dialog.getByRole('textbox', { name: 'Buyer' }).fill('Exact Amount Buyer');
+    await dialog.getByRole('textbox', { name: 'Dispute Reason' }).fill('Invoice issue');
+    await dialog.getByRole('radio', { name: 'USD' }).check();
+    await dialog.getByRole('spinbutton').fill('90071992547409.91');
+    await dialog.getByRole('button', { name: 'Create Dispute' }).click();
+    await expect(dialog).toHaveCount(0);
+
+    const createdRow = page.getByRole('row').filter({ hasText: 'Exact Amount Buyer' });
+    await expect(createdRow.getByRole('cell', { name: '5 Apr 2026', exact: true })).toBeVisible();
+    await expect(
+      createdRow.getByRole('cell', { name: '90,071,992,547,409.91', exact: true }),
+    ).toBeVisible();
+    await createdRow.getByRole('button', { name: 'Remove dispute 6229' }).click();
+    await expect(
+      page.getByRole('dialog', { name: 'Remove dispute 6229' }),
+    ).toHaveAccessibleDescription(/Invoice issue, 90,071,992,547,409\.91 USD/);
+  });
+});
+
 test('locks pending dismissal and preserves the EUR draft after a failed save', async ({
   page,
 }) => {

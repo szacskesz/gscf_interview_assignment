@@ -48,7 +48,7 @@ The reference README's suggestion to delete the lockfile is not an upgrade polic
 | `apps/disputes/src/main.ts`, `define-flags.d.ts` | Conditional startup and declared build-time flags.                                                                                                                                 |
 | `apps/disputes/src/mocks/browser.ts`             | Browser-only composition: construct the repository/handlers and start `setupWorker`.                                                                                               |
 | `apps/disputes/public/mockServiceWorker.js`      | Generated worker served only by mock-enabled builds.                                                                                                                               |
-| `libs/core`                                      | API configuration, local date source, and reusable amount and date formatters.                                                                                                     |
+| `libs/core`                                      | API configuration and exact splitting of integer cents for display.                                                                                                                |
 | `libs/data-access/disputes`                      | Domain/DTO types, Angular HTTP API adapter, and feature-scoped signal store.                                                                                                       |
 | `libs/feature/disputes`                          | Create Dispute schema, user-facing errors, and input conversion to integer cents.                                                                                                  |
 | `libs/data-access/disputes-mock`                 | Separate CLI library with seed records, in-memory repository, handler factory, and focused specs. Depends on the disputes library's public domain API and core; never the reverse. |
@@ -129,7 +129,7 @@ The full sequence is maintained in [the main plan](1-Initial-Plan.md#11-incremen
 
 1. **Stage 8, MSW infrastructure:** after Vitest unit/browser component and Playwright E2E setup, add pinned MSW, worker generation, profiles, dynamic startup, and a minimal HTTP smoke fixture. Verify worker readiness and build exclusion independently of business features, before Storybook.
 2. **Stages 9-12, shared catalog and kit:** continue Storybook, Compodoc, story tests, and shared UI components. They remain independent of mock business data.
-3. **Stage 13, domain contracts:** establish core configuration and formatters plus the disputes DTO public API.
+3. **Stage 13, domain contracts:** establish core configuration and the integer-cent helper plus the disputes DTO public API.
 4. **Stage 14, mock backend:** add the separate mock library, exact seeds, in-memory repository, GET/POST/DELETE handlers, and Vitest contract tests. Retire any temporary infrastructure-only smoke endpoint.
 5. **Stage 15, HTTP/store integration:** connect the real Angular HTTP boundary and signal read model, operation states, and error/delay test harness before rendering feature workflows.
 6. **Stages 16-18, business features:** implement overview, create, and remove individually with their E2E and failure-state coverage.
