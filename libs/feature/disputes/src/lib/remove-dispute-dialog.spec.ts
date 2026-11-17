@@ -14,7 +14,7 @@ const dispute: Dispute = {
   amount: 123450,
   currency: 'USD',
   status: 'New',
-  date: '2026-11-14',
+  date: '2026-11-14T12:00:00.000Z',
 };
 
 async function createDialog() {

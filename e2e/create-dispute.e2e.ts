@@ -301,14 +301,20 @@ test.describe('Formatting in a non-UTC time zone', () => {
   test.use({ timezoneId: 'Asia/Tokyo' });
 
   test('uses the local creation date and formats the saved amount', async ({ page }) => {
-    await page.clock.setFixedTime(new Date('2026-04-04T23:59:00Z'));
+    const createdAt = '2026-04-04T23:59:00.000Z';
+    await page.clock.setFixedTime(new Date(createdAt));
     await page.goto('/disputes');
     const dialog = await openCreate(page);
     await dialog.getByRole('textbox', { name: 'Buyer' }).fill('Exact Amount Buyer');
     await dialog.getByRole('textbox', { name: 'Dispute Reason' }).fill('Invoice issue');
     await dialog.getByRole('radio', { name: 'USD' }).check();
     await dialog.getByRole('spinbutton').fill('1250.91');
+    const saved = page.waitForResponse(
+      (response) =>
+        response.url().endsWith('/api/disputes') && response.request().method() === 'POST',
+    );
     await dialog.getByRole('button', { name: 'Create Dispute' }).click();
+    await expect((await saved).json()).resolves.toMatchObject({ date: createdAt });
     await expect(dialog).toHaveCount(0);
 
     const createdRow = page.getByRole('row').filter({ hasText: 'Exact Amount Buyer' });

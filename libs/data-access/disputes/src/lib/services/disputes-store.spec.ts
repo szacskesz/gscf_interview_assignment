@@ -20,7 +20,7 @@ const row = {
   amount: 10025,
   currency: 'EUR',
   status: 'New',
-  date: '2026-11-14',
+  date: '2026-11-14T12:00:00.000Z',
 } as const;
 
 describe('Disputes store', () => {

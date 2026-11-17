@@ -18,7 +18,7 @@ const dispute: Dispute = {
   amount: 1230,
   currency: 'USD',
   status: 'New',
-  date: '2026-11-14',
+  date: '2026-11-14T12:00:00.000Z',
 };
 
 async function createOverview(state: ReturnType<DisputesStore['$readState']> = 'ready') {

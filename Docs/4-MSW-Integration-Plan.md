@@ -68,7 +68,7 @@ Use same-origin `/api/disputes` by default, with one injected API base URL confi
 | `POST /api/disputes`       | `201` with the complete created `Dispute` | A controlled test scenario can fail the write so the UI can exercise retry. |
 | `DELETE /api/disputes/:id` | `204`, no body                            | `404` if the dispute does not exist.                                        |
 
-The Create Dispute feature validates the original decimal string with Signal Forms and converts valid values to safe integer cents. The create request contains `buyer`, `reason`, `amount`, and `currency`. The response contains the saved `Dispute`, including its generated number, status, and `YYYY-MM-DD` date.
+The Create Dispute feature validates the original decimal string with Signal Forms and converts valid values to safe integer cents. The create request contains `buyer`, `reason`, `amount`, and `currency`. The response contains the saved `Dispute`, including its generated number, status, and UTC ISO 8601 timestamp.
 
 The Angular adapter and MSW handlers use the typed demo contract. The in-memory mock applies operations to that data. Test scenarios simulate HTTP failures, and the UI keeps the draft available for retry. Integrating an external API would require reviewing how its request and response data are validated.
 

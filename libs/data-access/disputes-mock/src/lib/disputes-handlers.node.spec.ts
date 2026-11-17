@@ -17,7 +17,9 @@ function remove(id: string | number) {
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 beforeEach(() => {
-  server.resetHandlers(...createDisputesHandlers(url, new DisputesRepository(() => '2026-11-14')));
+  server.resetHandlers(
+    ...createDisputesHandlers(url, new DisputesRepository(() => '2026-11-14T12:00:00.000Z')),
+  );
 });
 afterAll(() => server.close());
 
@@ -43,7 +45,7 @@ describe('Mock disputes API', () => {
       currency: 'EUR',
       id: 6229,
       status: 'New',
-      date: '2026-11-14',
+      date: '2026-11-14T12:00:00.000Z',
     });
     const response = await fetch(url);
     await expect(response.json()).resolves.toMatchObject([

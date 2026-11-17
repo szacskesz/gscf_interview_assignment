@@ -28,7 +28,7 @@
             }}</gscf-badge>
           </td>
           <td class="whitespace-nowrap">
-            {{ row.date + 'T00:00:00Z' | date: 'd MMM yyyy' : '+0000' : 'en-US' }}
+            {{ row.date | date: 'd MMM yyyy' : undefined : 'en-US' }}
           </td>
           <td class="text-right whitespace-nowrap tabular-nums">
             {{ row.amount / 100 | number: '1.2-2' : 'en-US' }}

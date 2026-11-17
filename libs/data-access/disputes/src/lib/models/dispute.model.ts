@@ -5,7 +5,7 @@ export interface Dispute {
   readonly id: number;
   readonly buyer: string;
   readonly status: DisputeStatus;
-  /** Calendar date in YYYY-MM-DD format. */
+  /** ISO 8601 timestamp in UTC. */
   readonly date: string;
   /** Disputed amount in integer cents. */
   readonly amount: number;

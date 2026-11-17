@@ -5,7 +5,7 @@ export class DisputesRepository {
   private rows: readonly Dispute[] = initialDisputes.map((row) => ({ ...row }));
   private nextId = Math.max(...initialDisputes.map((row) => row.id)) + 1;
 
-  constructor(private readonly today: () => string) {}
+  constructor(private readonly currentTimestamp: () => string) {}
 
   list(): readonly Dispute[] {
     return this.rows;
@@ -24,7 +24,7 @@ export class DisputesRepository {
       currency,
       id: this.nextId,
       status: 'New',
-      date: this.today(),
+      date: this.currentTimestamp(),
     };
     this.nextId += 1;
     this.rows = [dispute, ...this.rows];

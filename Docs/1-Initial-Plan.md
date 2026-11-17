@@ -445,7 +445,7 @@ interface Dispute {
 }
 ```
 
-`date` is a validated calendar-date string in `YYYY-MM-DD` format. `amount` is an integer number of cents. The form draft is a separate type and may contain incomplete values; invalid draft data must not enter the collection.
+`date` is a UTC ISO 8601 timestamp. `amount` is an integer number of cents. The form draft is a separate type and may contain incomplete values; invalid draft data must not enter the collection.
 
 ### State management and numbering
 
@@ -491,7 +491,7 @@ The populated prototype shows `1,250.00` inside a number field. Native number co
 
 ### Dates
 
-Create the date from local year, month, and day when the save command runs. Avoid `toISOString().slice(0, 10)`, which derives a UTC date and can produce the wrong local day.
+Capture a UTC ISO timestamp when the save command runs. Format it as a calendar date in the browser time zone.
 
 Use one date formatter for the table with an explicit English locale and the required `d MMM yyyy` output. Store sample dates as date-only values and avoid reparsing them through a timezone-sensitive UTC conversion. Pass a small current-date function into the mock repository so tests can freeze the date without depending on the machine's clock. The API assigns the date; the frontend store must not assign it again.
 
