@@ -44,28 +44,22 @@ export function validateAmount(value: string): AmountResult {
   return Number.isFinite(amount) ? { valid: true, amount } : { valid: false, error: 'range' };
 }
 
-export function initialDisputeFormValue(): Pick<Dispute, 'buyer' | 'reason'> & {
-  amount: AmountDraft;
-  currency: Currency | '';
-} {
-  return {
-    buyer: '',
-    reason: '',
-    amount: { raw: '', badInput: false },
-    currency: '',
-  };
+export interface DisputeFormControls {
+  amountInput: AmountDraft;
+  currencyInput: Currency | '';
 }
 
-export const disputeSchema = schema<ReturnType<typeof initialDisputeFormValue>>((path) => {
-  requiredNonEmpty(path.buyer, 'Enter a buyer name.');
-  requiredNonEmpty(path.reason, 'Enter a dispute reason.');
-  validate(path.amount, ({ value }) => {
+export const disputeSchema = schema<Partial<Dispute> & DisputeFormControls>((path) => {
+  // The form initializes both text fields so Signal Forms can register them.
+  requiredNonEmpty(path.buyer!, 'Enter a buyer name.');
+  requiredNonEmpty(path.reason!, 'Enter a dispute reason.');
+  validate(path.amountInput, ({ value }) => {
     const { raw, badInput } = value();
     const result = validateAmount(raw);
     if (badInput) return { kind: 'invalid', message: amountErrors.invalid };
     return result.valid ? undefined : { kind: result.error, message: amountErrors[result.error] };
   });
-  required(path.currency, { message: 'Select a currency.' });
+  required(path.currencyInput, { message: 'Select a currency.' });
 });
 
 export function visibleError(
@@ -87,36 +81,41 @@ export class CreateDisputeForm {
   /** Emits validated values with the amount as a decimal number. */
   readonly submitted = output<Partial<Dispute>>();
 
-  private readonly $formValue = signal(initialDisputeFormValue());
+  private readonly $formValue = signal<Partial<Dispute> & DisputeFormControls>({
+    buyer: '',
+    reason: '',
+    amountInput: { raw: '', badInput: false },
+    currencyInput: '',
+  });
 
   protected readonly $form = form(this.$formValue, disputeSchema, {
     submission: {
       onInvalid: (field) => {
-        const fields = [field.buyer, field.reason, field.amount, field.currency];
+        const fields = [field.buyer, field.reason, field.amountInput, field.currencyInput];
         fields
-          .find((field) => field().invalid())?.()
+          .find((field) => field?.().invalid())?.()
           .focusBoundControl();
       },
       action: async () => {
         if (this.$busy()) return;
-        const { buyer, reason, amount, currency } = this.$formValue();
-        if (currency !== 'USD' && currency !== 'EUR') return;
+        const { buyer, reason, amountInput, currencyInput } = this.$formValue();
+        if (!buyer || !reason || (currencyInput !== 'USD' && currencyInput !== 'EUR')) return;
 
-        const parsedAmount = validateAmount(amount.raw);
-        if (amount.badInput || !parsedAmount.valid) return;
+        const parsedAmount = validateAmount(amountInput.raw);
+        if (amountInput.badInput || !parsedAmount.valid) return;
 
         this.submitted.emit({
           buyer: buyer.trim(),
           reason: reason.trim(),
           amount: parsedAmount.amount,
-          currency,
+          currency: currencyInput,
         });
       },
     },
   });
 
-  protected readonly $buyerError = computed(() => visibleError(this.$form.buyer()));
-  protected readonly $reasonError = computed(() => visibleError(this.$form.reason()));
-  protected readonly $amountError = computed(() => visibleError(this.$form.amount()));
-  protected readonly $currencyError = computed(() => visibleError(this.$form.currency()));
+  protected readonly $buyerError = computed(() => visibleError(this.$form.buyer!()));
+  protected readonly $reasonError = computed(() => visibleError(this.$form.reason!()));
+  protected readonly $amountError = computed(() => visibleError(this.$form.amountInput()));
+  protected readonly $currencyError = computed(() => visibleError(this.$form.currencyInput()));
 }

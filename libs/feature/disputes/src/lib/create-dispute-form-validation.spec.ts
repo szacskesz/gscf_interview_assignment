@@ -2,26 +2,36 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
 import { requiredNonEmpty } from '@gscf/core';
+import type { Dispute } from '@gscf/disputes-data-access';
 import { describe, expect, it } from 'vitest';
 import {
   disputeSchema,
   validateAmount,
   visibleError,
-  type initialDisputeFormValue,
+  type DisputeFormControls,
 } from './create-dispute-form';
 
-function createForm(overrides: Partial<ReturnType<typeof initialDisputeFormValue>> = {}) {
-  const $draft = signal<ReturnType<typeof initialDisputeFormValue>>({
+function createForm(overrides: Partial<Dispute & DisputeFormControls> = {}) {
+  const $draft = signal<Partial<Dispute> & DisputeFormControls>({
     buyer: 'Buyer',
     reason: 'Invoice issue',
-    amount: { raw: '12.30', badInput: false },
-    currency: 'USD',
+    amountInput: { raw: '12.30', badInput: false },
+    currencyInput: 'USD',
     ...overrides,
   });
   return TestBed.runInInjectionContext(() => form($draft, disputeSchema));
 }
 
 describe('Dispute form schema', () => {
+  it('accepts dispute properties alongside the controls without replacing their values', () => {
+    const $form = createForm({ id: 123, amount: 10, currency: 'EUR' });
+    $form.amountInput().value.set({ raw: '12.345', badInput: false });
+    $form.currencyInput().value.set('USD');
+
+    expect($form().value()).toMatchObject({ id: 123, amount: 10, currency: 'EUR' });
+    expect($form.amountInput().errors()).toMatchObject([{ kind: 'precision' }]);
+  });
+
   it.each([null, undefined, '', ' \t\n'])('requires nonblank text for %j', (text) => {
     const $draft = signal<string | null | undefined>(text);
     const $form = TestBed.runInInjectionContext(() =>
@@ -37,17 +47,17 @@ describe('Dispute form schema', () => {
   });
 
   it('rejects whitespace-only text and missing currency until each field is corrected', () => {
-    const $form = createForm({ buyer: '  ', reason: '\t', currency: '' });
+    const $form = createForm({ buyer: '  ', reason: '\t', currencyInput: '' });
     expect($form().invalid()).toBe(true);
-    expect($form.buyer().errors()).toMatchObject([{ message: 'Enter a buyer name.' }]);
-    expect($form.reason().errors()).toMatchObject([{ message: 'Enter a dispute reason.' }]);
-    expect($form.currency().errors()).toMatchObject([{ message: 'Select a currency.' }]);
+    expect($form.buyer!().errors()).toMatchObject([{ message: 'Enter a buyer name.' }]);
+    expect($form.reason!().errors()).toMatchObject([{ message: 'Enter a dispute reason.' }]);
+    expect($form.currencyInput().errors()).toMatchObject([{ message: 'Select a currency.' }]);
 
-    $form.buyer().value.set('Buyer');
-    expect($form.buyer().valid()).toBe(true);
-    expect($form.reason().invalid()).toBe(true);
-    $form.reason().value.set('Reason');
-    $form.currency().value.set('EUR');
+    $form.buyer!().value.set('Buyer');
+    expect($form.buyer!().valid()).toBe(true);
+    expect($form.reason!().invalid()).toBe(true);
+    $form.reason!().value.set('Reason');
+    $form.currencyInput().value.set('EUR');
     expect($form().valid()).toBe(true);
   });
 
@@ -60,30 +70,30 @@ describe('Dispute form schema', () => {
   ])(
     'reports only $message for amount $raw with badInput=$badInput',
     ({ raw, badInput, message }) => {
-      const $form = createForm({ amount: { raw, badInput } });
-      expect($form.amount().errors()).toMatchObject([{ message }]);
-      expect($form.amount().value()).toEqual({ raw, badInput });
+      const $form = createForm({ amountInput: { raw, badInput } });
+      expect($form.amountInput().errors()).toMatchObject([{ message }]);
+      expect($form.amountInput().value()).toEqual({ raw, badInput });
     },
   );
 
   it('clears the precision error when the user removes the extra decimal digit', () => {
-    const $form = createForm({ amount: { raw: '1.230', badInput: false } });
-    expect($form.amount().errors()).toMatchObject([{ kind: 'precision' }]);
+    const $form = createForm({ amountInput: { raw: '1.230', badInput: false } });
+    expect($form.amountInput().errors()).toMatchObject([{ kind: 'precision' }]);
 
-    $form.amount().value.set({ raw: '1.23', badInput: false });
-    expect($form.amount().valid()).toBe(true);
+    $form.amountInput().value.set({ raw: '1.23', badInput: false });
+    expect($form.amountInput().valid()).toBe(true);
   });
 
   it('reveals an error after touch and clears it as soon as the field becomes valid', () => {
     const $form = createForm({ buyer: '', reason: '' });
-    expect(visibleError($form.buyer())).toBeNull();
-    $form.buyer().markAsTouched();
-    $form.reason().markAsTouched();
-    expect(visibleError($form.buyer())).toBe('Enter a buyer name.');
+    expect(visibleError($form.buyer!())).toBeNull();
+    $form.buyer!().markAsTouched();
+    $form.reason!().markAsTouched();
+    expect(visibleError($form.buyer!())).toBe('Enter a buyer name.');
 
-    $form.buyer().value.set('Buyer');
-    expect(visibleError($form.buyer())).toBeNull();
-    expect(visibleError($form.reason())).toBe('Enter a dispute reason.');
+    $form.buyer!().value.set('Buyer');
+    expect(visibleError($form.buyer!())).toBeNull();
+    expect(visibleError($form.reason!())).toBe('Enter a dispute reason.');
   });
 });
 
