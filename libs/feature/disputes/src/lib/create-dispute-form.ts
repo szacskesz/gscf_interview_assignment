@@ -44,14 +44,19 @@ export function validateAmount(value: string): AmountResult {
   return Number.isFinite(amount) ? { valid: true, amount } : { valid: false, error: 'range' };
 }
 
-export interface DisputeDraft {
-  buyer: string;
-  reason: string;
+export function initialDisputeFormValue(): Pick<Dispute, 'buyer' | 'reason'> & {
   amount: AmountDraft;
   currency: Currency | '';
+} {
+  return {
+    buyer: '',
+    reason: '',
+    amount: { raw: '', badInput: false },
+    currency: '',
+  };
 }
 
-export const disputeSchema = schema<DisputeDraft>((path) => {
+export const disputeSchema = schema<ReturnType<typeof initialDisputeFormValue>>((path) => {
   requiredNonEmpty(path.buyer, 'Enter a buyer name.');
   requiredNonEmpty(path.reason, 'Enter a dispute reason.');
   validate(path.amount, ({ value }) => {
@@ -80,16 +85,11 @@ export class CreateDisputeForm {
   /** Locks form editing and submission while the host saves the dispute. */
   readonly $busy = input(false, { alias: 'busy' });
   /** Emits validated values with the amount as a decimal number. */
-  readonly submitted = output<Pick<Dispute, 'buyer' | 'reason' | 'amount' | 'currency'>>();
+  readonly submitted = output<Partial<Dispute>>();
 
-  private readonly $draft = signal<DisputeDraft>({
-    buyer: '',
-    reason: '',
-    amount: { raw: '', badInput: false },
-    currency: '',
-  });
+  private readonly $formValue = signal(initialDisputeFormValue());
 
-  protected readonly $form = form(this.$draft, disputeSchema, {
+  protected readonly $form = form(this.$formValue, disputeSchema, {
     submission: {
       onInvalid: (field) => {
         const fields = [field.buyer, field.reason, field.amount, field.currency];
@@ -99,7 +99,7 @@ export class CreateDisputeForm {
       },
       action: async () => {
         if (this.$busy()) return;
-        const { buyer, reason, amount, currency } = this.$draft();
+        const { buyer, reason, amount, currency } = this.$formValue();
         if (currency !== 'USD' && currency !== 'EUR') return;
 
         const parsedAmount = validateAmount(amount.raw);

@@ -7,11 +7,11 @@ import {
   disputeSchema,
   validateAmount,
   visibleError,
-  type DisputeDraft,
+  type initialDisputeFormValue,
 } from './create-dispute-form';
 
-function createForm(overrides: Partial<DisputeDraft> = {}) {
-  const $draft = signal<DisputeDraft>({
+function createForm(overrides: Partial<ReturnType<typeof initialDisputeFormValue>> = {}) {
+  const $draft = signal<ReturnType<typeof initialDisputeFormValue>>({
     buyer: 'Buyer',
     reason: 'Invoice issue',
     amount: { raw: '12.30', badInput: false },
