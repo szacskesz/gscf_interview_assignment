@@ -305,7 +305,6 @@ libs/
         lib/
           models/
             dispute.model.ts
-            dispute-api.model.ts
             disputes-store.model.ts
           services/
             disputes-api.ts

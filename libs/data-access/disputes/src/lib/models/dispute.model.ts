@@ -12,3 +12,5 @@ export interface Dispute {
   readonly currency: Currency;
   readonly reason: string;
 }
+
+export type CreateDisputeRequest = Pick<Dispute, 'buyer' | 'reason' | 'amount' | 'currency'>;

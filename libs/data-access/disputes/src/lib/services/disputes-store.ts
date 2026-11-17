@@ -1,6 +1,5 @@
 import { Service, computed, inject, signal } from '@angular/core';
-import type { CreateDisputeRequest } from '../models/dispute-api.model';
-import type { Dispute } from '../models/dispute.model';
+import type { CreateDisputeRequest, Dispute } from '../models/dispute.model';
 import type { MutationResult, ReadState } from '../models/disputes-store.model';
 import { DisputesApi } from './disputes-api';
 
