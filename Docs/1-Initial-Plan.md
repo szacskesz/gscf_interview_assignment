@@ -273,7 +273,7 @@ apps/
 libs/
   core/
     src/
-      lib/clock/
+      lib/local-date.ts
       lib/api-config/
       public-api.ts
   ui/
