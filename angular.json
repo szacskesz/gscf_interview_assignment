@@ -253,26 +253,6 @@
         }
       }
     },
-    "ui-notifications": {
-      "projectType": "library",
-      "root": "libs/ui/notifications",
-      "sourceRoot": "libs/ui/notifications/src",
-      "prefix": "gscf",
-      "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "libs/ui/notifications/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "libs/ui/notifications/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        }
-      }
-    },
     "core": {
       "projectType": "library",
       "root": "libs/core",

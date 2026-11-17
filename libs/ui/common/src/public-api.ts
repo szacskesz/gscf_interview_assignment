@@ -2,3 +2,4 @@ export { Button, type ButtonVariant } from './lib/directives/button/button.direc
 export { Icon, type IconName } from './lib/components/icon/icon.component';
 export { Badge } from './lib/components/badge/badge.component';
 export { DialogFrame } from './lib/components/dialog-frame/dialog-frame.component';
+export { Notifications } from './lib/services/notifications/notifications.service';

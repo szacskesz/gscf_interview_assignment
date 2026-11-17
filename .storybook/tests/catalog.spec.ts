@@ -10,6 +10,7 @@ test('renders the catalog and completes each story interaction', async ({ page, 
   const index: CatalogIndex = await response.json();
   const stories = Object.values(index.entries).filter((entry) => entry.type === 'story');
   expect(stories.length).toBeGreaterThan(0);
+  expect(stories.map((story) => story.id)).toContain('notifications-success--created');
   test.setTimeout(stories.length * 10_000 + 10_000);
 
   for (const story of stories) {

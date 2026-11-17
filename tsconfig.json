@@ -15,7 +15,6 @@
     "paths": {
       "@gscf/ui-common": ["./dist/libs/ui/common"],
       "@gscf/ui-form": ["./dist/libs/ui/form"],
-      "@gscf/ui-notifications": ["./dist/libs/ui/notifications"],
       "@gscf/core": ["./dist/libs/core"],
       "@gscf/disputes-data-access": ["./dist/libs/data-access/disputes"],
       "@gscf/disputes-mock": ["./dist/libs/data-access/disputes-mock"],
@@ -47,9 +46,6 @@
     },
     {
       "path": "./libs/ui/form/tsconfig.lib.json"
-    },
-    {
-      "path": "./libs/ui/notifications/tsconfig.lib.json"
     },
     {
       "path": "./libs/core/tsconfig.lib.json"

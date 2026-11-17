@@ -11,8 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
-import { Button, Icon } from '@gscf/ui-common';
-import { Notifications } from '@gscf/ui-notifications';
+import { Button, Icon, Notifications } from '@gscf/ui-common';
 import { CreateDisputeDialog } from '../create-dispute-dialog/create-dispute-dialog.component';
 import { DisputesTable } from '../disputes-table/disputes-table.component';
 import { RemoveDisputeDialog } from '../remove-dispute-dialog/remove-dispute-dialog.component';

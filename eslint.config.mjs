@@ -16,7 +16,6 @@ const packageNames = [
   '@gscf/disputes-feature',
   '@gscf/ui-common',
   '@gscf/ui-form',
-  '@gscf/ui-notifications',
 ];
 
 function restrictPackages(files, allowed, ignores = []) {
@@ -79,10 +78,7 @@ export default defineConfig(
     ['libs/data-access/disputes-mock/**/*.ts'],
     ['@gscf/core', '@gscf/disputes-data-access'],
   ),
-  restrictPackages(
-    ['libs/ui/form/**/*.ts', 'libs/ui/notifications/**/*.ts'],
-    ['@gscf/core', '@gscf/ui-common'],
-  ),
+  restrictPackages(['libs/ui/form/**/*.ts'], ['@gscf/core', '@gscf/ui-common']),
   restrictPackages(
     ['libs/feature/**/*.ts'],
     packageNames.filter(

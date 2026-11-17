@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
-import { Icon } from '@gscf/ui-common';
+import { Icon } from '../icon/icon.component';
 
 interface NotificationData {
   title: string;

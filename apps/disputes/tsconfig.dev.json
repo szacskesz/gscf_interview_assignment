@@ -4,7 +4,6 @@
     "paths": {
       "@gscf/ui-common": ["../../libs/ui/common/src/public-api.ts"],
       "@gscf/ui-form": ["../../libs/ui/form/src/public-api.ts"],
-      "@gscf/ui-notifications": ["../../libs/ui/notifications/src/public-api.ts"],
       "@gscf/core": ["../../libs/core/src/public-api.ts"],
       "@gscf/disputes-data-access": ["../../libs/data-access/disputes/src/public-api.ts"],
       "@gscf/disputes-mock": ["../../libs/data-access/disputes-mock/src/public-api.ts"],

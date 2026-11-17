@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatIconRegistry } from '@angular/material/icon';
 import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
-import { Notifications } from '@gscf/ui-notifications';
+import { Notifications } from '@gscf/ui-common';
 import { Subject, type Observable } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { CreateDisputeDialog } from '../create-dispute-dialog/create-dispute-dialog.component';
