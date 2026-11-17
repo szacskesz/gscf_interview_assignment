@@ -3,7 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
 import { requiredNonEmpty } from '@gscf/core';
 import { describe, expect, it } from 'vitest';
-import { disputeSchema, visibleError, type DisputeDraft } from './dispute-form';
+import {
+  disputeSchema,
+  validateAmount,
+  visibleError,
+  type DisputeDraft,
+} from './create-dispute-form';
 
 function createForm(overrides: Partial<DisputeDraft> = {}) {
   const $draft = signal<DisputeDraft>({
@@ -79,5 +84,28 @@ describe('Dispute form schema', () => {
     $form.buyer().value.set('Buyer');
     expect(visibleError($form.buyer())).toBeNull();
     expect(visibleError($form.reason())).toBe('Enter a dispute reason.');
+  });
+});
+
+describe('Dispute amount', () => {
+  it.each([
+    ['', 'required'],
+    ['1e3', 'invalid'],
+    ['1,250.00', 'invalid'],
+    ['-12.345', 'nonpositive'],
+    ['0.000', 'nonpositive'],
+    ['1.230', 'precision'],
+    ['9'.repeat(309), 'range'],
+  ])('rejects %j as %s', (input, error) => {
+    expect(validateAmount(input)).toEqual({ valid: false, error });
+  });
+
+  it.each([
+    ['1250', 1250],
+    ['1250.5', 1250.5],
+    ['.01', 0.01],
+    ['100000000000000', 100_000_000_000_000],
+  ])('parses %j as the decimal amount %s', (input, amount) => {
+    expect(validateAmount(input)).toEqual({ valid: true, amount });
   });
 });

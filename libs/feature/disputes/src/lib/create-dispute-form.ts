@@ -1,10 +1,73 @@
 import { Component, computed, input, output, signal } from '@angular/core';
-import { FormField, FormRoot, form } from '@angular/forms/signals';
-import type { Dispute } from '@gscf/disputes-data-access';
+import {
+  FormField,
+  FormRoot,
+  form,
+  required,
+  schema,
+  validate,
+  type FieldState,
+} from '@angular/forms/signals';
+import { hasAtMostDecimalPlaces, requiredNonEmpty } from '@gscf/core';
+import type { Currency, Dispute } from '@gscf/disputes-data-access';
 import { FieldFrame, RadioInput, TextInput } from '@gscf/ui-form';
-import { AmountField } from './amount-field';
-import { validateAmount } from './dispute-amount';
-import { disputeSchema, visibleError, type DisputeDraft } from './dispute-form';
+import { AmountField, type AmountDraft } from './amount-field';
+
+const amountDecimalPlaces = 2;
+
+const amountErrors = {
+  required: 'Enter a dispute amount.',
+  invalid: 'Enter a valid dispute amount.',
+  nonpositive: 'Enter an amount greater than 0.',
+  precision: `Enter an amount with up to ${amountDecimalPlaces} decimals.`,
+  range: 'Enter a smaller dispute amount.',
+} as const;
+
+type AmountResult =
+  | { readonly valid: true; readonly amount: number }
+  | { readonly valid: false; readonly error: keyof typeof amountErrors };
+
+const amountPattern = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
+
+export function validateAmount(value: string): AmountResult {
+  if (value === '') return { valid: false, error: 'required' };
+  if (!amountPattern.test(value)) return { valid: false, error: 'invalid' };
+
+  if (value.startsWith('-') || !/[1-9]/.test(value)) {
+    return { valid: false, error: 'nonpositive' };
+  }
+  if (!hasAtMostDecimalPlaces(value, amountDecimalPlaces)) {
+    return { valid: false, error: 'precision' };
+  }
+
+  const amount = Number(value);
+  return Number.isFinite(amount) ? { valid: true, amount } : { valid: false, error: 'range' };
+}
+
+export interface DisputeDraft {
+  buyer: string;
+  reason: string;
+  amount: AmountDraft;
+  currency: Currency | '';
+}
+
+export const disputeSchema = schema<DisputeDraft>((path) => {
+  requiredNonEmpty(path.buyer, 'Enter a buyer name.');
+  requiredNonEmpty(path.reason, 'Enter a dispute reason.');
+  validate(path.amount, ({ value }) => {
+    const { raw, badInput } = value();
+    const result = validateAmount(raw);
+    if (badInput) return { kind: 'invalid', message: amountErrors.invalid };
+    return result.valid ? undefined : { kind: result.error, message: amountErrors[result.error] };
+  });
+  required(path.currency, { message: 'Select a currency.' });
+});
+
+export function visibleError(
+  field: Pick<FieldState<unknown>, 'touched' | 'errors'>,
+): string | null {
+  return field.touched() ? (field.errors()[0]?.message ?? null) : null;
+}
 
 @Component({
   selector: 'gscf-create-dispute-form',

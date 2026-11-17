@@ -334,9 +334,11 @@ libs/
             create-dispute-dialog.ts
             create-dispute-dialog.html
             create-dispute-dialog.spec.ts
-          dispute-form.ts
-          dispute-amount.ts
-          dispute-amount.node.spec.ts
+          create-dispute-form/
+            create-dispute-form.ts
+            create-dispute-form.html
+            create-dispute-form.spec.ts
+            create-dispute-form-validation.spec.ts
           remove-dispute-dialog/
           amount-field/
         public-api.ts
