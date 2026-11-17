@@ -6,12 +6,11 @@ import tseslint from 'typescript-eslint';
 
 const sourceFiles = ['apps/**/*.ts', 'libs/**/*.ts'];
 const privateImports = {
-  group: ['@gscf/*/*', '!@gscf/core/validators', '@gscf/core/validators/**', '**/dist/**'],
+  group: ['@gscf/*/*', '**/dist/**'],
   message: 'Import the library by its package public API, such as @gscf/ui-common.',
 };
 const packageNames = [
   '@gscf/core',
-  '@gscf/core/validators',
   '@gscf/disputes-data-access',
   '@gscf/disputes-mock',
   '@gscf/disputes-feature',

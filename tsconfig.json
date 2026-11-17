@@ -17,7 +17,6 @@
       "@gscf/ui-form": ["./dist/libs/ui/form"],
       "@gscf/ui-notifications": ["./dist/libs/ui/notifications"],
       "@gscf/core": ["./dist/libs/core"],
-      "@gscf/core/validators": ["./dist/libs/core/validators"],
       "@gscf/disputes-data-access": ["./dist/libs/data-access/disputes"],
       "@gscf/disputes-mock": ["./dist/libs/data-access/disputes-mock"],
       "@gscf/disputes-feature": ["./dist/libs/feature/disputes"]

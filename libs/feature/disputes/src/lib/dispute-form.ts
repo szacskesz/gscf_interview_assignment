@@ -1,5 +1,5 @@
 import { required, schema, validate, type FieldState } from '@angular/forms/signals';
-import { requiredNonEmpty } from '@gscf/core/validators';
+import { requiredNonEmpty } from '@gscf/core';
 import type { Currency } from '@gscf/disputes-data-access';
 import type { AmountDraft } from './amount-field';
 import { amountErrors, validateAmount } from './dispute-amount';

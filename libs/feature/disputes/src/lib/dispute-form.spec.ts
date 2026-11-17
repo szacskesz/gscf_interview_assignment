@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
-import { requiredNonEmpty } from '@gscf/core/validators';
+import { requiredNonEmpty } from '@gscf/core';
 import { describe, expect, it } from 'vitest';
 import { disputeSchema, visibleError, type DisputeDraft } from './dispute-form';
 

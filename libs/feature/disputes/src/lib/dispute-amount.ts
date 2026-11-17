@@ -1,4 +1,4 @@
-import { hasAtMostDecimalPlaces } from '@gscf/core/validators';
+import { hasAtMostDecimalPlaces } from '@gscf/core';
 
 const amountDecimalPlaces = 2;
 
