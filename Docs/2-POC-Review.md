@@ -130,7 +130,7 @@ The [number control](D:/Projects/angular-17-template-v2/libs/ui/form/src/lib/num
 
 The control also defaults to a two-decimal separator mask and uses a text-input abstraction. That creates a further integration risk: invalid precision might be constrained or normalized before the assignment's explicit validation can report it. The mask's full browser behavior was not tested.
 
-**Recommendation:** do not reuse this control or parser for dispute amounts. Preserve the raw input until validation succeeds, use the specified native numeric input, enforce the exact error priority, and convert validated amounts into integer minor units. Do not strip signs, round invalid values, or use permissive partial parsing. This is required by the assignment and existing plan, not a style preference.
+**Recommendation:** use the specified native numeric input and preserve the raw value through validation so errors appear in the required order. After validation, convert the input to a number in the selected currency. Preserve the sign and fractional digits during validation and require the entire input to match the amount format.
 
 ### 5.2 Validation timing differs from the required behavior
 

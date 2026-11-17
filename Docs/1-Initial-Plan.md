@@ -483,7 +483,6 @@ Implementation details:
 - Convert the validated decimal string to a number in the specified currency.
 - Reject values that convert to a non-finite number.
 - Format display values with English thousands separators and exactly two fractional digits. Keep the separate currency column rather than adding a currency symbol to the Amount column.
-- Format large supported values using integer whole/fractional portions so display formatting does not lose a cent through floating-point division.
 
 Examples: `1250`, `1250.5`, and `1250.50` are valid and display as `1,250.00`, `1,250.50`, and `1,250.50`. `12.345` remains visible and invalid. Under the chosen literal precision policy, `1.230` also fails rather than silently discarding the last zero.
 
@@ -619,7 +618,7 @@ Test the mock repository separately from the Angular store. Reuse environment-in
 - Cover `0`, `-1`, `-12.345`, `0.01`, `1`, `1.2`, `1.23`, `1.230`, `12.345`, whitespace, invalid syntax, and supported large amounts.
 - Amount parsing stores decimal numbers and formatting always shows two decimal places.
 - Date formatting and the injected current-date function handle local calendar boundaries.
-- The form preserves literal amount precision during validation. API tests verify the integer-cent request and the planned response codes.
+- The form preserves literal amount precision during validation. API tests verify the decimal amount in the request and the planned response codes.
 - Loading, error, and loaded-empty states remain distinct; failed writes do not trigger local success updates or toasts.
 - Repeated submissions and stale GET responses cannot duplicate or overwrite a confirmed mutation.
 
