@@ -1,15 +1,16 @@
-import type { AmountError, AmountResult } from '../models/dispute-amount.model';
-
 export const amountErrors = {
   required: 'Enter a dispute amount.',
   invalid: 'Enter a valid dispute amount.',
   nonpositive: 'Enter an amount greater than 0.',
   precision: 'Enter an amount with up to 2 decimals.',
   range: 'Enter a smaller dispute amount.',
-} as const satisfies Record<AmountError, string>;
+} as const;
+
+type AmountResult =
+  | { readonly valid: true; readonly minorUnits: number }
+  | { readonly valid: false; readonly error: keyof typeof amountErrors };
 
 const amountPattern = /^(-?)(?:(\d+)(?:\.(\d*))?|\.(\d+))$/;
-const wholeNumberFormat = new Intl.NumberFormat('en-US');
 
 export function validateAmount(value: string): AmountResult {
   if (value === '') return { valid: false, error: 'required' };
@@ -27,9 +28,4 @@ export function validateAmount(value: string): AmountResult {
   return Number.isSafeInteger(minorUnits)
     ? { valid: true, minorUnits }
     : { valid: false, error: 'range' };
-}
-
-export function formatAmount(minorUnits: number): string {
-  const fraction = minorUnits % 100;
-  return `${wholeNumberFormat.format((minorUnits - fraction) / 100)}.${String(fraction).padStart(2, '0')}`;
 }

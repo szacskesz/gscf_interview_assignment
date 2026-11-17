@@ -3,7 +3,7 @@ import { Service, inject } from '@angular/core';
 import { API_BASE_PATH, apiPath } from '@gscf/core';
 import { firstValueFrom } from 'rxjs';
 import type { CreateDisputeRequest } from '../models/dispute-api.model';
-import { parseDispute, parseDisputes } from '../utils/dispute-api-parsing';
+import type { Dispute } from '../models/dispute.model';
 
 const requestTimeout = 10_000;
 
@@ -13,16 +13,15 @@ export class DisputesApi {
   private readonly url = apiPath(inject(API_BASE_PATH), 'disputes');
 
   read() {
-    return httpResource(() => ({ url: this.url, timeout: requestTimeout, cache: 'no-store' }), {
-      parse: parseDisputes,
-    });
+    return httpResource<Dispute[]>(() => ({
+      url: this.url,
+      timeout: requestTimeout,
+      cache: 'no-store',
+    }));
   }
 
-  async create(draft: CreateDisputeRequest) {
-    const response = await firstValueFrom(
-      this.http.post<unknown>(this.url, draft, { timeout: requestTimeout }),
-    );
-    return parseDispute(response);
+  create(draft: CreateDisputeRequest): Promise<Dispute> {
+    return firstValueFrom(this.http.post<Dispute>(this.url, draft, { timeout: requestTimeout }));
   }
 
   async remove(number: number): Promise<void> {

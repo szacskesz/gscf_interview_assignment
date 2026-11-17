@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatAmount, validateAmount } from './dispute-amount';
+import { validateAmount } from './dispute-amount';
 
 describe('Dispute amount', () => {
   it.each([
@@ -15,12 +15,11 @@ describe('Dispute amount', () => {
   });
 
   it.each([
-    ['1250', 125000, '1,250.00'],
-    ['1250.5', 125050, '1,250.50'],
-    ['.01', 1, '0.01'],
-    ['90071992547409.91', Number.MAX_SAFE_INTEGER, '90,071,992,547,409.91'],
-  ])('stores %j as exactly %s cents', (input, minorUnits, formatted) => {
+    ['1250', 125000],
+    ['1250.5', 125050],
+    ['.01', 1],
+    ['90071992547409.91', Number.MAX_SAFE_INTEGER],
+  ])('stores %j as exactly %s cents', (input, minorUnits) => {
     expect(validateAmount(input)).toEqual({ valid: true, minorUnits });
-    expect(formatAmount(minorUnits)).toBe(formatted);
   });
 });

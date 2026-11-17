@@ -273,7 +273,10 @@ apps/
 libs/
   core/
     src/
-      lib/local-date.ts
+      lib/utils/
+        format-amount.ts
+        format-calendar-date.ts
+        local-date.ts
       lib/api-config/
       public-api.ts
   ui/
@@ -307,19 +310,11 @@ libs/
           models/
             dispute.model.ts
             dispute-api.model.ts
-            dispute-amount.model.ts
             disputes-store.model.ts
           services/
             disputes-api.ts
             disputes-store.ts
             disputes-store.spec.ts
-          utils/
-            dispute-amount.ts
-            dispute-amount.node.spec.ts
-            dispute-api-parsing.ts
-            dispute-date.ts
-            dispute-date.node.spec.ts
-            dispute-validation.ts
         public-api.ts
     disputes-mock/
       src/
@@ -341,7 +336,9 @@ libs/
             create-dispute-dialog.ts
             create-dispute-dialog.html
             create-dispute-dialog.spec.ts
-            dispute-form.schema.ts
+          dispute-form.ts
+          dispute-amount.ts
+          dispute-amount.node.spec.ts
           remove-dispute-dialog/
           amount-field/
         public-api.ts
@@ -422,8 +419,8 @@ Keep the empty-state markup within the overview unless it becomes substantial. D
 | Creation dialog              | Owns the isolated draft/validation and awaits the create command before closing.                      |
 | Removal dialog               | Presents the selected record, requests removal only on confirmation, and stays open until the result. |
 | Disputes store               | Owns the feature's HTTP read model, derived UI state, and pending/error command state.                |
-| Disputes API adapter         | Encapsulates resource/HTTP URLs, typed requests, and validated responses; knows nothing about MSW.    |
-| Mock repository and handlers | Own session data, validate HTTP requests, allocate IDs/status/date, and return API responses.         |
+| Disputes API adapter         | Encapsulates resource/HTTP URLs and the typed request and response contract.                          |
+| Mock repository and handlers | Own session data, allocate IDs/status/date, and return API responses.                                 |
 | Amount/date functions        | Perform deterministic normalization and display formatting.                                           |
 | Notification adapter         | Supplies application copy and appearance to `MatSnackBar`.                                            |
 
@@ -462,7 +459,7 @@ interface Dispute {
 
 This produces `6229` when creating after deleting all original rows, matching Figure 1.6b. If `6229` has already been created and removed, the next dispute is `6230`. Reloading starts a new mock session and resets both records and numbering.
 
-Use GET/POST `/api/disputes` and DELETE `/api/disputes/:number`. Send the valid raw decimal amount as a string; the shared validator converts it to safe integer cents in the mock repository. The API returns the complete created record. No mandatory artificial delay is needed; controlled scenarios exercise pending/error behavior. The API contract, runtime validation, bootstrap, and profile details are in [the MSW plan](4-MSW-Integration-Plan.md). This supersedes the earlier no-HTTP assumption.
+Use GET/POST `/api/disputes` and DELETE `/api/disputes/:number`. The Create Dispute feature validates the raw decimal string and sends safe integer `amountMinorUnits`. The mock stores those cents and returns the complete created record. Controlled scenarios exercise pending/error behavior. The HTTP contract, bootstrap, and build profiles are in [the MSW plan](4-MSW-Integration-Plan.md).
 
 ## 6. Form, money, and date implementation
 
@@ -624,7 +621,7 @@ Test the mock repository separately from the Angular store. Reuse environment-in
 - Cover `0`, `-1`, `-12.345`, `0.01`, `1`, `1.2`, `1.23`, `1.230`, `12.345`, whitespace, invalid syntax, and supported large amounts.
 - Amount parsing and formatting preserve cents and always produce two display decimals.
 - Date formatting and the injected current-date function handle local calendar boundaries.
-- API contracts validate unknown payloads, preserve literal amount precision, and return the planned success/error status codes.
+- The form preserves literal amount precision during validation. API tests verify the integer-cent request and the planned response codes.
 - Loading, error, and loaded-empty states remain distinct; failed writes do not trigger local success updates or toasts.
 - Repeated submissions and stale GET responses cannot duplicate or overwrite a confirmed mutation.
 
@@ -701,7 +698,7 @@ Complete the stages in order. Add one tool or architectural concern per reviewab
 | 10. Compodoc                        | Add JSDoc extraction and generated-JSON integration with Storybook Autodocs.                                                                                                                                                                                                                                                          | Descriptions and aliases for the fixture's public signal APIs appear correctly, or explicit documentation fills extraction gaps. Generated files are kept out of source commits.                                                                                      |
 | 11. Story component tests           | Add the renderer-compatible story test runner and isolated configuration.                                                                                                                                                                                                                                                             | A `play` interaction and assertion run against a built/local catalog; failures are reported by a dedicated command.                                                                                                                                                   |
 | 12. Common UI kit                   | Implement `ui/common`, `ui/form`, and notification presentation in small component-sized increments. Add CDK/Dialog and Material snack-bar infrastructure when needed. Each component includes stories/tests before moving on.                                                                                                        | Default, focus, invalid, disabled, busy, mobile, and long-content states are demonstrated; documented APIs have no business-store/mock dependencies.                                                                                                                  |
-| 13. Core and domain contracts       | Add API configuration, date source, domain/DTO models, and pure money/date functions in core/data-access public APIs.                                                                                                                                                                                                                 | Vitest verifies exact validation precedence, raw decimal precision, safe cents, and local dates. Clean dependency-order library builds work.                                                                                                                          |
+| 13. Core and domain contracts       | Add API configuration and shared amount and date formatters in core, plus domain and DTO models in data access.                                                                                                                                                                                                                       | Vitest verifies formatting of exact integer cents and calendar dates. Clean dependency-order library builds work.                                                                                                                                                     |
 | 14. MSW disputes backend            | Add the separate mock library, exact fixtures, in-memory repository, and GET/POST/DELETE handlers; remove the temporary smoke endpoint.                                                                                                                                                                                               | Vitest repository/HTTP tests cover seeds/order, payload validation, status codes, prepend/removal, monotonic IDs, empty lists, and session reset; no browser globals in shared handlers.                                                                              |
 | 15. HTTP and signal store           | Add the Angular API adapter, resource read model, feature-scoped store, pending/error commands, and isolated test scenario setup.                                                                                                                                                                                                     | Tests verify loading/error/empty separation, confirmed updates, failure recovery, one submission path, no stale-read overwrite, and mock-free client imports.                                                                                                         |
 | 16. Disputes overview               | Add the lazy feature, table, counter, empty/loading/error states, retry, and branded navigation using the completed kit.                                                                                                                                                                                                              | Seed values/order match the PDF through MSW; Playwright verifies populated/empty/error rendering; the route is a real lazy boundary.                                                                                                                                  |

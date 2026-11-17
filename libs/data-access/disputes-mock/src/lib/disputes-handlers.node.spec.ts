@@ -5,7 +5,7 @@ import { DisputesRepository } from './disputes-repository';
 
 const url = 'http://mock.test/api/disputes';
 const server = setupServer();
-const draft = { buyer: ' Buyer ', reason: ' Reason ', amount: '1250.50', currency: 'EUR' };
+const draft = { buyer: 'Buyer', reason: 'Reason', amountMinorUnits: 125050, currency: 'EUR' };
 
 function create(body: unknown) {
   return fetch(url, { method: 'POST', body: JSON.stringify(body) });
@@ -32,16 +32,7 @@ describe('Mock disputes API', () => {
     ]);
   });
 
-  it('rejects bad payloads before allocating a number and prepends a valid record', async () => {
-    const malformed = await fetch(url, { method: 'POST', body: '{' });
-    expect(malformed.status).toBe(400);
-
-    const invalid = await create({ ...draft, buyer: ' ', amount: '1.230' });
-    expect(invalid.status).toBe(422);
-    await expect(invalid.json()).resolves.toMatchObject({
-      fields: { buyer: 'Enter a buyer name.', amount: 'Enter an amount with up to 2 decimals.' },
-    });
-
+  it('assigns generated fields and prepends the posted record with its exact cents', async () => {
     const created = await create({ ...draft, number: 400, status: 'Acknowledged' });
     expect(created.status).toBe(201);
     const record: unknown = await created.json();
@@ -63,8 +54,7 @@ describe('Mock disputes API', () => {
     ]);
   });
 
-  it('validates removal, preserves empty state, and never reuses a deleted number', async () => {
-    expect((await remove('0')).status).toBe(400);
+  it('returns 404 for missing records, preserves empty state, and never reuses a deleted number', async () => {
     expect((await remove(9999)).status).toBe(404);
     await create(draft);
     for (const number of [6229, 6228, 6227, 6224]) {

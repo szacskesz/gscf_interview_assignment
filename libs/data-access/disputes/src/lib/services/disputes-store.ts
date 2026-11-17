@@ -2,7 +2,6 @@ import { Service, computed, inject, signal } from '@angular/core';
 import type { CreateDisputeRequest } from '../models/dispute-api.model';
 import type { Dispute } from '../models/dispute.model';
 import type { MutationResult, ReadState } from '../models/disputes-store.model';
-import { mutationError } from '../utils/dispute-api-parsing';
 import { DisputesApi } from './disputes-api';
 
 @Service({ autoProvided: false })
@@ -51,8 +50,8 @@ export class DisputesStore {
     this.$pendingOperation.set(true);
     try {
       return { ok: true, value: await operation() };
-    } catch (error: unknown) {
-      return { ok: false, error: mutationError(error, fallback) };
+    } catch {
+      return { ok: false, error: { message: fallback } };
     } finally {
       this.$pendingOperation.set(false);
     }

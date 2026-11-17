@@ -1,5 +1,6 @@
 import { Component, ElementRef, computed, input, output, viewChildren } from '@angular/core';
-import { formatAmount, formatDisputeDate, type Dispute } from '@gscf/disputes-data-access';
+import { formatAmount, formatCalendarDate } from '@gscf/core';
+import type { Dispute } from '@gscf/disputes-data-access';
 import { Badge, Button, Icon } from '@gscf/ui-common';
 
 @Component({
@@ -23,7 +24,7 @@ export class DisputesTable {
   protected readonly $displayRows = computed(() =>
     this.$rows().map((row) => ({
       ...row,
-      dateLabel: formatDisputeDate(row.disputeDate),
+      dateLabel: formatCalendarDate(row.disputeDate),
       amountLabel: formatAmount(row.amountMinorUnits),
     })),
   );

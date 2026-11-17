@@ -67,7 +67,7 @@ describe('Create dispute dialog', () => {
     expect(dialog.close).not.toHaveBeenCalled();
   });
 
-  it('submits trimmed text and the exact amount string, then closes with the saved record', async () => {
+  it('submits trimmed text and exact integer cents, then closes with the saved record', async () => {
     const { fixture, create, dialog, fillDraft, submit } = await createDialog();
     create.mockResolvedValue({ ok: true, value: dispute });
     fillDraft();
@@ -78,17 +78,17 @@ describe('Create dispute dialog', () => {
     expect(create).toHaveBeenCalledExactlyOnceWith({
       buyer: 'Buyer',
       reason: 'Invoice issue',
-      amount: '12.30',
+      amountMinorUnits: 1230,
       currency: 'EUR',
     });
     expect(dialog.close).toHaveBeenCalledExactlyOnceWith(dispute);
   });
 
-  it('keeps the draft open and associates backend field errors with their inputs', async () => {
+  it('shows a save failure and keeps the draft open for retry', async () => {
     const { fixture, element, create, dialog, fillDraft, submit } = await createDialog();
     create.mockResolvedValue({
       ok: false,
-      error: { message: 'Check the draft.', fields: { buyer: 'Buyer could not be verified.' } },
+      error: { message: 'Dispute could not be created. Try again.' },
     });
     fillDraft();
     await fixture.whenStable();
@@ -96,10 +96,8 @@ describe('Create dispute dialog', () => {
     await fixture.whenStable();
 
     const buyer = element.querySelector<HTMLInputElement>('#dispute-buyer')!;
-    expect(element.querySelector('[role="alert"]')?.textContent).toBe('Check the draft.');
-    expect(buyer.getAttribute('aria-describedby')).toBe('dispute-buyer-error');
-    expect(element.querySelector('#dispute-buyer-error')?.textContent).toBe(
-      'Buyer could not be verified.',
+    expect(element.querySelector('[role="alert"]')?.textContent).toBe(
+      'Dispute could not be created. Try again.',
     );
     expect(buyer.value.trim()).toBe('Buyer');
     expect(dialog.close).not.toHaveBeenCalled();

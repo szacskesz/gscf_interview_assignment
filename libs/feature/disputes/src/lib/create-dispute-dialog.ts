@@ -1,10 +1,11 @@
 import { DialogRef } from '@angular/cdk/dialog';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, FormRoot, form } from '@angular/forms/signals';
-import { DisputesStore, isCurrency, type Dispute } from '@gscf/disputes-data-access';
+import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Button, DialogFrame } from '@gscf/ui-common';
 import { FieldFrame, RadioInput, TextInput } from '@gscf/ui-form';
 import { AmountField } from './amount-field';
+import { validateAmount } from './dispute-amount';
 import { disputeSchema, visibleError, type DisputeDraft } from './dispute-form';
 
 @Component({
@@ -41,10 +42,13 @@ export class CreateDisputeDialog {
           .find((field) => field().invalid())?.()
           .focusBoundControl();
       },
-      action: async (field) => {
+      action: async () => {
         if (this.$busy()) return undefined;
         const { buyer, reason, amount, currency } = this.$draft();
-        if (!isCurrency(currency)) return undefined;
+        if (currency !== 'USD' && currency !== 'EUR') return undefined;
+
+        const parsedAmount = validateAmount(amount.raw);
+        if (amount.badInput || !parsedAmount.valid) return undefined;
 
         this.$failure.set(null);
         this.dialog.disableClose = true;
@@ -52,24 +56,13 @@ export class CreateDisputeDialog {
           const result = await this.store.create({
             buyer: buyer.trim(),
             reason: reason.trim(),
-            amount: amount.raw,
+            amountMinorUnits: parsedAmount.minorUnits,
             currency,
           });
           if (result.ok) {
             this.dialog.close(result.value);
-            return undefined;
           } else {
             this.$failure.set(result.error.message);
-            const errors = result.error.fields;
-            const fieldErrors = [
-              { fieldTree: field.buyer, message: errors?.buyer },
-              { fieldTree: field.reason, message: errors?.reason },
-              { fieldTree: field.amount, message: errors?.amount },
-              { fieldTree: field.currency, message: errors?.currency },
-            ];
-            return fieldErrors.flatMap(({ fieldTree, message }) =>
-              message ? [{ fieldTree, message, kind: 'api' }] : [],
-            );
           }
         } finally {
           this.dialog.disableClose = false;

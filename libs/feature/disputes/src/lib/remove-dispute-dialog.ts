@@ -1,6 +1,7 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { Component, inject, signal } from '@angular/core';
-import { DisputesStore, formatAmount, type Dispute } from '@gscf/disputes-data-access';
+import { formatAmount } from '@gscf/core';
+import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Button, DialogFrame } from '@gscf/ui-common';
 
 @Component({

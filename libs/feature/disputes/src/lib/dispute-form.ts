@@ -1,6 +1,7 @@
 import { required, schema, validate, type FieldState } from '@angular/forms/signals';
-import { amountErrors, validateAmount, type Currency } from '@gscf/disputes-data-access';
+import type { Currency } from '@gscf/disputes-data-access';
 import type { AmountDraft } from './amount-field';
+import { amountErrors, validateAmount } from './dispute-amount';
 
 export interface DisputeDraft {
   buyer: string;

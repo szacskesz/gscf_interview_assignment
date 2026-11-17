@@ -1,8 +1,6 @@
 import type { CreateDisputeRequest, Dispute } from '@gscf/disputes-data-access';
 import { initialDisputes } from './dispute-fixtures';
 
-type ValidDisputeDraft = Omit<CreateDisputeRequest, 'amount'> & { amountMinorUnits: number };
-
 export class DisputesRepository {
   private rows: readonly Dispute[] = initialDisputes.map((row) => ({ ...row }));
   private nextNumber = Math.max(...initialDisputes.map((row) => row.number)) + 1;
@@ -13,9 +11,12 @@ export class DisputesRepository {
     return this.rows;
   }
 
-  create(draft: ValidDisputeDraft): Dispute {
+  create({ buyer, reason, amountMinorUnits, currency }: CreateDisputeRequest): Dispute {
     const dispute: Dispute = {
-      ...draft,
+      buyer,
+      reason,
+      amountMinorUnits,
+      currency,
       number: this.nextNumber,
       status: 'New',
       disputeDate: this.today(),

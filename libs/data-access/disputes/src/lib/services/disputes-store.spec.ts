@@ -7,7 +7,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DisputesStore } from './disputes-store';
 
 const url = '/api/disputes';
-const draft = { buyer: 'Buyer', reason: 'Reason', amount: '100.25', currency: 'EUR' } as const;
+const draft = {
+  buyer: 'Buyer',
+  reason: 'Reason',
+  amountMinorUnits: 10025,
+  currency: 'EUR',
+} as const;
 const row = {
   number: 6229,
   buyer: 'Buyer',
