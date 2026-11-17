@@ -5,8 +5,8 @@ import { DisputesApi } from './disputes-api';
 
 @Service({ autoProvided: false })
 export class DisputesStore {
-  private readonly api = inject(DisputesApi);
-  private readonly $list = this.api.read();
+  private readonly disputesApi = inject(DisputesApi);
+  private readonly $list = this.disputesApi.read();
   private readonly $pendingOperation = signal(false);
 
   readonly $pending = this.$pendingOperation.asReadonly();
@@ -25,7 +25,7 @@ export class DisputesStore {
 
   async create(draft: Partial<Dispute>): Promise<MutationResult<Dispute>> {
     return this.mutate(async () => {
-      const created = await this.api.create(draft);
+      const created = await this.disputesApi.create(draft);
       this.$list.update((rows) => [created, ...(rows ?? [])]);
       return created;
     }, 'Dispute could not be created. Try again.');
@@ -33,7 +33,7 @@ export class DisputesStore {
 
   async remove(id: number): Promise<MutationResult<void>> {
     return this.mutate(async () => {
-      await this.api.remove(id);
+      await this.disputesApi.remove(id);
       this.$list.update((rows) => (rows ?? []).filter((row) => row.id !== id));
     }, 'Dispute could not be removed. Try again.');
   }
