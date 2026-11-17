@@ -10,11 +10,3 @@ export interface Dispute {
   readonly currency: Currency;
   readonly reason: string;
 }
-
-export function isCurrency(value: unknown): value is Currency {
-  return value === 'USD' || value === 'EUR';
-}
-
-export function isPositiveSafeInteger(value: unknown): value is number {
-  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
-}

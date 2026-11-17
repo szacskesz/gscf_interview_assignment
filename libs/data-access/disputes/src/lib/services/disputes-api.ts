@@ -1,17 +1,11 @@
-import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Service, inject } from '@angular/core';
 import { API_BASE_PATH, apiPath } from '@gscf/core';
 import { firstValueFrom } from 'rxjs';
-import {
-  isRecord,
-  parseDispute,
-  parseDisputes,
-  type ApiError,
-  type CreateDisputeRequest,
-} from './dispute-api.model';
+import type { CreateDisputeRequest } from '../models/dispute-api.model';
+import { parseDispute, parseDisputes } from '../utils/dispute-api-parsing';
 
 const requestTimeout = 10_000;
-const fields = ['buyer', 'reason', 'amount', 'currency'] as const;
 
 @Service()
 export class DisputesApi {
@@ -36,19 +30,4 @@ export class DisputesApi {
       this.http.delete<void>(`${this.url}/${number}`, { timeout: requestTimeout }),
     );
   }
-}
-
-export function mutationError(error: unknown, fallback: string): ApiError {
-  const body: unknown = error instanceof HttpErrorResponse ? error.error : null;
-  if (!(error instanceof HttpErrorResponse) || error.status !== 422 || !isRecord(body)) {
-    return { message: fallback };
-  }
-  const errors: NonNullable<ApiError['fields']> = {};
-  const returned = body['fields'];
-  if (isRecord(returned)) {
-    for (const field of fields) {
-      if (typeof returned[field] === 'string') errors[field] = returned[field];
-    }
-  }
-  return { message: fallback, fields: errors };
 }

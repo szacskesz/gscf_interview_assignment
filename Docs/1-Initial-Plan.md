@@ -304,15 +304,22 @@ libs/
     disputes/
       src/
         lib/
-          dispute.model.ts
-          dispute-api.model.ts
-          disputes-api.ts
-          disputes-store.ts
-          disputes-store.spec.ts
-          dispute-amount.ts
-          dispute-amount.spec.ts
-          dispute-date.ts
-          dispute-date.spec.ts
+          models/
+            dispute.model.ts
+            dispute-api.model.ts
+            dispute-amount.model.ts
+            disputes-store.model.ts
+          services/
+            disputes-api.ts
+            disputes-store.ts
+            disputes-store.spec.ts
+          utils/
+            dispute-amount.ts
+            dispute-amount.node.spec.ts
+            dispute-api-parsing.ts
+            dispute-date.ts
+            dispute-date.node.spec.ts
+            dispute-validation.ts
         public-api.ts
     disputes-mock/
       src/

@@ -1,10 +1,9 @@
 import { Service, computed, inject, signal } from '@angular/core';
-import type { ApiError, CreateDisputeRequest } from './dispute-api.model';
-import type { Dispute } from './dispute.model';
-import { DisputesApi, mutationError } from './disputes-api';
-
-type MutationResult<T> = { ok: true; value: T } | { ok: false; error: ApiError };
-type ReadState = 'loading' | 'error' | 'ready';
+import type { CreateDisputeRequest } from '../models/dispute-api.model';
+import type { Dispute } from '../models/dispute.model';
+import type { MutationResult, ReadState } from '../models/disputes-store.model';
+import { mutationError } from '../utils/dispute-api-parsing';
+import { DisputesApi } from './disputes-api';
 
 @Service({ autoProvided: false })
 export class DisputesStore {

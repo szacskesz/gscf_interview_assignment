@@ -1,14 +1,12 @@
+import type { AmountError, AmountResult } from '../models/dispute-amount.model';
+
 export const amountErrors = {
   required: 'Enter a dispute amount.',
   invalid: 'Enter a valid dispute amount.',
   nonpositive: 'Enter an amount greater than 0.',
   precision: 'Enter an amount with up to 2 decimals.',
   range: 'Enter a smaller dispute amount.',
-} as const;
-
-type AmountResult =
-  | { readonly valid: true; readonly minorUnits: number }
-  | { readonly valid: false; readonly error: keyof typeof amountErrors };
+} as const satisfies Record<AmountError, string>;
 
 const amountPattern = /^(-?)(?:(\d+)(?:\.(\d*))?|\.(\d+))$/;
 const wholeNumberFormat = new Intl.NumberFormat('en-US');

@@ -1,14 +1,16 @@
-export { amountErrors, formatAmount, validateAmount } from './lib/dispute-amount';
-export { formatDisputeDate, isCalendarDate } from './lib/dispute-date';
-export { DisputesStore } from './lib/disputes-store';
-export { isCurrency, isPositiveSafeInteger } from './lib/dispute.model';
-export type { Currency, Dispute, DisputeStatus } from './lib/dispute.model';
+export type {
+  ApiError,
+  CreateDisputeField,
+  CreateDisputeRequest,
+} from './lib/models/dispute-api.model';
+export type { Currency, Dispute, DisputeStatus } from './lib/models/dispute.model';
+export { DisputesStore } from './lib/services/disputes-store';
+export { amountErrors, formatAmount, validateAmount } from './lib/utils/dispute-amount';
+export { parseDispute, parseDisputes } from './lib/utils/dispute-api-parsing';
+export { formatDisputeDate, isCalendarDate } from './lib/utils/dispute-date';
 export {
+  isCurrency,
   isNonblankText,
+  isPositiveSafeInteger,
   isRecord,
-  parseDispute,
-  parseDisputes,
-  type ApiError,
-  type CreateDisputeField,
-  type CreateDisputeRequest,
-} from './lib/dispute-api.model';
+} from './lib/utils/dispute-validation';
