@@ -1,1 +1,1 @@
-export { disputesRoutes } from './lib/disputes.routes';
+export { disputesRoutes } from './lib/routes/disputes.routes';

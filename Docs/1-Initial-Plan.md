@@ -273,36 +273,32 @@ apps/
 libs/
   core/
     src/
-      lib/api-config/
-      lib/validators/
-        decimal-places.ts
-        required-non-empty.ts
+      lib/
+        config/
+          api-config/
+            api-config.ts
+        validators/
+          decimal-places/
+            decimal-places.node.spec.ts
+            decimal-places.ts
+          required-non-empty/
+            required-non-empty.ts
       public-api.ts
-  ui/
-    common/
-      src/
-        lib/
-          button/
-          icon-button/
-          icon/
-          badge/
-          dialog-frame/
-        public-api.ts
-    form/
-      src/
-        lib/
-          field-frame/
-          field-error/
-          text-input/
-          radio-group/
-        public-api.ts
-    notifications/
-      src/
-        lib/
-          notifications.ts
-          success-notification/
-        public-api.ts
   data-access/
+    disputes-mock/
+      src/
+        lib/
+          fixtures/
+            disputes/
+              dispute-fixtures.ts
+          handlers/
+            disputes/
+              disputes-handlers.node.spec.ts
+              disputes-handlers.ts
+          repositories/
+            disputes/
+              disputes-repository.ts
+        public-api.ts
     disputes/
       src/
         lib/
@@ -310,37 +306,92 @@ libs/
             dispute.model.ts
             disputes-store.model.ts
           services/
-            disputes-api.ts
-            disputes-store.ts
-            disputes-store.spec.ts
-        public-api.ts
-    disputes-mock/
-      src/
-        lib/
-          dispute.fixtures.ts
-          disputes-repository.ts
-          disputes-repository.spec.ts
-          disputes.handlers.ts
-          disputes.handlers.spec.ts
+            disputes-api/
+              disputes-api.ts
+            disputes-store/
+              disputes-store.spec.ts
+              disputes-store.ts
         public-api.ts
   feature/
     disputes/
       src/
         lib/
-          disputes.routes.ts
-          disputes-overview/
-          disputes-table/
-          create-dispute-dialog/
-            create-dispute-dialog.ts
-            create-dispute-dialog.html
-            create-dispute-dialog.spec.ts
-          create-dispute-form/
-            create-dispute-form.ts
-            create-dispute-form.html
-            create-dispute-form.spec.ts
-            create-dispute-form-validation.spec.ts
-          remove-dispute-dialog/
-          amount-field/
+          components/
+            amount-field/
+              amount-field.spec.ts
+              amount-field.ts
+            create-dispute-dialog/
+              create-dispute-dialog.html
+              create-dispute-dialog.spec.ts
+              create-dispute-dialog.ts
+            create-dispute-form/
+              create-dispute-form-validation.spec.ts
+              create-dispute-form.html
+              create-dispute-form.spec.ts
+              create-dispute-form.ts
+            disputes-overview/
+              disputes-overview.html
+              disputes-overview.spec.ts
+              disputes-overview.ts
+            disputes-table/
+              disputes-table.html
+              disputes-table.ts
+            remove-dispute-dialog/
+              remove-dispute-dialog.spec.ts
+              remove-dispute-dialog.ts
+          routes/
+            disputes.routes.ts
+        public-api.ts
+  ui/
+    common/
+      src/
+        lib/
+          components/
+            badge/
+              badge.stories.ts
+              badge.ts
+            dialog-frame/
+              dialog-frame.stories.ts
+              dialog-frame.ts
+            icon/
+              icon.spec.ts
+              icon.stories.ts
+              icon.ts
+          directives/
+            button/
+              button.browser.spec.ts
+              button.spec.ts
+              button.stories.ts
+              button.ts
+          services/
+            ui-icon-set/
+              ui-icon-set.ts
+        public-api.ts
+    form/
+      src/
+        lib/
+          components/
+            field-frame/
+              field-frame.stories.ts
+              field-frame.ts
+          directives/
+            radio-input/
+              radio-input.stories.ts
+              radio-input.ts
+            text-input/
+              text-input.stories.ts
+              text-input.ts
+        public-api.ts
+    notifications/
+      src/
+        lib/
+          components/
+            success-notification/
+              success-notification.stories.ts
+              success-notification.ts
+          services/
+            notifications/
+              notifications.ts
         public-api.ts
 styles/
   tokens.css

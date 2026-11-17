@@ -1,2 +1,2 @@
-export { createDisputesHandlers } from './lib/disputes-handlers';
-export { DisputesRepository } from './lib/disputes-repository';
+export { createDisputesHandlers } from './lib/handlers/disputes/disputes-handlers';
+export { DisputesRepository } from './lib/repositories/disputes/disputes-repository';
