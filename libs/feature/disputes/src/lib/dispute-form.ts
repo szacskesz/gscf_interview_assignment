@@ -2,6 +2,7 @@ import { required, schema, validate, type FieldState } from '@angular/forms/sign
 import type { Currency } from '@gscf/disputes-data-access';
 import type { AmountDraft } from './amount-field';
 import { amountErrors, validateAmount } from './dispute-amount';
+import { requiredNonEmpty } from './validators/required-non-empty';
 
 export interface DisputeDraft {
   buyer: string;
@@ -11,19 +12,8 @@ export interface DisputeDraft {
 }
 
 export const disputeSchema = schema<DisputeDraft>((path) => {
-  const nonblank = ({ value }: { value: () => string }) => value().trim().length > 0;
-  required(path.buyer, { message: 'Enter a buyer name.' });
-  validate(path.buyer, (context) =>
-    context.value() && !nonblank(context)
-      ? { kind: 'required', message: 'Enter a buyer name.' }
-      : undefined,
-  );
-  required(path.reason, { message: 'Enter a dispute reason.' });
-  validate(path.reason, (context) =>
-    context.value() && !nonblank(context)
-      ? { kind: 'required', message: 'Enter a dispute reason.' }
-      : undefined,
-  );
+  requiredNonEmpty(path.buyer, 'Enter a buyer name.');
+  requiredNonEmpty(path.reason, 'Enter a dispute reason.');
   validate(path.amount, ({ value }) => {
     const { raw, badInput } = value();
     const result = validateAmount(raw);

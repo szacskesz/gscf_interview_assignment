@@ -12,6 +12,10 @@ type AmountResult =
 
 const amountPattern = /^(-?)(?:(\d+)(?:\.(\d*))?|\.(\d+))$/;
 
+function validateAmountPrecision(fraction: string): 'precision' | undefined {
+  return fraction.length > 2 ? 'precision' : undefined;
+}
+
 export function validateAmount(value: string): AmountResult {
   if (value === '') return { valid: false, error: 'required' };
   const match = amountPattern.exec(value);
@@ -22,7 +26,8 @@ export function validateAmount(value: string): AmountResult {
   if (sign === '-' || !/[1-9]/.test(whole + fraction)) {
     return { valid: false, error: 'nonpositive' };
   }
-  if (fraction.length > 2) return { valid: false, error: 'precision' };
+  const precisionError = validateAmountPrecision(fraction);
+  if (precisionError) return { valid: false, error: precisionError };
 
   const minorUnits = Number(whole + fraction.padEnd(2, '0'));
   return Number.isSafeInteger(minorUnits)
