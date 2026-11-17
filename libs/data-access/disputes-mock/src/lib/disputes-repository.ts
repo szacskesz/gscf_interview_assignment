@@ -1,4 +1,4 @@
-import type { CreateDisputeRequest, Dispute } from '@gscf/disputes-data-access';
+import type { Dispute } from '@gscf/disputes-data-access';
 import { initialDisputes } from './dispute-fixtures';
 
 export class DisputesRepository {
@@ -11,7 +11,12 @@ export class DisputesRepository {
     return this.rows;
   }
 
-  create({ buyer, reason, amount, currency }: CreateDisputeRequest): Dispute {
+  create({
+    buyer,
+    reason,
+    amount,
+    currency,
+  }: Pick<Dispute, 'buyer' | 'reason' | 'amount' | 'currency'>): Dispute {
     const dispute: Dispute = {
       buyer,
       reason,

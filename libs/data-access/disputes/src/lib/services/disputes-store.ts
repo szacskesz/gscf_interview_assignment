@@ -1,5 +1,5 @@
 import { Service, computed, inject, signal } from '@angular/core';
-import type { CreateDisputeRequest, Dispute } from '../models/dispute.model';
+import type { Dispute } from '../models/dispute.model';
 import type { MutationResult, ReadState } from '../models/disputes-store.model';
 import { DisputesApi } from './disputes-api';
 
@@ -23,7 +23,9 @@ export class DisputesStore {
     return !this.$pending() && this.$readState() === 'error' && this.$list.reload();
   }
 
-  async create(draft: CreateDisputeRequest): Promise<MutationResult<Dispute>> {
+  async create(
+    draft: Pick<Dispute, 'buyer' | 'reason' | 'amount' | 'currency'>,
+  ): Promise<MutationResult<Dispute>> {
     return this.mutate(async () => {
       const created = await this.api.create(draft);
       this.$list.update((rows) => [created, ...(rows ?? [])]);

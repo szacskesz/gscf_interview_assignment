@@ -13,4 +13,6 @@ export interface Dispute {
   readonly reason: string;
 }
 
-export type CreateDisputeRequest = Pick<Dispute, 'buyer' | 'reason' | 'amount' | 'currency'>;
+export interface ApiError {
+  readonly message: string;
+}

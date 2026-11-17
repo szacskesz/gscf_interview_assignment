@@ -1,11 +1,10 @@
-import type { CreateDisputeRequest } from '@gscf/disputes-data-access';
 import { http, HttpResponse } from 'msw/http';
 import type { DisputesRepository } from './disputes-repository';
 
 export function createDisputesHandlers(url: string, repository: DisputesRepository) {
   return [
     http.get(url, () => HttpResponse.json(repository.list())),
-    http.post<never, CreateDisputeRequest>(url, async ({ request }) => {
+    http.post<never, Parameters<DisputesRepository['create']>[0]>(url, async ({ request }) => {
       const created = repository.create(await request.json());
       return HttpResponse.json(created, { status: 201 });
     }),
