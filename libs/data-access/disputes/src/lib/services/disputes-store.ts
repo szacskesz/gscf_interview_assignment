@@ -23,9 +23,7 @@ export class DisputesStore {
     return !this.$pending() && this.$readState() === 'error' && this.$list.reload();
   }
 
-  async create(
-    draft: Pick<Dispute, 'buyer' | 'reason' | 'amount' | 'currency'>,
-  ): Promise<MutationResult<Dispute>> {
+  async create(draft: Partial<Dispute>): Promise<MutationResult<Dispute>> {
     return this.mutate(async () => {
       const created = await this.api.create(draft);
       this.$list.update((rows) => [created, ...(rows ?? [])]);
