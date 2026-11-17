@@ -2,12 +2,12 @@ import { DialogRef } from '@angular/cdk/dialog';
 import { Component, inject, signal } from '@angular/core';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Button, DialogFrame } from '@gscf/ui-common';
-import { CreateDisputeForm } from '../create-dispute-form/create-dispute-form';
+import { CreateDisputeForm } from '../create-dispute-form/create-dispute-form.component';
 
 @Component({
   selector: 'gscf-create-dispute-dialog',
   imports: [Button, CreateDisputeForm, DialogFrame],
-  templateUrl: './create-dispute-dialog.html',
+  templateUrl: './create-dispute-dialog.component.html',
 })
 export class CreateDisputeDialog {
   private readonly dialog = inject<DialogRef<Dispute>>(DialogRef);

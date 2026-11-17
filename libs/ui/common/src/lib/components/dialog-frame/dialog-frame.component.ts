@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
-import { Button } from '../../directives/button/button';
-import { Icon } from '../icon/icon';
+import { Button } from '../../directives/button/button.directive';
+import { Icon } from '../icon/icon.component';
 
 @Component({
   imports: [Button, Icon],

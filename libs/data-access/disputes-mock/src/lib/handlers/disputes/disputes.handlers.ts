@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw/http';
-import type { DisputesRepository } from '../../repositories/disputes/disputes-repository';
+import type { DisputesRepository } from '../../repositories/disputes/disputes.repository';
 
 export function createDisputesHandlers(url: string, repository: DisputesRepository) {
   return [

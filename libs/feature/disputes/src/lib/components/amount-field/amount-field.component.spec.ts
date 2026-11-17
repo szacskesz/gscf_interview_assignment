@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { AmountField } from './amount-field';
+import { AmountField } from './amount-field.component';
 
 async function createAmountField() {
   const fixture = TestBed.createComponent(AmountField);

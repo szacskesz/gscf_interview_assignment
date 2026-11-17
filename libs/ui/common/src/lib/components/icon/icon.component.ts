@@ -1,6 +1,6 @@
 import { Component, inject, input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-import { UiIconSet } from '../../services/ui-icon-set/ui-icon-set';
+import { UiIconSet } from '../../services/ui-icon-set/ui-icon-set.service';
 
 export type IconName = 'add' | 'remove' | 'close' | 'warning' | 'check';
 

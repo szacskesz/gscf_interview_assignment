@@ -13,15 +13,15 @@ import {
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Button, Icon } from '@gscf/ui-common';
 import { Notifications } from '@gscf/ui-notifications';
-import { CreateDisputeDialog } from '../create-dispute-dialog/create-dispute-dialog';
-import { DisputesTable } from '../disputes-table/disputes-table';
-import { RemoveDisputeDialog } from '../remove-dispute-dialog/remove-dispute-dialog';
+import { CreateDisputeDialog } from '../create-dispute-dialog/create-dispute-dialog.component';
+import { DisputesTable } from '../disputes-table/disputes-table.component';
+import { RemoveDisputeDialog } from '../remove-dispute-dialog/remove-dispute-dialog.component';
 
 @Component({
   selector: 'gscf-disputes-overview',
   imports: [Button, DisputesTable, Icon],
   providers: [DisputesStore],
-  templateUrl: './disputes-overview.html',
+  templateUrl: './disputes-overview.component.html',
 })
 export class DisputesOverview {
   private readonly dialog = inject(Dialog);

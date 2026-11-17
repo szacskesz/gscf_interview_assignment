@@ -1,7 +1,7 @@
 import { Service, computed, inject, signal } from '@angular/core';
 import type { Dispute } from '../../models/dispute.model';
 import type { MutationResult, ReadState } from '../../models/disputes-store.model';
-import { DisputesApi } from '../disputes-api/disputes-api';
+import { DisputesApi } from '../disputes-api/disputes-api.service';
 
 @Service({ autoProvided: false })
 export class DisputesStore {

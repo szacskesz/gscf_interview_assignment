@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { hasAtMostDecimalPlaces } from './decimal-places';
+import { hasAtMostDecimalPlaces } from './decimal-places.validator';
 
 it.each([
   ['1250', 0, true],

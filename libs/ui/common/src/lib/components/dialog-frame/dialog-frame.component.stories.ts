@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/angular';
 import { expect } from 'storybook/test';
-import { DialogFrame } from './dialog-frame';
+import { DialogFrame } from './dialog-frame.component';
 
 const meta = {
   title: 'Common/Dialog frame',

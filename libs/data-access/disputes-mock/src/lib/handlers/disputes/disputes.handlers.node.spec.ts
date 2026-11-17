@@ -1,7 +1,7 @@
 import { setupServer } from 'msw/node';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createDisputesHandlers } from './disputes-handlers';
-import { DisputesRepository } from '../../repositories/disputes/disputes-repository';
+import { createDisputesHandlers } from './disputes.handlers';
+import { DisputesRepository } from '../../repositories/disputes/disputes.repository';
 
 const url = 'http://mock.test/api/disputes';
 const server = setupServer();

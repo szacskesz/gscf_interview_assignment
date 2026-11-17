@@ -6,7 +6,7 @@ import { Badge, Button, Icon } from '@gscf/ui-common';
 @Component({
   selector: 'gscf-disputes-table',
   imports: [Badge, Button, DatePipe, DecimalPipe, Icon],
-  templateUrl: './disputes-table.html',
+  templateUrl: './disputes-table.component.html',
 })
 export class DisputesTable {
   readonly $rows = input.required<readonly Dispute[]>({ alias: 'rows' });

@@ -1,7 +1,7 @@
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
 import { expect } from 'storybook/test';
-import { FieldFrame } from './field-frame';
-import { TextInput } from '../../directives/text-input/text-input';
+import { FieldFrame } from './field-frame.component';
+import { TextInput } from '../../directives/text-input/text-input.directive';
 
 const meta = {
   title: 'Form/Field frame',

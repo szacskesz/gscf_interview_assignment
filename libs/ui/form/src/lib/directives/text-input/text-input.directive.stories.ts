@@ -1,7 +1,7 @@
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
 import { expect, waitFor, within } from 'storybook/test';
-import { FieldFrame } from '../../components/field-frame/field-frame';
-import { TextInput } from './text-input';
+import { FieldFrame } from '../../components/field-frame/field-frame.component';
+import { TextInput } from './text-input.directive';
 
 const meta = {
   title: 'Form/Required input states',

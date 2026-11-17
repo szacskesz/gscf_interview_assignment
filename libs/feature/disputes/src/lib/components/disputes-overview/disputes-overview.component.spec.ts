@@ -7,9 +7,9 @@ import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Notifications } from '@gscf/ui-notifications';
 import { Subject, type Observable } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
-import { CreateDisputeDialog } from '../create-dispute-dialog/create-dispute-dialog';
-import { DisputesOverview } from './disputes-overview';
-import { RemoveDisputeDialog } from '../remove-dispute-dialog/remove-dispute-dialog';
+import { CreateDisputeDialog } from '../create-dispute-dialog/create-dispute-dialog.component';
+import { DisputesOverview } from './disputes-overview.component';
+import { RemoveDisputeDialog } from '../remove-dispute-dialog/remove-dispute-dialog.component';
 
 const dispute: Dispute = {
   id: 6228,

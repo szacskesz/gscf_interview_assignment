@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { expect, it } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
-import { Button } from './button';
+import { Button } from './button.directive';
 
 @Component({
   imports: [Button],

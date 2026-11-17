@@ -1,7 +1,7 @@
 import { moduleMetadata, type Meta, type StoryObj } from '@storybook/angular';
 import { expect } from 'storybook/test';
-import { FieldFrame } from '../../components/field-frame/field-frame';
-import { RadioInput } from './radio-input';
+import { FieldFrame } from '../../components/field-frame/field-frame.component';
+import { RadioInput } from './radio-input.directive';
 
 const meta = {
   title: 'Form/Radio input',

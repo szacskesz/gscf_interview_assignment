@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatIconRegistry } from '@angular/material/icon';
 import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { expect, it, vi } from 'vitest';
-import { Icon } from './icon';
+import { Icon } from './icon.component';
 
 it('registers the shared icon set on first use and reuses it for later icons', async () => {
   TestBed.configureTestingModule({

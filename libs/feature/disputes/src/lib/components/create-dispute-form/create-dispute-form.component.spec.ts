@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatIconRegistry } from '@angular/material/icon';
 import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { expect, it, vi } from 'vitest';
-import { CreateDisputeForm } from './create-dispute-form';
+import { CreateDisputeForm } from './create-dispute-form.component';
 
 @Component({
   imports: [CreateDisputeForm],

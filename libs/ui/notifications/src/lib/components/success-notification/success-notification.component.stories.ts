@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { type Meta, type StoryObj } from '@storybook/angular';
 import { expect, screen } from 'storybook/test';
-import { Notifications } from '../../services/notifications/notifications';
+import { Notifications } from '../../services/notifications/notifications.service';
 
 @Component({
   selector: 'gscf-story-notification',

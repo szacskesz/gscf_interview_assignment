@@ -5,7 +5,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { describe, expect, it, vi } from 'vitest';
-import { RemoveDisputeDialog } from './remove-dispute-dialog';
+import { RemoveDisputeDialog } from './remove-dispute-dialog.component';
 
 const dispute: Dispute = {
   id: 6228,

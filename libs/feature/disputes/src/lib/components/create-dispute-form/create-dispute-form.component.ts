@@ -11,7 +11,7 @@ import {
 import { hasAtMostDecimalPlaces, requiredNonEmpty } from '@gscf/core';
 import type { Currency, Dispute } from '@gscf/disputes-data-access';
 import { FieldFrame, RadioInput, TextInput } from '@gscf/ui-form';
-import { AmountField, type AmountDraft } from '../amount-field/amount-field';
+import { AmountField, type AmountDraft } from '../amount-field/amount-field.component';
 
 const amountDecimalPlaces = 2;
 
@@ -71,7 +71,7 @@ export function visibleError(
 @Component({
   selector: 'gscf-create-dispute-form',
   imports: [AmountField, FieldFrame, FormField, FormRoot, RadioInput, TextInput],
-  templateUrl: './create-dispute-form.html',
+  templateUrl: './create-dispute-form.component.html',
 })
 export class CreateDisputeForm {
   /** Unique ID for the native form, its controls, and any external submit button. */

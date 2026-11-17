@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { expect, it } from 'vitest';
-import { Button } from './button';
+import { Button } from './button.directive';
 
 @Component({
   imports: [Button],

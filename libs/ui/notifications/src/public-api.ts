@@ -1,1 +1,1 @@
-export { Notifications } from './lib/services/notifications/notifications';
+export { Notifications } from './lib/services/notifications/notifications.service';

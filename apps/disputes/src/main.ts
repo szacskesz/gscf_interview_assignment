@@ -1,6 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { App } from './app/app.component';
 import { environment } from './environments/environment';
 
 declare const COMPILE_TIME_ENABLE_MOCK: boolean;

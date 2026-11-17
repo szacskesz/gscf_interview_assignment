@@ -1,6 +1,6 @@
 import { Service, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SuccessNotification } from '../../components/success-notification/success-notification';
+import { SuccessNotification } from '../../components/success-notification/success-notification.component';
 
 @Service()
 export class Notifications {

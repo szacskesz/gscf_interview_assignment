@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/angular';
 import { expect } from 'storybook/test';
-import { Badge } from './badge';
+import { Badge } from './badge.component';
 
 const meta = {
   title: 'Common/Badge',

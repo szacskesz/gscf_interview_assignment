@@ -4,7 +4,7 @@ import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { API_BASE_PATH } from '@gscf/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { DisputesStore } from './disputes-store';
+import { DisputesStore } from './disputes-store.service';
 
 const url = '/api/disputes';
 const draft = {

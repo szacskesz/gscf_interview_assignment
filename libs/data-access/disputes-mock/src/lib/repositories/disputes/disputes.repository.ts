@@ -1,5 +1,5 @@
 import type { Dispute } from '@gscf/disputes-data-access';
-import { initialDisputes } from '../../fixtures/disputes/dispute-fixtures';
+import { initialDisputes } from '../../fixtures/disputes/dispute.fixtures';
 
 export class DisputesRepository {
   private rows: readonly Dispute[] = initialDisputes.map((row) => ({ ...row }));

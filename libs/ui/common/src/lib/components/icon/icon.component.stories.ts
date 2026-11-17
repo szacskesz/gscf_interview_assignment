@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/angular';
 import { expect, waitFor } from 'storybook/test';
-import { Icon, type IconName } from './icon';
+import { Icon, type IconName } from './icon.component';
 
 const meta = {
   title: 'Common/Icon',

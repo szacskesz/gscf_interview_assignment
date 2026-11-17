@@ -1,7 +1,7 @@
 import { type Meta, type StoryObj, moduleMetadata } from '@storybook/angular';
 import { expect } from 'storybook/test';
-import { Icon } from '../../components/icon/icon';
-import { Button } from './button';
+import { Icon } from '../../components/icon/icon.component';
+import { Button } from './button.directive';
 
 const meta = {
   title: 'Common/Button',

@@ -6,6 +6,23 @@
     "analytics": false
   },
   "newProjectRoot": "apps",
+  "schematics": {
+    "@schematics/angular:component": {
+      "type": "component",
+      "addTypeToClassName": false
+    },
+    "@schematics/angular:directive": {
+      "type": "directive",
+      "addTypeToClassName": false
+    },
+    "@schematics/angular:service": {
+      "type": "service",
+      "addTypeToClassName": false
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    }
+  },
   "projects": {
     "disputes": {
       "projectType": "application",

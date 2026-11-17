@@ -9,7 +9,7 @@ import {
   validateAmount,
   visibleError,
   type DisputeFormControls,
-} from './create-dispute-form';
+} from './create-dispute-form.component';
 
 function createForm(overrides: Partial<Dispute & DisputeFormControls> = {}) {
   const $draft = signal<Partial<Dispute> & DisputeFormControls>({
