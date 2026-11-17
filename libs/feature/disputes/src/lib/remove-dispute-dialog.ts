@@ -16,7 +16,7 @@ import { Button, DialogFrame } from '@gscf/ui-common';
     >
       <p id="remove-dispute-description" class="mb-6 wrap-anywhere text-sm">
         Dispute {{ dispute.id }} ({{ dispute.reason }},
-        {{ dispute.amount / 100 | number: '1.2-2' : 'en-US' }}
+        {{ dispute.amount | number: '1.2-2' : 'en-US' }}
         {{ dispute.currency }}) will be removed from the Disputes list, together with its comments
         and linked invoices. This cannot be undone.
       </p>

@@ -314,7 +314,9 @@ test.describe('Formatting in a non-UTC time zone', () => {
         response.url().endsWith('/api/disputes') && response.request().method() === 'POST',
     );
     await dialog.getByRole('button', { name: 'Create Dispute' }).click();
-    await expect((await saved).json()).resolves.toMatchObject({ date: createdAt });
+    const response = await saved;
+    expect(response.request().postDataJSON()).toMatchObject({ amount: 1250.91 });
+    await expect(response.json()).resolves.toMatchObject({ date: createdAt, amount: 1250.91 });
     await expect(dialog).toHaveCount(0);
 
     const createdRow = page.getByRole('row').filter({ hasText: 'Exact Amount Buyer' });

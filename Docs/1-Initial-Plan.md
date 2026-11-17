@@ -445,7 +445,7 @@ interface Dispute {
 }
 ```
 
-`date` is a UTC ISO 8601 timestamp. `amount` is an integer number of cents. The form draft is a separate type and may contain incomplete values; invalid draft data must not enter the collection.
+`date` is a UTC ISO 8601 timestamp. `amount` is a decimal number in the specified currency. The form draft is a separate type and may contain incomplete values; invalid draft data must not enter the collection.
 
 ### State management and numbering
 
@@ -457,7 +457,7 @@ interface Dispute {
 
 This produces `6229` when creating after deleting all original rows, matching Figure 1.6b. If `6229` has already been created and removed, the next dispute is `6230`. Reloading starts a new mock session and resets both records and numbering.
 
-Use GET/POST `/api/disputes` and DELETE `/api/disputes/:id`. The Create Dispute feature validates the raw decimal string and sends safe integer `amount`. The mock stores those cents and returns the complete created record. Controlled scenarios exercise pending/error behavior. The HTTP contract, bootstrap, and build profiles are in [the MSW plan](4-MSW-Integration-Plan.md).
+Use GET/POST `/api/disputes` and DELETE `/api/disputes/:id`. The Create Dispute feature validates the raw decimal string and sends a decimal number as `amount`. The mock stores the amount directly and returns the complete created record. Controlled scenarios exercise pending/error behavior. The HTTP contract, bootstrap, and build profiles are in [the MSW plan](4-MSW-Integration-Plan.md).
 
 ## 6. Form, money, and date implementation
 
@@ -480,8 +480,8 @@ Implementation details:
 - Use `step="0.01"` as an input affordance, with explicit application validation as the authority.
 - Accept ordinary decimal notation; document that grouped input and exponent notation are not supported in this first version.
 - Retain at most two fractional digits only after validation; do not truncate or round a failing value.
-- Convert a valid decimal string into cents by parsing its whole and fractional portions, avoiding floating-point multiplication as the validation strategy.
-- Require the resulting cents value to be a safe integer. This is a technical storage boundary, not an invented commercial maximum.
+- Convert the validated decimal string to a number in the specified currency.
+- Reject values that convert to a non-finite number.
 - Format display values with English thousands separators and exactly two fractional digits. Keep the separate currency column rather than adding a currency symbol to the Amount column.
 - Format large supported values using integer whole/fractional portions so display formatting does not lose a cent through floating-point division.
 
@@ -617,7 +617,7 @@ Test the mock repository separately from the Angular store. Reuse environment-in
 - Removal changes only the requested record, and repeated removal does not affect another row.
 - Amount validation distinguishes empty, nonpositive, precision, malformed, and unsafe values with the correct precedence.
 - Cover `0`, `-1`, `-12.345`, `0.01`, `1`, `1.2`, `1.23`, `1.230`, `12.345`, whitespace, invalid syntax, and supported large amounts.
-- Amount parsing and formatting preserve cents and always produce two display decimals.
+- Amount parsing stores decimal numbers and formatting always shows two decimal places.
 - Date formatting and the injected current-date function handle local calendar boundaries.
 - The form preserves literal amount precision during validation. API tests verify the integer-cent request and the planned response codes.
 - Loading, error, and loaded-empty states remain distinct; failed writes do not trigger local success updates or toasts.

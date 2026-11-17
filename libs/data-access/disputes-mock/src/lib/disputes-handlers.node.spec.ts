@@ -5,7 +5,7 @@ import { DisputesRepository } from './disputes-repository';
 
 const url = 'http://mock.test/api/disputes';
 const server = setupServer();
-const draft = { buyer: 'Buyer', reason: 'Reason', amount: 125050, currency: 'EUR' };
+const draft = { buyer: 'Buyer', reason: 'Reason', amount: 1250.5, currency: 'EUR' };
 
 function create(body: unknown) {
   return fetch(url, { method: 'POST', body: JSON.stringify(body) });
@@ -28,20 +28,20 @@ describe('Mock disputes API', () => {
     const response = await fetch(url);
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject([
-      { id: 6228, buyer: 'Alpine Logistics AG', amount: 2400000000 },
-      { id: 6227, buyer: 'Northwind Traders', amount: 1645000000 },
+      { id: 6228, buyer: 'Alpine Logistics AG', amount: 24_000_000 },
+      { id: 6227, buyer: 'Northwind Traders', amount: 16_450_000 },
       { id: 6224, buyer: 'Helvetia Foods GmbH', status: 'Acknowledged' },
     ]);
   });
 
-  it('assigns generated fields and prepends the posted record with its exact cents', async () => {
+  it('assigns generated fields and prepends the posted record with its decimal amount', async () => {
     const created = await create({ ...draft, id: 400, status: 'Acknowledged' });
     expect(created.status).toBe(201);
     const record: unknown = await created.json();
     expect(record).toEqual({
       buyer: 'Buyer',
       reason: 'Reason',
-      amount: 125050,
+      amount: 1250.5,
       currency: 'EUR',
       id: 6229,
       status: 'New',

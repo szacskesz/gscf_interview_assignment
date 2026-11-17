@@ -7,7 +7,7 @@ export interface Dispute {
   readonly status: DisputeStatus;
   /** ISO 8601 timestamp in UTC. */
   readonly date: string;
-  /** Disputed amount in integer cents. */
+  /** Disputed amount in the specified currency, including any fractional units. */
   readonly amount: number;
   readonly currency: Currency;
   readonly reason: string;

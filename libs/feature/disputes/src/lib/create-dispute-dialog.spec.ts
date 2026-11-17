@@ -11,7 +11,7 @@ const dispute: Dispute = {
   id: 6229,
   buyer: 'Buyer',
   reason: 'Invoice issue',
-  amount: 1230,
+  amount: 12.3,
   currency: 'EUR',
   status: 'New',
   date: '2026-11-14T12:00:00.000Z',
@@ -70,7 +70,7 @@ describe('Create dispute dialog', () => {
     expect(dialog.close).not.toHaveBeenCalled();
   });
 
-  it('submits trimmed text and exact integer cents, then closes with the saved record', async () => {
+  it('submits trimmed text and the decimal amount, then closes with the saved record', async () => {
     const { fixture, create, dialog, fillDraft, submit } = await createDialog();
     create.mockResolvedValue({ ok: true, value: dispute });
     fillDraft();
@@ -81,7 +81,7 @@ describe('Create dispute dialog', () => {
     expect(create).toHaveBeenCalledExactlyOnceWith({
       buyer: 'Buyer',
       reason: 'Invoice issue',
-      amount: 1230,
+      amount: 12.3,
       currency: 'EUR',
     });
     expect(dialog.close).toHaveBeenCalledExactlyOnceWith(dispute);

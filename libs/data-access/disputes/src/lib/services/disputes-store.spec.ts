@@ -10,14 +10,14 @@ const url = '/api/disputes';
 const draft = {
   buyer: 'Buyer',
   reason: 'Reason',
-  amount: 10025,
+  amount: 100.25,
   currency: 'EUR',
 } as const;
 const row = {
   id: 6229,
   buyer: 'Buyer',
   reason: 'Reason',
-  amount: 10025,
+  amount: 100.25,
   currency: 'EUR',
   status: 'New',
   date: '2026-11-14T12:00:00.000Z',

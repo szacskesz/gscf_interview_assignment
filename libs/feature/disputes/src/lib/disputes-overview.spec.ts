@@ -15,7 +15,7 @@ const dispute: Dispute = {
   id: 6228,
   buyer: 'Buyer',
   reason: 'Invoice issue',
-  amount: 1230,
+  amount: 12.3,
   currency: 'USD',
   status: 'New',
   date: '2026-11-14T12:00:00.000Z',

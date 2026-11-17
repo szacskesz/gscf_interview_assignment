@@ -11,27 +11,22 @@ export const amountErrors = {
 } as const;
 
 type AmountResult =
-  | { readonly valid: true; readonly minorUnits: number }
+  | { readonly valid: true; readonly amount: number }
   | { readonly valid: false; readonly error: keyof typeof amountErrors };
 
-const amountPattern = /^(-?)(?:(\d+)(?:\.(\d*))?|\.(\d+))$/;
+const amountPattern = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
 
 export function validateAmount(value: string): AmountResult {
   if (value === '') return { valid: false, error: 'required' };
-  const match = amountPattern.exec(value);
-  if (!match) return { valid: false, error: 'invalid' };
+  if (!amountPattern.test(value)) return { valid: false, error: 'invalid' };
 
-  const [, sign, whole = '0', decimals, leadingDecimals] = match;
-  const fraction = decimals ?? leadingDecimals ?? '';
-  if (sign === '-' || !/[1-9]/.test(whole + fraction)) {
+  if (value.startsWith('-') || !/[1-9]/.test(value)) {
     return { valid: false, error: 'nonpositive' };
   }
   if (!hasAtMostDecimalPlaces(value, amountDecimalPlaces)) {
     return { valid: false, error: 'precision' };
   }
 
-  const minorUnits = Number(whole + fraction.padEnd(amountDecimalPlaces, '0'));
-  return Number.isSafeInteger(minorUnits)
-    ? { valid: true, minorUnits }
-    : { valid: false, error: 'range' };
+  const amount = Number(value);
+  return Number.isFinite(amount) ? { valid: true, amount } : { valid: false, error: 'range' };
 }

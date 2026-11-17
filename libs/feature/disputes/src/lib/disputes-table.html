@@ -31,7 +31,7 @@
             {{ row.date | date: 'd MMM yyyy' : undefined : 'en-US' }}
           </td>
           <td class="text-right whitespace-nowrap tabular-nums">
-            {{ row.amount / 100 | number: '1.2-2' : 'en-US' }}
+            {{ row.amount | number: '1.2-2' : 'en-US' }}
           </td>
           <td>{{ row.currency }}</td>
           <td class="max-w-80 wrap-anywhere">{{ row.reason }}</td>

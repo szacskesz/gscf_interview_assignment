@@ -9,17 +9,17 @@ describe('Dispute amount', () => {
     ['-12.345', 'nonpositive'],
     ['0.000', 'nonpositive'],
     ['1.230', 'precision'],
-    ['90071992547409.92', 'range'],
+    ['9'.repeat(309), 'range'],
   ])('rejects %j as %s', (input, error) => {
     expect(validateAmount(input)).toEqual({ valid: false, error });
   });
 
   it.each([
-    ['1250', 125000],
-    ['1250.5', 125050],
-    ['.01', 1],
-    ['90071992547409.91', Number.MAX_SAFE_INTEGER],
-  ])('stores %j as exactly %s cents', (input, minorUnits) => {
-    expect(validateAmount(input)).toEqual({ valid: true, minorUnits });
+    ['1250', 1250],
+    ['1250.5', 1250.5],
+    ['.01', 0.01],
+    ['100000000000000', 100_000_000_000_000],
+  ])('parses %j as the decimal amount %s', (input, amount) => {
+    expect(validateAmount(input)).toEqual({ valid: true, amount });
   });
 });
