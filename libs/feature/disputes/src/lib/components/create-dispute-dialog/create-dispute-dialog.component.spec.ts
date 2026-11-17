@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatIconRegistry } from '@angular/material/icon';
 import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
+import { defer, finalize, of, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { CreateDisputeDialog } from './create-dispute-dialog.component';
 
@@ -18,12 +19,13 @@ const dispute: Dispute = {
 };
 
 async function createDialog() {
+  const $pending = signal(false);
   const create = vi.fn<DisputesStore['create']>();
   const dialog = { close: vi.fn(), disableClose: false };
   TestBed.configureTestingModule({
     providers: [
       { provide: MatIconRegistry, useClass: FakeMatIconRegistry },
-      { provide: DisputesStore, useValue: { $pending: signal(false), create } },
+      { provide: DisputesStore, useValue: { $pending, create } },
       { provide: DialogRef, useValue: dialog },
     ],
   });
@@ -48,6 +50,7 @@ async function createDialog() {
     fixture,
     element,
     create,
+    $pending,
     dialog,
     fillDraft,
     submit: element.querySelector<HTMLButtonElement>('button[type="submit"]')!,
@@ -72,7 +75,7 @@ describe('Create dispute dialog', () => {
 
   it('submits trimmed text and the decimal amount, then closes with the saved record', async () => {
     const { fixture, create, dialog, fillDraft, submit } = await createDialog();
-    create.mockResolvedValue({ ok: true, value: dispute });
+    create.mockReturnValue(of({ ok: true, value: dispute }));
     fillDraft();
     await fixture.whenStable();
     submit.click();
@@ -89,10 +92,12 @@ describe('Create dispute dialog', () => {
 
   it('shows a save failure and keeps the draft open for retry', async () => {
     const { fixture, element, create, dialog, fillDraft, submit } = await createDialog();
-    create.mockResolvedValue({
-      ok: false,
-      error: { message: 'Dispute could not be created. Try again.' },
-    });
+    create.mockReturnValue(
+      of({
+        ok: false,
+        error: { message: 'Dispute could not be created. Try again.' },
+      }),
+    );
     fillDraft();
     await fixture.whenStable();
     submit.click();
@@ -105,5 +110,33 @@ describe('Create dispute dialog', () => {
     expect(buyer.value.trim()).toBe('Buyer');
     expect(dialog.close).not.toHaveBeenCalled();
     expect(dialog.disableClose).toBe(false);
+  });
+
+  it('keeps the dialog locked until the response and unsubscribes on destruction', async () => {
+    const { fixture, create, $pending, dialog, fillDraft, submit } = await createDialog();
+    const response$ = new Subject<{ ok: true; value: Dispute }>();
+    const cleanup = vi.fn(() => $pending.set(false));
+    create.mockReturnValue(
+      defer(() => {
+        $pending.set(true);
+        return response$.pipe(finalize(cleanup));
+      }),
+    );
+    fillDraft();
+    await fixture.whenStable();
+    submit.click();
+    await fixture.whenStable();
+    submit.click();
+    await fixture.whenStable();
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(dialog.disableClose).toBe(true);
+    expect(dialog.close).not.toHaveBeenCalled();
+
+    fixture.destroy();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    expect($pending()).toBe(false);
+    expect(dialog.disableClose).toBe(false);
+    response$.next({ ok: true, value: dispute });
+    expect(dialog.close).not.toHaveBeenCalled();
   });
 });

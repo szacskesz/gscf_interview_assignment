@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatIconRegistry } from '@angular/material/icon';
 import { FakeMatIconRegistry } from '@angular/material/icon/testing';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
+import { defer, finalize, of, Subject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { RemoveDisputeDialog } from './remove-dispute-dialog.component';
 
@@ -58,14 +59,13 @@ describe('Remove dispute dialog', () => {
 
   it('blocks duplicate removal while pending and allows dismissal again after failure', async () => {
     const { fixture, element, $pending, confirm, cancel, dialog, remove } = await createDialog();
-    let failRequest!: () => void;
-    const pending = new Promise<void>((resolve) => (failRequest = resolve));
-    remove.mockImplementation(async () => {
-      $pending.set(true);
-      await pending;
-      $pending.set(false);
-      return { ok: false, error: { message: 'Removal failed.' } };
-    });
+    const response$ = new Subject<{ ok: false; error: { message: string } }>();
+    remove.mockReturnValue(
+      defer(() => {
+        $pending.set(true);
+        return response$.pipe(finalize(() => $pending.set(false)));
+      }),
+    );
 
     confirm.click();
     await fixture.whenStable();
@@ -75,7 +75,8 @@ describe('Remove dispute dialog', () => {
     expect(remove).toHaveBeenCalledExactlyOnceWith(dispute.id);
     expect(dialog.close).not.toHaveBeenCalled();
 
-    failRequest();
+    response$.next({ ok: false, error: { message: 'Removal failed.' } });
+    response$.complete();
     await fixture.whenStable();
     expect(element.querySelector('[role="alert"]')?.textContent).toBe('Removal failed.');
     expect(dialog.disableClose).toBe(false);
@@ -86,11 +87,27 @@ describe('Remove dispute dialog', () => {
 
   it('closes with a confirmed result after the store removes the selected record', async () => {
     const { fixture, confirm, dialog, remove } = await createDialog();
-    remove.mockResolvedValue({ ok: true, value: undefined });
+    remove.mockReturnValue(of({ ok: true, value: undefined }));
     confirm.click();
     await fixture.whenStable();
 
     expect(remove).toHaveBeenCalledExactlyOnceWith(dispute.id);
     expect(dialog.close).toHaveBeenCalledExactlyOnceWith(true);
+  });
+
+  it('unsubscribes from a pending removal when the dialog is destroyed', async () => {
+    const { fixture, confirm, dialog, remove } = await createDialog();
+    const response$ = new Subject<{ ok: true; value: undefined }>();
+    const cleanup = vi.fn();
+    remove.mockReturnValue(response$.pipe(finalize(cleanup)));
+    confirm.click();
+    expect(dialog.disableClose).toBe(true);
+    expect(dialog.close).not.toHaveBeenCalled();
+
+    fixture.destroy();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(dialog.disableClose).toBe(false);
+    response$.next({ ok: true, value: undefined });
+    expect(dialog.close).not.toHaveBeenCalled();
   });
 });

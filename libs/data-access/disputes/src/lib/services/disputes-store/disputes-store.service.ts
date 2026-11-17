@@ -1,4 +1,5 @@
 import { Service, computed, inject, signal } from '@angular/core';
+import { catchError, defer, finalize, map, of, tap, type Observable } from 'rxjs';
 import type { Dispute } from '../../models/dispute.model';
 import type { MutationResult, ReadState } from '../../models/disputes-store.model';
 import { DisputesApi } from '../disputes-api/disputes-api.service';
@@ -23,36 +24,47 @@ export class DisputesStore {
     return !this.$pending() && this.$readState() === 'error' && this.$list.reload();
   }
 
-  async create(draft: Partial<Dispute>): Promise<MutationResult<Dispute>> {
-    return this.mutate(async () => {
-      const created = await this.disputesApi.create(draft);
-      this.$list.update((rows) => [created, ...(rows ?? [])]);
-      return created;
-    }, 'Dispute could not be created. Try again.');
+  create(draft: Partial<Dispute>): Observable<MutationResult<Dispute>> {
+    return this.mutate(
+      () =>
+        this.disputesApi
+          .create(draft)
+          .pipe(tap((created) => this.$list.update((rows) => [created, ...(rows ?? [])]))),
+      'Dispute could not be created. Try again.',
+    );
   }
 
-  async remove(id: number): Promise<MutationResult<void>> {
-    return this.mutate(async () => {
-      await this.disputesApi.remove(id);
-      this.$list.update((rows) => (rows ?? []).filter((row) => row.id !== id));
-    }, 'Dispute could not be removed. Try again.');
+  remove(id: number): Observable<MutationResult<void>> {
+    return this.mutate(
+      () =>
+        this.disputesApi.remove(id).pipe(
+          map(() => {
+            this.$list.update((rows) => (rows ?? []).filter((row) => row.id !== id));
+            return undefined;
+          }),
+        ),
+      'Dispute could not be removed. Try again.',
+    );
   }
 
-  private async mutate<T>(
-    operation: () => Promise<T>,
+  private mutate<T>(
+    operation: () => Observable<T>,
     fallback: string,
-  ): Promise<MutationResult<T>> {
-    if (this.$pending() || this.$readState() !== 'ready') {
-      return { ok: false, error: { message: 'Disputes are currently busy.' } };
-    }
+  ): Observable<MutationResult<T>> {
+    return defer(() => {
+      if (this.$pending() || this.$readState() !== 'ready') {
+        return of<MutationResult<T>>({
+          ok: false,
+          error: { message: 'Disputes are currently busy.' },
+        });
+      }
 
-    this.$pendingOperation.set(true);
-    try {
-      return { ok: true, value: await operation() };
-    } catch {
-      return { ok: false, error: { message: fallback } };
-    } finally {
-      this.$pendingOperation.set(false);
-    }
+      this.$pendingOperation.set(true);
+      return defer(operation).pipe(
+        map((value): MutationResult<T> => ({ ok: true, value })),
+        catchError(() => of<MutationResult<T>>({ ok: false, error: { message: fallback } })),
+        finalize(() => this.$pendingOperation.set(false)),
+      );
+    });
   }
 }

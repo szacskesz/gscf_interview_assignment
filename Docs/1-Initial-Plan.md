@@ -467,7 +467,7 @@ Keep the empty-state markup within the overview unless it becomes substantial. D
 | Application shell            | Navigation, route outlet, and global styling.                                                         |
 | Disputes overview            | Coordinates user actions, opens dialogs, invokes store commands, and requests notifications.          |
 | Disputes table               | Displays immutable records and emits a removal request with the selected dispute.                     |
-| Creation dialog              | Owns the isolated draft/validation and awaits the create command before closing.                      |
+| Creation dialog              | Owns draft/validation and closes after a successful create response.                                  |
 | Removal dialog               | Presents the selected record, requests removal only on confirmation, and stays open until the result. |
 | Disputes store               | Owns the feature's HTTP read model, derived UI state, and pending/error command state.                |
 | Disputes API adapter         | Encapsulates resource/HTTP URLs and the typed request and response contract.                          |
@@ -477,7 +477,7 @@ Keep the empty-state markup within the overview unless it becomes substantial. D
 
 The overview provides the store from `libs/data-access/disputes` for the feature. Use `@Service({ autoProvided: false })` with the explicit overview provider so its lifetime remains feature-scoped. It exposes readonly signals, while presentational components receive data through typed inputs. Pass the same feature command context into dialogs rather than creating a second store there. Dialog results are typed; a dismissal result must never be interpreted as confirmation. Only store commands issue mutations, and only successful API responses update the UI collection.
 
-For creation, the dialog's single Signal Forms submission action awaits the store command. Keep its draft on failure; close with a typed success result on success, then request the notification once using the returned number. For removal, pass a snapshot of the selected record and remove by its stable number only after explicit confirmation. Retain the dialog/row on failure. Guard repeated actions and an already absent record. CDK controls focus and the user-approved pending dismissal lock; package-owned snack bars report confirmed success only.
+For creation, the Signal Forms submission action validates the draft and emits it to the dialog. The dialog subscribes once to the store's create Observable and ties the subscription to its destruction lifecycle. Keep its draft on failure; close with a typed success result on success, then request the notification once using the returned number. For removal, pass a snapshot of the selected record and remove by its stable number only after explicit confirmation. Retain the dialog/row on failure. API/store mutation methods return Observables. The store uses subscription-time guards and acquires its pending lock inside `defer()`. Update rows only after a successful response and release the lock with `finalize()` on completion, error, or unsubscribe. Each dialog uses `takeUntilDestroyed()` and restores dismissal in its own `finalize()`. Guard repeated actions and an already absent record. CDK controls focus and the user-approved pending dismissal lock; package-owned snack bars report confirmed success only.
 
 ### Domain model
 

@@ -1,8 +1,10 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { DecimalPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DisputesStore, type Dispute } from '@gscf/disputes-data-access';
 import { Button, DialogFrame } from '@gscf/ui-common';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'gscf-remove-dispute-dialog',
@@ -51,6 +53,7 @@ import { Button, DialogFrame } from '@gscf/ui-common';
 export class RemoveDisputeDialog {
   private readonly dialog = inject<DialogRef<boolean>>(DialogRef);
   private readonly store = inject(DisputesStore);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly dispute = inject<Dispute>(DIALOG_DATA);
   protected readonly $busy = this.store.$pending;
   protected readonly $failure = signal<string | null>(null);
@@ -59,16 +62,19 @@ export class RemoveDisputeDialog {
     if (!this.$busy()) this.dialog.close();
   }
 
-  protected async confirm(): Promise<void> {
+  protected confirm(): void {
     if (this.$busy()) return;
     this.$failure.set(null);
     this.dialog.disableClose = true;
-    try {
-      const result = await this.store.remove(this.dispute.id);
-      if (result.ok) this.dialog.close(true);
-      else this.$failure.set(result.error.message);
-    } finally {
-      this.dialog.disableClose = false;
-    }
+    this.store
+      .remove(this.dispute.id)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => (this.dialog.disableClose = false)),
+      )
+      .subscribe((result) => {
+        if (result.ok) this.dialog.close(true);
+        else this.$failure.set(result.error.message);
+      });
   }
 }

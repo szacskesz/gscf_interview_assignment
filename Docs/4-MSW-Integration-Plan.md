@@ -104,7 +104,7 @@ A browser may retain a worker registration independently of output files. Run pr
 
 Initial loading is separate from the assignment's empty state. Show an accessible loading status, hide an unconfirmed row counter, and make actions unavailable until the initial list resolves. On GET failure, show a concise inline error and Retry. Do not invent a new navigation flow.
 
-For creation, keep the dialog/draft open during the Signal Forms `FormRoot`/`submit()` action and await the store command. On failure, retain input, display an accessible inline/field error, and restore actions. On success, update the table/count, close once, restore focus, and show the package-backed success toast using the returned number.
+For creation, `FormRoot`/`submit()` validates and emits the draft. The dialog subscribes once to the store's mutation Observable and stays open until its successful response. Tie the subscription to dialog destruction, and release pending/dismissal locks with `finalize()`. On failure, retain input, display an accessible inline/field error, and restore actions. On success, update the table/count, close once, restore focus, and show the package-backed success toast using the returned number.
 
 Removal follows the same pending/error pattern: send DELETE only after explicit confirmation, retain the selected row until success, and close/restore focus using the existing next-row/previous-row/New Dispute fallback. A `404` is not a successful removal toast; report the failure and reconcile the list explicitly if necessary.
 
