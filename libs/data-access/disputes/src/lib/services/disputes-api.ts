@@ -24,9 +24,7 @@ export class DisputesApi {
     return firstValueFrom(this.http.post<Dispute>(this.url, draft, { timeout: requestTimeout }));
   }
 
-  async remove(number: number): Promise<void> {
-    await firstValueFrom(
-      this.http.delete<void>(`${this.url}/${number}`, { timeout: requestTimeout }),
-    );
+  async remove(id: number): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.url}/${id}`, { timeout: requestTimeout }));
   }
 }

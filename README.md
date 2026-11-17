@@ -54,7 +54,7 @@ The mock-enabled previews use loopback HTTP so browsers can register the MSW wor
 - The app shell loads the disputes feature through a lazy route. CLI libraries expose explicit public APIs. The shared UI libraries provide native controls and presentation, CDK owns modal focus and dismissal, and Material owns toast announcements, replacement, and the five-second lifetime.
 - The feature-scoped signal store reads through `httpResource` and sends writes through `HttpClient`. It updates rows only after a confirmed response. Signal Forms validates the create draft and shares one submission path for Enter and the submit button.
 - Enter ungrouped U.S. decimals such as `1250.00` with a period. The native number input ignores comma keystrokes and comma-containing pastes, preserving the current value and validation state. The browser controls how the native field renders decimal separators. The table displays `1,250.00`. Precision is checked before converting to integer cents, so `1.230` is invalid. The mock API assigns the local calendar date, status, and next number.
-- The mock worker handles GET and POST at `/api/disputes` and DELETE at `/api/disputes/:number`. A full reload resets the mock repository and numbering. The Playwright-managed E2E profile alone exposes controlled error and empty-state scenarios.
+- The mock worker handles GET and POST at `/api/disputes` and DELETE at `/api/disputes/:id`. A full reload resets the mock repository and numbering. The Playwright-managed E2E profile alone exposes controlled error and empty-state scenarios.
 
 ## Verification commands
 

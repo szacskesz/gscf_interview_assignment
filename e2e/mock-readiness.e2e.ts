@@ -6,11 +6,7 @@ test('serves the disputes API through its registered worker', async ({ page, req
   const disputes = await firstResponse;
   expect(disputes.fromServiceWorker()).toBe(true);
   expect(disputes.ok()).toBe(true);
-  await expect(disputes.json()).resolves.toMatchObject([
-    { number: 6228 },
-    { number: 6227 },
-    { number: 6224 },
-  ]);
+  await expect(disputes.json()).resolves.toMatchObject([{ id: 6228 }, { id: 6227 }, { id: 6224 }]);
 
   const worker = await request.get('/mockServiceWorker.js');
   expect(worker.ok()).toBe(true);

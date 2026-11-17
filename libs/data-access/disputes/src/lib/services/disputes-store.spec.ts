@@ -10,17 +10,17 @@ const url = '/api/disputes';
 const draft = {
   buyer: 'Buyer',
   reason: 'Reason',
-  amountMinorUnits: 10025,
+  amount: 10025,
   currency: 'EUR',
 } as const;
 const row = {
-  number: 6229,
+  id: 6229,
   buyer: 'Buyer',
   reason: 'Reason',
-  amountMinorUnits: 10025,
+  amount: 10025,
   currency: 'EUR',
   status: 'New',
-  disputeDate: '2026-11-14',
+  date: '2026-11-14',
 } as const;
 
 describe('Disputes store', () => {
@@ -75,7 +75,7 @@ describe('Disputes store', () => {
     await expect(creating).resolves.toMatchObject({ ok: true });
     expect(store.$rows()).toEqual([row]);
 
-    const removing = store.remove(row.number);
+    const removing = store.remove(row.id);
     http
       .expectOne({ url: `${url}/6229`, method: 'DELETE' })
       .flush(null, { status: 500, statusText: 'Failure' });
@@ -83,7 +83,7 @@ describe('Disputes store', () => {
     expect(store.$pending()).toBe(false);
     expect(store.$rows()).toEqual([row]);
 
-    const confirmed = store.remove(row.number);
+    const confirmed = store.remove(row.id);
     http.expectOne({ url: `${url}/6229`, method: 'DELETE' }).flush(null);
     await expect(confirmed).resolves.toMatchObject({ ok: true });
     expect(store.$rows()).toEqual([]);

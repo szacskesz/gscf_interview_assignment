@@ -39,7 +39,7 @@ export function testScenarioHandlers(url: string) {
     case 'remove-error':
       return [
         http.delete(
-          `${url}/:number`,
+          `${url}/:id`,
           async () => {
             await delay(600);
             return new HttpResponse(null, { status: 503 });

@@ -24,8 +24,8 @@ export class DisputesTable {
   protected readonly $displayRows = computed(() =>
     this.$rows().map((row) => ({
       ...row,
-      dateLabel: formatCalendarDate(row.disputeDate),
-      amountLabel: formatAmount(row.amountMinorUnits),
+      dateLabel: formatCalendarDate(row.date),
+      amountLabel: formatAmount(row.amount),
     })),
   );
 }

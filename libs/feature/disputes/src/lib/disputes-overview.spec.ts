@@ -10,13 +10,13 @@ import { DisputesOverview } from './disputes-overview';
 import { RemoveDisputeDialog } from './remove-dispute-dialog';
 
 const dispute: Dispute = {
-  number: 6228,
+  id: 6228,
   buyer: 'Buyer',
   reason: 'Invoice issue',
-  amountMinorUnits: 1230,
+  amount: 1230,
   currency: 'USD',
   status: 'New',
-  disputeDate: '2026-11-14',
+  date: '2026-11-14',
 };
 
 async function createOverview(state: ReturnType<DisputesStore['$readState']> = 'ready') {

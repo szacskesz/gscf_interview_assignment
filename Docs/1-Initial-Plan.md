@@ -437,17 +437,17 @@ type Currency = 'USD' | 'EUR';
 type DisputeStatus = 'New' | 'Acknowledged';
 
 interface Dispute {
-  readonly number: number;
+  readonly id: number;
   readonly buyer: string;
   readonly status: DisputeStatus;
-  readonly disputeDate: string;
-  readonly amountMinorUnits: number;
+  readonly date: string;
+  readonly amount: number;
   readonly currency: Currency;
   readonly reason: string;
 }
 ```
 
-`disputeDate` is a validated calendar-date string in `YYYY-MM-DD` format. `amountMinorUnits` is an integer number of cents. The form draft is a separate type and may contain incomplete values; invalid draft data must not enter the collection.
+`date` is a validated calendar-date string in `YYYY-MM-DD` format. `amount` is an integer number of cents. The form draft is a separate type and may contain incomplete values; invalid draft data must not enter the collection.
 
 ### State management and numbering
 
@@ -459,7 +459,7 @@ interface Dispute {
 
 This produces `6229` when creating after deleting all original rows, matching Figure 1.6b. If `6229` has already been created and removed, the next dispute is `6230`. Reloading starts a new mock session and resets both records and numbering.
 
-Use GET/POST `/api/disputes` and DELETE `/api/disputes/:number`. The Create Dispute feature validates the raw decimal string and sends safe integer `amountMinorUnits`. The mock stores those cents and returns the complete created record. Controlled scenarios exercise pending/error behavior. The HTTP contract, bootstrap, and build profiles are in [the MSW plan](4-MSW-Integration-Plan.md).
+Use GET/POST `/api/disputes` and DELETE `/api/disputes/:id`. The Create Dispute feature validates the raw decimal string and sends safe integer `amount`. The mock stores those cents and returns the complete created record. Controlled scenarios exercise pending/error behavior. The HTTP contract, bootstrap, and build profiles are in [the MSW plan](4-MSW-Integration-Plan.md).
 
 ## 6. Form, money, and date implementation
 

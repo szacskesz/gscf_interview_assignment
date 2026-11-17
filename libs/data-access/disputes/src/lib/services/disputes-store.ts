@@ -32,10 +32,10 @@ export class DisputesStore {
     }, 'Dispute could not be created. Try again.');
   }
 
-  async remove(number: number): Promise<MutationResult<void>> {
+  async remove(id: number): Promise<MutationResult<void>> {
     return this.mutate(async () => {
-      await this.api.remove(number);
-      this.$list.update((rows) => (rows ?? []).filter((row) => row.number !== number));
+      await this.api.remove(id);
+      this.$list.update((rows) => (rows ?? []).filter((row) => row.id !== id));
     }, 'Dispute could not be removed. Try again.');
   }
 

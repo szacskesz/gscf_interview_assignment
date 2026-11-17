@@ -6,13 +6,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { RemoveDisputeDialog } from './remove-dispute-dialog';
 
 const dispute: Dispute = {
-  number: 6228,
+  id: 6228,
   buyer: 'Buyer',
   reason: 'Invoice issue',
-  amountMinorUnits: 123450,
+  amount: 123450,
   currency: 'USD',
   status: 'New',
-  disputeDate: '2026-11-14',
+  date: '2026-11-14',
 };
 
 async function createDialog() {
@@ -69,7 +69,7 @@ describe('Remove dispute dialog', () => {
     confirm.click();
     expect(cancel.disabled).toBe(true);
     expect(dialog.disableClose).toBe(true);
-    expect(remove).toHaveBeenCalledExactlyOnceWith(dispute.number);
+    expect(remove).toHaveBeenCalledExactlyOnceWith(dispute.id);
     expect(dialog.close).not.toHaveBeenCalled();
 
     failRequest();
@@ -87,7 +87,7 @@ describe('Remove dispute dialog', () => {
     confirm.click();
     await fixture.whenStable();
 
-    expect(remove).toHaveBeenCalledExactlyOnceWith(dispute.number);
+    expect(remove).toHaveBeenCalledExactlyOnceWith(dispute.id);
     expect(dialog.close).toHaveBeenCalledExactlyOnceWith(true);
   });
 });

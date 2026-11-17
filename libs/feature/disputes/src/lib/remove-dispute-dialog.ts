@@ -9,15 +9,15 @@ import { Button, DialogFrame } from '@gscf/ui-common';
   imports: [Button, DialogFrame],
   template: `
     <gscf-dialog-frame
-      [heading]="'Remove dispute ' + dispute.number"
+      [heading]="'Remove dispute ' + dispute.id"
       headingId="remove-dispute-title"
       [busy]="$busy()"
       (closed)="dismiss()"
     >
       <p id="remove-dispute-description" class="mb-6 wrap-anywhere text-sm">
-        Dispute {{ dispute.number }} ({{ dispute.reason }}, {{ amount }} {{ dispute.currency }})
-        will be removed from the Disputes list, together with its comments and linked invoices. This
-        cannot be undone.
+        Dispute {{ dispute.id }} ({{ dispute.reason }}, {{ amount }} {{ dispute.currency }}) will be
+        removed from the Disputes list, together with its comments and linked invoices. This cannot
+        be undone.
       </p>
       @if ($failure(); as error) {
         <p role="alert" class="mb-4 text-sm text-danger">{{ error }}</p>
@@ -51,7 +51,7 @@ export class RemoveDisputeDialog {
   private readonly dialog = inject<DialogRef<boolean>>(DialogRef);
   private readonly store = inject(DisputesStore);
   protected readonly dispute = inject<Dispute>(DIALOG_DATA);
-  protected readonly amount = formatAmount(this.dispute.amountMinorUnits);
+  protected readonly amount = formatAmount(this.dispute.amount);
   protected readonly $busy = this.store.$pending;
   protected readonly $failure = signal<string | null>(null);
 
@@ -64,7 +64,7 @@ export class RemoveDisputeDialog {
     this.$failure.set(null);
     this.dialog.disableClose = true;
     try {
-      const result = await this.store.remove(this.dispute.number);
+      const result = await this.store.remove(this.dispute.id);
       if (result.ok) this.dialog.close(true);
       else this.$failure.set(result.error.message);
     } finally {

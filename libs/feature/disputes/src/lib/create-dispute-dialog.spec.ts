@@ -6,13 +6,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { CreateDisputeDialog } from './create-dispute-dialog';
 
 const dispute: Dispute = {
-  number: 6229,
+  id: 6229,
   buyer: 'Buyer',
   reason: 'Invoice issue',
-  amountMinorUnits: 1230,
+  amount: 1230,
   currency: 'EUR',
   status: 'New',
-  disputeDate: '2026-11-14',
+  date: '2026-11-14',
 };
 
 async function createDialog() {
@@ -78,7 +78,7 @@ describe('Create dispute dialog', () => {
     expect(create).toHaveBeenCalledExactlyOnceWith({
       buyer: 'Buyer',
       reason: 'Invoice issue',
-      amountMinorUnits: 1230,
+      amount: 1230,
       currency: 'EUR',
     });
     expect(dialog.close).toHaveBeenCalledExactlyOnceWith(dispute);

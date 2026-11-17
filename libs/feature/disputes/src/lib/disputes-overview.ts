@@ -76,10 +76,7 @@ export class DisputesOverview {
       })
       .closed.subscribe((created) => {
         if (created) {
-          this.notifications.success(
-            'Dispute created',
-            `Dispute ${created.number} has been created.`,
-          );
+          this.notifications.success('Dispute created', `Dispute ${created.id} has been created.`);
         }
       });
   }
@@ -87,7 +84,7 @@ export class DisputesOverview {
   protected removeDispute(event: { dispute: Dispute; trigger: HTMLButtonElement }): void {
     if (this.store.$pending()) return;
     const { dispute, trigger } = event;
-    const rowIndex = this.store.$rows().findIndex((row) => row.number === dispute.number);
+    const rowIndex = this.store.$rows().findIndex((row) => row.id === dispute.id);
     if (rowIndex < 0) return;
     this.dialog
       .open<boolean>(RemoveDisputeDialog, {
@@ -109,10 +106,7 @@ export class DisputesOverview {
           },
           { injector: this.injector },
         );
-        this.notifications.success(
-          'Dispute removed',
-          `Dispute ${dispute.number} has been removed.`,
-        );
+        this.notifications.success('Dispute removed', `Dispute ${dispute.id} has been removed.`);
       });
   }
 }

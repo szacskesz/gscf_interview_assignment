@@ -56,7 +56,7 @@ export class CreateDisputeDialog {
           const result = await this.store.create({
             buyer: buyer.trim(),
             reason: reason.trim(),
-            amountMinorUnits: parsedAmount.minorUnits,
+            amount: parsedAmount.minorUnits,
             currency,
           });
           if (result.ok) {

@@ -18,9 +18,9 @@
       </tr>
     </thead>
     <tbody>
-      @for (row of $displayRows(); track row.number) {
+      @for (row of $displayRows(); track row.id) {
         <tr class="border-b border-divider">
-          <td>{{ row.number }}</td>
+          <td>{{ row.id }}</td>
           <td class="max-w-52 wrap-anywhere">{{ row.buyer }}</td>
           <td>
             <gscf-badge [tone]="row.status === 'New' ? 'blue' : 'yellow'">{{
@@ -36,7 +36,7 @@
               #removeButton
               type="button"
               gscfButton="text-danger"
-              [attr.aria-label]="'Remove dispute ' + row.number"
+              [attr.aria-label]="'Remove dispute ' + row.id"
               (click)="removalRequested.emit({ dispute: row, trigger: removeButton })"
             >
               <gscf-icon name="remove" /> Remove

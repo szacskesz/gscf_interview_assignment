@@ -3,7 +3,7 @@ import { initialDisputes } from './dispute-fixtures';
 
 export class DisputesRepository {
   private rows: readonly Dispute[] = initialDisputes.map((row) => ({ ...row }));
-  private nextNumber = Math.max(...initialDisputes.map((row) => row.number)) + 1;
+  private nextId = Math.max(...initialDisputes.map((row) => row.id)) + 1;
 
   constructor(private readonly today: () => string) {}
 
@@ -11,23 +11,23 @@ export class DisputesRepository {
     return this.rows;
   }
 
-  create({ buyer, reason, amountMinorUnits, currency }: CreateDisputeRequest): Dispute {
+  create({ buyer, reason, amount, currency }: CreateDisputeRequest): Dispute {
     const dispute: Dispute = {
       buyer,
       reason,
-      amountMinorUnits,
+      amount,
       currency,
-      number: this.nextNumber,
+      id: this.nextId,
       status: 'New',
-      disputeDate: this.today(),
+      date: this.today(),
     };
-    this.nextNumber += 1;
+    this.nextId += 1;
     this.rows = [dispute, ...this.rows];
     return dispute;
   }
 
-  remove(number: number): boolean {
-    const remaining = this.rows.filter((dispute) => dispute.number !== number);
+  remove(id: number): boolean {
+    const remaining = this.rows.filter((dispute) => dispute.id !== id);
     if (remaining.length === this.rows.length) return false;
     this.rows = remaining;
     return true;
